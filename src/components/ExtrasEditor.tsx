@@ -141,7 +141,14 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
   const scrollToCategory = (categoryName: string) => {
     const element = categoryRefs.current[categoryName];
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const container = element.closest('.overflow-y-auto');
+      if (container) {
+        const topOffset = element.offsetTop - container.offsetTop - 16; // 16px padding
+        container.scrollTo({
+          top: topOffset,
+          behavior: 'smooth'
+        });
+      }
     }
   };
 
@@ -189,6 +196,7 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
               <div 
                 key={category.name}
                 ref={el => categoryRefs.current[category.name] = el}
+                id={`category-${category.name.toLowerCase()}`}
               >
                 <h3 className="text-lg font-semibold text-[#2D3648] mb-3 capitalize">
                   {category.name}
