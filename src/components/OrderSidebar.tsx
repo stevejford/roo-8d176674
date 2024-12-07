@@ -44,22 +44,20 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen flex flex-col`}>
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6">
-          {isMobile && (
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
-              <button 
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          )}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[#2D3648] text-lg">Pickup/Delivery</span>
-              <div className="flex items-center relative">
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={() => setMode('pickup')}
                   className={`px-4 py-2 rounded-full ${mode === 'pickup' ? 'bg-[#10B981] text-white' : 'bg-gray-100'}`}
@@ -72,14 +70,6 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
                 >
                   Delivery
                 </button>
-                {isMobile && (
-                  <button
-                    onClick={onClose}
-                    className="ml-2 p-1.5 hover:bg-gray-100 rounded-full"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
               </div>
             </div>
             <OrderLocation mode={mode} />
@@ -103,9 +93,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
 
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
-                Items
-              </h3>
+              <h3 className="font-semibold text-[#2D3648]">Items</h3>
               {!showVoucherInput && (
                 <button 
                   onClick={() => setShowVoucherInput(true)}

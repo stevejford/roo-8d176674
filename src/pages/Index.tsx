@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { AppFooter } from "@/components/index/AppFooter";
 import { CategoryNav } from "@/components/index/CategoryNav";
 import { MainContent } from "@/components/index/MainContent";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -21,7 +22,7 @@ const Index = () => {
     description: string;
     image: string;
   } | null>(null);
-  const [showSidebar, setShowSidebar] = useState(false);
+  const isMobile = useIsMobile();
 
   const menuScrollRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -82,12 +83,10 @@ const Index = () => {
 
   const handleProductSelect = (product: { title: string; description: string; image: string }) => {
     setSelectedProduct(product);
-    setShowSidebar(true);
   };
 
   const handleCloseSidebar = () => {
     setSelectedProduct(null);
-    setShowSidebar(false);
   };
 
   if (isLoading) {
@@ -104,8 +103,8 @@ const Index = () => {
     return acc;
   }, {});
 
-  const shouldShowSidebar = window.innerWidth >= 1024 || selectedProduct || showSidebar;
-  const mainContentClass = window.innerWidth >= 1024 && shouldShowSidebar ? 'lg:w-[calc(100%-400px)]' : 'w-full';
+  const shouldShowSidebar = (!isMobile && selectedProduct) || (isMobile && selectedProduct);
+  const mainContentClass = shouldShowSidebar && !isMobile ? 'lg:w-[calc(100%-400px)]' : 'w-full';
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -132,11 +131,11 @@ const Index = () => {
 
         {shouldShowSidebar && (
           <aside className={`${
-            window.innerWidth >= 1024 
+            !isMobile 
               ? 'w-[400px] fixed top-0 right-0 h-screen'
               : 'fixed inset-0'
           } z-50 ${
-            window.innerWidth < 1024 ? 'animate-slide-in-right' : ''
+            isMobile ? 'animate-slide-in-right' : ''
           }`}>
             <OrderSidebar 
               selectedProduct={selectedProduct}
