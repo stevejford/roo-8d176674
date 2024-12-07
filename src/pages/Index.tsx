@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
-import { AdminButton } from "@/components/index/AdminButton";
 import { CategorySection } from "@/components/index/CategorySection";
 import { AppFooter } from "@/components/index/AppFooter";
 
@@ -94,10 +93,6 @@ const Index = () => {
       />
       <div className="flex flex-1">
         <main className="w-[calc(100%-400px)] px-4 pb-16">
-          <div className="flex justify-between items-center mb-2">
-            {isAdmin && <AdminButton />}
-          </div>
-
           <div className="relative">
             <button 
               onClick={() => scrollMenu('left')}

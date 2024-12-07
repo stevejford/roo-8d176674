@@ -1,4 +1,5 @@
 import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AppFooterProps {
   isAdmin: boolean;
@@ -7,6 +8,8 @@ interface AppFooterProps {
 }
 
 export const AppFooter = ({ isAdmin, isLoggedIn, onSignOut }: AppFooterProps) => {
+  const navigate = useNavigate();
+  
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 z-40">
       <div className="container mx-auto px-4 flex items-center justify-between">
@@ -19,6 +22,14 @@ export const AppFooter = ({ isAdmin, isLoggedIn, onSignOut }: AppFooterProps) =>
             >
               <LogOut className="h-4 w-4" />
               {isAdmin && <span>Admin Logout</span>}
+            </button>
+          )}
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/admin")}
+              className="text-gray-400 hover:text-gray-600 transition-colors text-sm"
+            >
+              Admin Dashboard
             </button>
           )}
         </div>
