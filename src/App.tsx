@@ -10,11 +10,15 @@ import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
-// Protected route component that checks for authentication and admin status
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, isAdmin } = useAuth();
+  const { session, isAdmin, isLoading } = useAuth();
   
-  console.log("AdminRoute check - Session:", !!session, "IsAdmin:", isAdmin);
+  console.log("AdminRoute check - Session:", !!session, "IsAdmin:", isAdmin, "IsLoading:", isLoading);
+  
+  if (isLoading) {
+    console.log("Auth is loading...");
+    return null; // or a loading spinner
+  }
   
   if (!session) {
     console.log("No session, redirecting to login");
@@ -30,9 +34,12 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Protected route component that only checks for authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session } = useAuth();
+  const { session, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return null; // or a loading spinner
+  }
   
   if (!session) {
     return <Navigate to="/login" replace />;
