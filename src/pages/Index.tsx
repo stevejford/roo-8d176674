@@ -92,63 +92,65 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
       <div className="flex flex-1">
-        <main className="w-[calc(100%-400px)] px-4 pb-16">
-          <div className="relative">
-            <button 
-              onClick={() => scrollMenu('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
-              aria-label="Scroll left"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
+        <main className="w-[calc(100%-400px)] pb-16">
+          <div className="sticky top-16 bg-gray-50 z-40 px-4">
+            <div className="relative py-4">
+              <button 
+                onClick={() => scrollMenu('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+                aria-label="Scroll left"
               >
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-
-            <div 
-              ref={menuScrollRef}
-              className="overflow-x-auto scrollbar-hide py-2 px-8 flex space-x-6 scroll-smooth"
-            >
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => handleCategoryClick(category)}
-                  className="text-gray-900 whitespace-nowrap font-medium hover:text-primary transition-colors"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
                 >
-                  {category}
-                </button>
-              ))}
-            </div>
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
 
-            <button 
-              onClick={() => scrollMenu('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
-              aria-label="Scroll right"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
+              <div 
+                ref={menuScrollRef}
+                className="overflow-x-auto scrollbar-hide py-2 px-8 flex space-x-6 scroll-smooth"
               >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryClick(category)}
+                    className="text-gray-900 whitespace-nowrap font-medium hover:text-primary transition-colors"
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => scrollMenu('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+                aria-label="Scroll right"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-12 mt-8">
+          <div className="space-y-12 px-4">
             {categories.map((category) => (
               <CategorySection
                 key={category}
