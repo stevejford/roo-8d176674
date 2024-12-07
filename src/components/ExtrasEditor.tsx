@@ -139,11 +139,11 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
   };
 
   const scrollToCategory = (categoryName: string) => {
-    const element = categoryRefs.current[categoryName];
+    const element = categoryRefs.current[categoryName] as HTMLDivElement;
     if (element) {
-      const container = element.closest('.overflow-y-auto') as HTMLElement;
+      const container = element.closest('.overflow-y-auto') as HTMLDivElement;
       if (container) {
-        const topOffset = element.offsetTop - container.offsetTop - 16; // 16px padding
+        const topOffset = element.offsetTop - container.offsetTop - 16;
         container.scrollTo({
           top: topOffset,
           behavior: 'smooth'
