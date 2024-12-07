@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Minus, Plus } from "lucide-react";
 import { IngredientsEditor } from "./IngredientsEditor";
+import { ExtrasEditor } from "./ExtrasEditor";
 
 interface Size {
   name: string;
@@ -24,6 +25,7 @@ export const ProductDetails = ({ title, description, image, onClose }: ProductDe
   });
 
   const [showIngredientsEditor, setShowIngredientsEditor] = useState(false);
+  const [showExtrasEditor, setShowExtrasEditor] = useState(false);
   const [ingredients, setIngredients] = useState([
     { name: "Tomato Sauce Base", checked: true },
     { name: "Hot Honey ( Spicy)", checked: true },
@@ -117,7 +119,10 @@ export const ProductDetails = ({ title, description, image, onClose }: ProductDe
 
         <div className="border-t border-gray-200 p-4 mt-auto">
           <div className="grid grid-cols-2 gap-4">
-            <button className="py-3 px-4 text-[#2D3648] border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+            <button 
+              onClick={() => setShowExtrasEditor(true)}
+              className="py-3 px-4 text-[#2D3648] border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+            >
               Add Extras
             </button>
             <button 
@@ -135,6 +140,11 @@ export const ProductDetails = ({ title, description, image, onClose }: ProductDe
         onClose={() => setShowIngredientsEditor(false)}
         onIngredientToggle={handleIngredientToggle}
         ingredients={ingredients}
+      />
+
+      <ExtrasEditor
+        isOpen={showExtrasEditor}
+        onClose={() => setShowExtrasEditor(false)}
       />
     </>
   );
