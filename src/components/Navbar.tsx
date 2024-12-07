@@ -45,8 +45,8 @@ export const Navbar = () => {
                 className="w-full pr-12 h-9 text-sm rounded-full border-gray-200 placeholder:text-gray-500"
               />
               <div className="absolute right-1.5 top-1/2 transform -translate-y-1/2">
-                <button className="p-1.5 bg-primary rounded-full hover:bg-primary/90 transition-colors">
-                  <Search className="h-3.5 w-3.5 text-white" />
+                <button className="p-1.5 bg-white rounded-full hover:bg-gray-50 transition-colors shadow-sm">
+                  <Search className="h-3.5 w-3.5 text-primary" />
                 </button>
               </div>
             </div>
