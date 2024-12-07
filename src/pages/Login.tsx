@@ -22,6 +22,7 @@ const Login = () => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
     const error = hashParams.get('error');
     const errorDescription = hashParams.get('error_description');
 
@@ -42,9 +43,16 @@ const Login = () => {
       // Set the session with the access token
       supabase.auth.setSession({
         access_token: accessToken,
-        refresh_token: hashParams.get('refresh_token') || '',
+        refresh_token: refreshToken || '',
+      }).then(({ data, error }) => {
+        if (error) {
+          console.error('Error setting session:', error);
+          toast.error("Failed to process password reset. Please try again.");
+        } else {
+          console.log('Session set successfully:', data);
+          toast.info("Please enter your new password");
+        }
       });
-      toast.info("Please enter your new password");
     }
   }, []);
 
