@@ -72,7 +72,11 @@ const Index = () => {
                   price={24.00} // This should come from the sizes array in a real implementation
                   description={item.description || ''}
                   image={item.image_url || '/placeholder.svg'}
-                  onClick={() => setSelectedProduct(item)}
+                  onClick={() => setSelectedProduct({
+                    title: item.title,
+                    description: item.description || '',
+                    image: item.image_url || '/placeholder.svg'
+                  })}
                 />
               ))}
             </div>
