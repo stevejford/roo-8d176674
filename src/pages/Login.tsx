@@ -3,19 +3,18 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { session, isAdmin } = useAuth();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    if (session) {
+      // Redirect admin users to admin dashboard, regular users to index
+      navigate(isAdmin ? "/admin" : "/");
+    }
+  }, [session, isAdmin, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
