@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { Clock, MapPin, Plus, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock, MapPin, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { ComplementaryItem } from "./ComplementaryItem";
 
 export const OrderSidebar = () => {
   const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
@@ -158,28 +159,15 @@ export const OrderSidebar = () => {
               
               <div 
                 ref={scrollContainerRef}
-                className="flex overflow-x-auto gap-3 pb-2 -mx-6 px-6 scrollbar-hide relative scroll-smooth"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                className="flex overflow-x-auto gap-3 pb-2 -mx-6 px-6 scrollbar-hide relative scroll-smooth snap-x"
               >
                 {complementaryItems.map((item, index) => (
-                  <div key={index} className="flex-none w-[120px]">
-                    <div className="relative group">
-                      <img 
-                        src={item.image} 
-                        alt={item.name}
-                        className="w-full h-[120px] object-cover rounded-lg"
-                      />
-                      <div className="absolute top-2 left-2 flex items-center gap-1">
-                        <Plus className="w-4 h-4 text-[#E86452]" />
-                        <span className="text-xs font-medium bg-white px-2 py-1 rounded shadow-md">
-                          ${item.price.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="mt-2 text-sm font-medium text-[#2D3648] truncate">
-                      {item.name}
-                    </p>
-                  </div>
+                  <ComplementaryItem
+                    key={index}
+                    name={item.name}
+                    price={item.price}
+                    image={item.image}
+                  />
                 ))}
               </div>
 
