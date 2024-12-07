@@ -100,10 +100,6 @@ const Login = () => {
             }}
             providers={[]}
             redirectTo={window.location.origin}
-            onError={(error) => {
-              console.error('Auth error:', error);
-              toast.error(error.message || "An error occurred during authentication");
-            }}
           />
           <div className="mt-4 text-center">
             <a 
