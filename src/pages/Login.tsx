@@ -18,10 +18,24 @@ const Login = () => {
   };
 
   useEffect(() => {
-    // Check URL for auth flow type
+    // Check URL for auth flow type and errors
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     const accessToken = hashParams.get('access_token');
+    const error = hashParams.get('error');
+    const errorDescription = hashParams.get('error_description');
+
+    if (error) {
+      console.log('Auth error:', error, errorDescription);
+      if (error === 'access_denied' && errorDescription?.includes('expired')) {
+        toast.error("Password reset link has expired. Please request a new one.");
+      } else {
+        toast.error(errorDescription || "An error occurred during authentication");
+      }
+      // Clear the URL hash to remove error parameters
+      window.location.hash = '';
+      return;
+    }
 
     if (type === 'recovery' && accessToken) {
       console.log('Password reset flow detected with token');
