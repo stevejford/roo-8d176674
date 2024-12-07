@@ -5,33 +5,17 @@ import { MenuCard } from "@/components/MenuCard";
 import { OrderSidebar } from "@/components/OrderSidebar";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
-const popularItems = [
-  {
-    title: "The Stewart",
-    price: 24.00,
-    description: "Tomato, cheese, pepperoni and a sprinkle of parmesan. Topped with fresh basil.",
-    image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    title: "The Duncan",
-    price: 24.00,
-    description: "BBQ sauce base, cheese, bacon, onion, pineapple with cheese on top!",
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    title: "Arancini",
-    price: 11.90,
-    description: "Delicious fried balls of rice with 3 flavours to choose from.",
-    image: "https://images.unsplash.com/photo-1595295333158-4742f28fbd85?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    title: "Southwest Chicken",
-    price: 28.00,
-    description: "Tomato sauce base, Cheese, Chicken, Onion, Fresh Capsicum, topped with Southwest sauce.",
-    image: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=800&auto=format&fit=crop&q=60",
-  },
-];
+const fetchProducts = async () => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('active', true);
+  
+  if (error) throw error;
+  return data;
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -42,18 +26,24 @@ const Index = () => {
     image: string;
   } | null>(null);
 
-  useEffect(() => {
-    if (!session) {
-      navigate("/login");
-    }
-  }, [session, navigate]);
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts,
+  });
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/login");
   };
 
-  if (!session) return null;
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!session) {
+      navigate("/login");
+    }
+  }, [session, navigate]);
+
+  if (!session || isLoading) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -63,7 +53,7 @@ const Index = () => {
           <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold leading-tight tracking-normal text-left last:mb-0 text-primary-title text-7 capitalize lg:text-7.375 lg:tracking-tight 2xl:text-8.125">
-                Popular
+                Menu
               </h2>
               {isAdmin && (
                 <button
@@ -75,10 +65,13 @@ const Index = () => {
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {popularItems.map((item) => (
+              {products?.map((item) => (
                 <MenuCard 
-                  key={item.title} 
-                  {...item} 
+                  key={item.id}
+                  title={item.title}
+                  price={24.00} // This should come from the sizes array in a real implementation
+                  description={item.description || ''}
+                  image={item.image_url || '/placeholder.svg'}
                   onClick={() => setSelectedProduct(item)}
                 />
               ))}
