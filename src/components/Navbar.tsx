@@ -19,9 +19,10 @@ const categories = [
 interface NavbarProps {
   onSignOut: () => void;
   isAdmin: boolean;
+  onCategoryClick: (category: string) => void;
 }
 
-export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
+export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -85,6 +86,7 @@ export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
             {categories.map((category) => (
               <button
                 key={category}
+                onClick={() => onCategoryClick(category)}
                 className="text-gray-900 font-semibold text-[15px] leading-[18.75px] tracking-[-0.375px] capitalize whitespace-nowrap font-inter antialiased hover:text-primary transition-colors cursor-pointer"
               >
                 {category}
