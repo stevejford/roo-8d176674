@@ -21,12 +21,21 @@ export default {
       fontFamily: {
         inter: ['Inter', 'Arial', 'sans-serif'],
       },
+      fontSize: {
+        '7': '1.75rem',      // 28px
+        '7.375': '1.84375rem', // 29.5px
+        '8.125': '2.03125rem', // 32.5px
+      },
+      spacing: {
+        '4.5': '1.125rem',   // 18px
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        'primary-title': '#2D3648',
         primary: {
           DEFAULT: "#10B981",
           foreground: "#FFFFFF",

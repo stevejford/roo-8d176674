@@ -37,7 +37,9 @@ const Index = () => {
         <Navbar />
         <main>
           <div className="container mx-auto px-4 py-8">
-            <h2 className="text-2xl font-semibold mb-6">Popular</h2>
+            <h2 className="font-bold leading-tight tracking-normal text-left mb-4 last:mb-0 text-primary-title text-7 capitalize lg:text-7.375 lg:tracking-tight 2xl:text-8.125 2xl:mb-4.5">
+              Popular
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {popularItems.map((item) => (
                 <MenuCard key={item.title} {...item} />
