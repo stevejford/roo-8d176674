@@ -83,15 +83,15 @@ export type Database = {
       profiles: {
         Row: {
           id: string
-          role: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
           id: string
-          role?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
           id?: string
-          role?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: []
       }
@@ -103,7 +103,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role:
+        | "admin"
+        | "user"
+        | "staff"
+        | "kitchen"
+        | "delivery"
+        | "manager"
+        | "owner"
     }
     CompositeTypes: {
       [_ in never]: never

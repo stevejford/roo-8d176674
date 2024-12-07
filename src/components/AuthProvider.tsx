@@ -46,29 +46,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // If no profile exists, create one
-      if (!profile) {
-        console.log("No profile found, creating one...");
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert([
-            { id: session.user.id, role: 'user' }
-          ])
-          .select('role')
-          .single();
-
-        if (insertError) {
-          console.error('Error creating profile:', insertError);
-          setIsAdmin(false);
-          return;
-        }
-
-        console.log("Created new profile:", newProfile);
-        setIsAdmin(newProfile.role === 'admin');
-      } else {
+      if (profile) {
         console.log("Found existing profile:", profile);
         setIsAdmin(profile.role === 'admin');
       }
+
+      // Profile will be created by the database trigger, no need to create it here
+      console.log("Profile status:", profile ? "exists" : "will be created by trigger");
+      setIsAdmin(profile?.role === 'admin');
+
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
