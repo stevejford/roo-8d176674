@@ -24,7 +24,7 @@ export const Navbar = () => {
           <div className="flex-shrink-0">
             <h1 className="text-xl font-bold">Pizza & Pasta</h1>
           </div>
-          <div className="hidden md:block flex-1 max-w-md mx-4">
+          <div className="flex-1 max-w-md mx-4">
             <div className="relative">
               <Input
                 type="text"
@@ -33,12 +33,6 @@ export const Navbar = () => {
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-600 hover:text-gray-900">About</button>
-            <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90">
-              Sign In
-            </button>
           </div>
         </div>
         <div className="overflow-x-auto -mb-px">
