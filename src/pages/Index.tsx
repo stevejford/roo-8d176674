@@ -92,9 +92,6 @@ const Index = () => {
       <div className="relative flex">
         <main className="w-[calc(100%-400px)] px-4 py-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="font-bold leading-tight tracking-normal text-left last:mb-0 text-primary-title text-7 capitalize lg:text-7.375 lg:tracking-tight 2xl:text-8.125">
-              Menu
-            </h2>
             {isAdmin && (
               <button
                 onClick={() => navigate("/admin")}
