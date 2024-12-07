@@ -115,7 +115,7 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
       <div className="flex flex-1">
-        <main className={`${isMobile ? 'w-full' : 'w-[calc(100%-400px)]'} pb-16`}>
+        <main className={`w-full ${!isMobile && 'w-[calc(100%-400px)]'} pb-16`}>
           <div className="sticky top-16 bg-gray-50 z-40 px-4">
             <div className="relative py-4">
               <button 
