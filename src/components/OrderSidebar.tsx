@@ -1,194 +1,115 @@
-import React, { useState, useRef } from "react";
-import { Clock, MapPin, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { ComplementaryItem } from "./ComplementaryItem";
+import React, { useState } from "react";
+import { X, Plus, Minus } from "lucide-react";
+
+interface SizeOption {
+  name: string;
+  price: number;
+}
+
+interface ProductDetails {
+  name: string;
+  description: string;
+  image: string;
+  sizes: SizeOption[];
+  tags?: string[];
+}
 
 export const OrderSidebar = () => {
-  const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
-  const [showVoucherInput, setShowVoucherInput] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetails>({
+    name: "The Stewart",
+    description: "Tomato, Cheese, Pepperoni And A Sprinkle Of Parmesan. Topped With A Generous Amount Of Hot Honey!",
+    image: "/lovable-uploads/287b3edb-5299-4697-9d86-3416a2b1dc86.png",
+    tags: ["Gluten Free"],
+    sizes: [
+      { name: "King", price: 34.00 },
+      { name: "Family", price: 29.00 },
+      { name: "Large", price: 24.00 },
+      { name: "Medium", price: 19.00 },
+      { name: "Small", price: 15.00 }
+    ]
+  });
 
-  const complementaryItems = [
-    {
-      name: "The Stewart",
-      price: 24.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    },
-    {
-      name: "The Duncan",
-      price: 24.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    },
-    {
-      name: "Arancini",
-      price: 11.90,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    },
-    {
-      name: "Southwest...",
-      price: 28.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    },
-    {
-      name: "Matte",
-      price: 24.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    }
-  ];
+  const [quantities, setQuantities] = useState<Record<string, number>>(
+    Object.fromEntries(selectedProduct.sizes.map(size => [size.name, 0]))
+  );
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 200;
-      const newScrollLeft = direction === 'left' 
-        ? scrollContainerRef.current.scrollLeft - scrollAmount
-        : scrollContainerRef.current.scrollLeft + scrollAmount;
-      
-      scrollContainerRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-      });
-    }
+  const handleQuantityChange = (sizeName: string, change: number) => {
+    setQuantities(prev => ({
+      ...prev,
+      [sizeName]: Math.max(0, (prev[sizeName] || 0) + change)
+    }));
   };
 
   return (
-    <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen flex flex-col">
+    <div className="fixed inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-lg flex flex-col">
+      <div className="relative p-4 border-b border-gray-100">
+        <button className="absolute right-4 top-4">
+          <X className="h-6 w-6 text-gray-500" />
+        </button>
+      </div>
+
       <div className="flex-1 overflow-auto">
-        <div className="p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
-            <div className="flex p-1 bg-gray-100 rounded-full">
-              <button 
-                className={`flex-1 py-2 px-4 rounded-full ${mode === 'pickup' ? 'bg-white shadow-sm font-medium' : 'text-gray-600 hover:bg-white/50 transition-colors'}`}
-                onClick={() => setMode('pickup')}
+        <div className="aspect-square w-full relative">
+          <img
+            src={selectedProduct.image}
+            alt={selectedProduct.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-2xl font-semibold text-gray-900">{selectedProduct.name}</h2>
+            {selectedProduct.tags?.map((tag, index) => (
+              <span
+                key={index}
+                className="px-3 py-1 text-sm font-medium text-red-500 border border-red-500 rounded-full"
               >
-                Pickup
-              </button>
-              <button 
-                className={`flex-1 py-2 px-4 rounded-full ${mode === 'delivery' ? 'bg-white shadow-sm font-medium' : 'text-gray-600 hover:bg-white/50 transition-colors'}`}
-                onClick={() => setMode('delivery')}
-              >
-                Delivery
-              </button>
-            </div>
+                {tag}
+              </span>
+            ))}
           </div>
 
-          {mode === 'pickup' ? (
-            <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-              <MapPin className="h-5 w-5 text-gray-400 mt-1" />
-              <div>
-                <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
-                <p className="text-sm text-gray-600">
-                  Gateway Plaza, G65/621-659 Bellarine Hwy Leopold
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-              <Search className="h-5 w-5 text-gray-400 mt-1" />
-              <div className="flex-1">
-                <input 
-                  type="text" 
-                  placeholder="Enter delivery address"
-                  className="w-full text-sm text-gray-600 bg-transparent border-none focus:outline-none p-0"
-                />
-              </div>
-            </div>
-          )}
+          <p className="text-gray-600 mb-6">{selectedProduct.description}</p>
 
-          <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-            <Clock className="h-5 w-5 text-gray-400 mt-1" />
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-[#2D3648]">{mode === 'pickup' ? 'Pickup Time' : 'Delivery Time'}</h3>
-                <button className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors">
-                  CHANGE
-                </button>
-              </div>
-              <p className="text-sm text-gray-600">Today - 20 Minutes</p>
-            </div>
-          </div>
-          
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
-                Items
-              </h3>
-              {!showVoucherInput && (
-                <button 
-                  onClick={() => setShowVoucherInput(true)}
-                  className="text-[#E86452] text-sm font-medium flex items-center gap-1 hover:text-[#E86452]/90"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Voucher
-                </button>
-              )}
-            </div>
-            
-            {showVoucherInput ? (
-              <div className="space-y-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="ENTER VOUCHER CODE"
-                    className="w-full p-3 border border-gray-200 rounded-lg text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#E86452]"
-                  />
+          <div className="space-y-4">
+            <h3 className="font-semibold text-gray-900 mb-4">Quantity</h3>
+            {selectedProduct.sizes.map((size) => (
+              <div key={size.name} className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-4">
+                  <span className="text-gray-700 min-w-[80px]">{size.name}</span>
+                  <span className="text-gray-700">${size.price.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center gap-4">
                   <button
-                    onClick={() => setShowVoucherInput(false)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#E86452] hover:text-[#E86452]/90"
+                    onClick={() => handleQuantityChange(size.name, -1)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300"
                   >
-                    Cancel
+                    <Minus className="h-4 w-4 text-gray-500" />
+                  </button>
+                  <span className="w-8 text-center">{quantities[size.name]}</span>
+                  <button
+                    onClick={() => handleQuantityChange(size.name, 1)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300"
+                  >
+                    <Plus className="h-4 w-4 text-gray-500" />
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                <p>Your cart is empty</p>
-                <p className="text-sm">Add items to get started</p>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
-              Compliment your Order
-            </h3>
-            <div className="relative">
-              <button 
-                onClick={() => scroll('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-1 hover:bg-gray-50"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              
-              <div 
-                ref={scrollContainerRef}
-                className="flex overflow-x-auto gap-3 pb-2 -mx-6 px-6 scrollbar-hide relative scroll-smooth snap-x"
-              >
-                {complementaryItems.map((item, index) => (
-                  <ComplementaryItem
-                    key={index}
-                    name={item.name}
-                    price={item.price}
-                    image={item.image}
-                  />
-                ))}
-              </div>
-
-              <button 
-                onClick={() => scroll('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-1 hover:bg-gray-50"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-200 mt-auto">
-        <button className="w-full py-3 px-4 bg-[#E86452] text-white rounded-md flex items-center justify-center space-x-2">
-          <span>Store Closed</span>
-          <span>→</span>
-        </button>
+      <div className="p-4 border-t border-gray-100">
+        <div className="grid grid-cols-2 gap-4">
+          <button className="w-full py-3 px-4 bg-white border border-gray-300 rounded-md text-gray-700 font-medium">
+            Add Extras
+          </button>
+          <button className="w-full py-3 px-4 bg-white border border-gray-300 rounded-md text-gray-700 font-medium">
+            Edit Ingredients
+          </button>
+        </div>
       </div>
     </div>
   );
