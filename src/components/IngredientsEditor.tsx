@@ -1,5 +1,4 @@
 import React from "react";
-import { X } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import {
   Dialog,
@@ -30,15 +29,7 @@ export const IngredientsEditor = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-semibold text-[#2D3648]">Edit Ingredients</DialogTitle>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="h-6 w-6 text-gray-500" />
-            </button>
-          </div>
+          <DialogTitle className="text-2xl font-semibold text-[#2D3648]">Edit Ingredients</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-4">
           {ingredients.map((ingredient) => (
