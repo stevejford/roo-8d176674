@@ -10,11 +10,11 @@ interface CategoryNavProps {
 
 export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }: CategoryNavProps) => {
   return (
-    <div className="sticky top-16 bg-gray-50 z-40 px-4">
-      <div className="relative py-4">
+    <div className="sticky top-16 bg-gray-50 z-40">
+      <div className="relative py-4 max-w-[1400px] mx-auto px-4">
         <button 
           onClick={() => onScroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
           aria-label="Scroll left"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -37,7 +37,7 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
 
         <button 
           onClick={() => onScroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
           aria-label="Scroll right"
         >
           <ChevronRight className="h-5 w-5" />
