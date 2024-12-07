@@ -22,16 +22,6 @@ const categories = [
   "Soft Drinks",
 ];
 
-const fetchProducts = async () => {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('active', true);
-  
-  if (error) throw error;
-  return data;
-};
-
 const Index = () => {
   const navigate = useNavigate();
   const { session, isAdmin } = useAuth();
