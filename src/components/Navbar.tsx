@@ -32,17 +32,17 @@ export const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center h-16 gap-3">
           <div className="flex-shrink-0 flex items-center gap-2">
             <HopOff className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">Roo Restaurant</h1>
           </div>
-          <div className="flex-1 max-w-md mx-4">
+          <div className="flex-1 max-w-[280px]">
             <div className="relative">
               <Input
                 type="text"
                 placeholder="Search Menu"
-                className="w-full pl-10"
+                className="w-full pl-9 h-9 text-sm rounded-full border-gray-200"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             </div>
