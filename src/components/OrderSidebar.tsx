@@ -1,38 +1,59 @@
-import React from "react";
-import { Clock, MapPin, Plus } from "lucide-react";
+import React, { useState } from "react";
+import { Clock, MapPin, Plus, Search } from "lucide-react";
 
 export const OrderSidebar = () => {
+  const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
+
   return (
     <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
           <div className="flex p-1 bg-gray-100 rounded-full">
-            <button className="flex-1 py-2 px-4 rounded-full bg-white shadow-sm font-medium">
+            <button 
+              className={`flex-1 py-2 px-4 rounded-full ${mode === 'pickup' ? 'bg-white shadow-sm font-medium' : 'text-gray-600 hover:bg-white/50 transition-colors'}`}
+              onClick={() => setMode('pickup')}
+            >
               Pickup
             </button>
-            <button className="flex-1 py-2 px-4 rounded-full text-gray-600 hover:bg-white/50 transition-colors">
+            <button 
+              className={`flex-1 py-2 px-4 rounded-full ${mode === 'delivery' ? 'bg-white shadow-sm font-medium' : 'text-gray-600 hover:bg-white/50 transition-colors'}`}
+              onClick={() => setMode('delivery')}
+            >
               Delivery
             </button>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-            <MapPin className="h-5 w-5 text-gray-400 mt-1" />
-            <div>
-              <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
-              <p className="text-sm text-gray-600">
-                Gateway Plaza, G65/621-659 Bellarine Hwy Leopold
-              </p>
+          {mode === 'pickup' ? (
+            <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
+              <MapPin className="h-5 w-5 text-gray-400 mt-1" />
+              <div>
+                <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
+                <p className="text-sm text-gray-600">
+                  Gateway Plaza, G65/621-659 Bellarine Hwy Leopold
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
+              <Search className="h-5 w-5 text-gray-400 mt-1" />
+              <div className="flex-1">
+                <input 
+                  type="text" 
+                  placeholder="Enter delivery address"
+                  className="w-full text-sm text-gray-600 bg-transparent border-none focus:outline-none p-0"
+                />
+              </div>
+            </div>
+          )}
 
           <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
             <Clock className="h-5 w-5 text-gray-400 mt-1" />
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-medium text-[#2D3648]">Pickup Time</h3>
+                <h3 className="font-medium text-[#2D3648]">{mode === 'pickup' ? 'Pickup Time' : 'Delivery Time'}</h3>
                 <button className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors">
                   CHANGE
                 </button>
