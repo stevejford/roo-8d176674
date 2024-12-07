@@ -71,8 +71,8 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
       <div className="flex">
-        {/* Main content area with padding for sidebar */}
-        <div className="flex-1 pr-[400px]">
+        {/* Main content area */}
+        <div className="flex-1 max-w-[calc(100%-400px)]">
           <main className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="font-bold leading-tight tracking-normal text-left last:mb-0 text-primary-title text-7 capitalize lg:text-7.375 lg:tracking-tight 2xl:text-8.125">
@@ -120,10 +120,13 @@ const Index = () => {
             </div>
           </main>
         </div>
-        <OrderSidebar 
-          selectedProduct={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-        />
+        {/* Fixed sidebar */}
+        <div className="w-[400px] fixed top-0 right-0 h-screen">
+          <OrderSidebar 
+            selectedProduct={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+          />
+        </div>
       </div>
     </div>
   );
