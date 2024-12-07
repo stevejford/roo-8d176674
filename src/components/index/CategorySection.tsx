@@ -1,5 +1,6 @@
 import React from "react";
 import { MenuCard } from "@/components/MenuCard";
+import { SpecialCard } from "./SpecialCard";
 import type { Database } from "@/integrations/supabase/types";
 
 type Product = Database['public']['Tables']['products']['Row'];
@@ -13,25 +14,46 @@ interface CategorySectionProps {
 
 export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionProps>(
   ({ category, products, onProductSelect }, ref) => {
+    const isSpecialsCategory = category.toLowerCase() === "specials";
+
     return (
       <div ref={ref} className="scroll-mt-24">
         <h3 className="text-2xl font-bold text-primary-title mb-6">
           {category}
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${
+          isSpecialsCategory 
+            ? "grid-cols-1 md:grid-cols-2" 
+            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        }`}>
           {products.map((item) => (
-            <MenuCard 
-              key={item.id}
-              title={item.title}
-              price={24.00}
-              description={item.description || ''}
-              image={item.image_url || '/placeholder.svg'}
-              onClick={() => onProductSelect({
-                title: item.title,
-                description: item.description || '',
-                image: item.image_url || '/placeholder.svg'
-              })}
-            />
+            isSpecialsCategory ? (
+              <SpecialCard
+                key={item.id}
+                title={item.title}
+                price={24.00}
+                description={item.description || ''}
+                image={item.image_url || '/placeholder.svg'}
+                onClick={() => onProductSelect({
+                  title: item.title,
+                  description: item.description || '',
+                  image: item.image_url || '/placeholder.svg'
+                })}
+              />
+            ) : (
+              <MenuCard 
+                key={item.id}
+                title={item.title}
+                price={24.00}
+                description={item.description || ''}
+                image={item.image_url || '/placeholder.svg'}
+                onClick={() => onProductSelect({
+                  title: item.title,
+                  description: item.description || '',
+                  image: item.image_url || '/placeholder.svg'
+                })}
+              />
+            )
           ))}
         </div>
       </div>
