@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Trash2, Upload } from 'lucide-react';
@@ -100,7 +99,6 @@ export const ImageUpload = ({ currentImage, onImageUploaded }: ImageUploadProps)
   return (
     <div className="space-y-4">
       <div className="grid w-full max-w-sm items-center gap-1.5">
-        <Label htmlFor="image">Image</Label>
         <Input
           id="image"
           type="file"
