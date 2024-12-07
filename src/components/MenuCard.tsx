@@ -12,11 +12,11 @@ export const MenuCard = ({ title, price, description, image }: MenuItemProps) =>
   return (
     <button type="button" className="block w-full text-left">
       <div className="relative overflow-hidden rounded-lg 2xl:rounded-2.25">
-        <div className="relative z-1 w-full overflow-hidden rounded-lg bg-stone-300 2xl:rounded-2.25 after:absolute after:bottom-0 after:left-0 after:z-2 after:h-1/2 after:w-full after:bg-gradient-to-b after:from-neutral-200/0 after:to-black/50 aspect-w-1 aspect-h-1">
+        <div className="relative z-1 w-full pb-[100%] overflow-hidden rounded-lg bg-stone-300 2xl:rounded-2.25 after:absolute after:bottom-0 after:left-0 after:z-2 after:h-1/2 after:w-full after:bg-gradient-to-b after:from-neutral-200/0 after:to-black/50">
           <img
             src={image}
             alt={title}
-            className="z-1 h-full w-full rounded-lg object-cover object-center 2xl:rounded-2.25"
+            className="absolute inset-0 z-1 h-full w-full rounded-lg object-cover object-center 2xl:rounded-2.25"
           />
         </div>
         
