@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Extra {
   name: string;
@@ -118,6 +118,8 @@ const extrasData: ExtrasCategory[] = [
 
 export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
   const [quantities, setQuantities] = React.useState<Record<string, number>>({});
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleQuantityChange = (itemName: string, increment: boolean) => {
     setQuantities(prev => ({
@@ -126,54 +128,108 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
     }));
   };
 
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 200;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToCategory = (categoryName: string) => {
+    const element = categoryRefs.current[categoryName];
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold text-[#2D3648]">Add Extras</DialogTitle>
         </DialogHeader>
-        <div className="space-y-6">
-          {extrasData.map((category) => (
-            <div key={category.name}>
-              <h3 className="text-lg font-semibold text-[#2D3648] mb-3 capitalize">
+
+        <div className="relative mb-4">
+          <button 
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          
+          <div 
+            ref={scrollContainerRef}
+            className="overflow-x-auto scrollbar-hide py-2 px-8 flex space-x-6 scroll-smooth"
+          >
+            {extrasData.map((category) => (
+              <button
+                key={category.name}
+                onClick={() => scrollToCategory(category.name)}
+                className="text-[#2D3648] whitespace-nowrap text-sm font-medium hover:text-primary transition-colors"
+              >
                 {category.name}
-              </h3>
-              <div className="space-y-3">
-                {category.items.map((item) => (
-                  <div 
-                    key={item.name}
-                    className="flex items-center justify-between py-2 border-b border-gray-100"
-                  >
-                    <div>
-                      <span className="text-[#2D3648]">{item.name}</span>
-                      <span className="ml-2 text-sm text-gray-500">
-                        ${item.price.toFixed(2)}
-                      </span>
+              </button>
+            ))}
+          </div>
+
+          <button 
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto">
+          <div className="space-y-6">
+            {extrasData.map((category) => (
+              <div 
+                key={category.name}
+                ref={el => categoryRefs.current[category.name] = el}
+              >
+                <h3 className="text-lg font-semibold text-[#2D3648] mb-3 capitalize">
+                  {category.name}
+                </h3>
+                <div className="space-y-3">
+                  {category.items.map((item) => (
+                    <div 
+                      key={item.name}
+                      className="flex items-center justify-between py-2 border-b border-gray-100"
+                    >
+                      <div>
+                        <span className="text-[#2D3648]">{item.name}</span>
+                        <span className="ml-2 text-sm text-gray-500">
+                          ${item.price.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => handleQuantityChange(item.name, false)}
+                          className="p-1 rounded-full hover:bg-gray-100"
+                          type="button"
+                        >
+                          <Minus className="h-5 w-5 text-gray-400" />
+                        </button>
+                        <span className="w-4 text-center">
+                          {quantities[item.name] || 0}
+                        </span>
+                        <button
+                          onClick={() => handleQuantityChange(item.name, true)}
+                          className="p-1 rounded-full hover:bg-gray-100"
+                          type="button"
+                        >
+                          <Plus className="h-5 w-5 text-[#E86452]" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => handleQuantityChange(item.name, false)}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                        type="button"
-                      >
-                        <Minus className="h-5 w-5 text-gray-400" />
-                      </button>
-                      <span className="w-4 text-center">
-                        {quantities[item.name] || 0}
-                      </span>
-                      <button
-                        onClick={() => handleQuantityChange(item.name, true)}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                        type="button"
-                      >
-                        <Plus className="h-5 w-5 text-[#E86452]" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
