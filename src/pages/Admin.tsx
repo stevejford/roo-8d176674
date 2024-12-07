@@ -64,7 +64,7 @@ const Orders = () => (
   <div>Orders management coming soon</div>
 );
 
-const Users = () => (
+const UsersManagement = () => (
   <div>User management coming soon</div>
 );
 
@@ -72,7 +72,7 @@ const Analytics = () => (
   <div>Analytics dashboard coming soon</div>
 );
 
-const Settings = () => (
+const SettingsPanel = () => (
   <div>Settings panel coming soon</div>
 );
 
@@ -134,9 +134,9 @@ const Admin = () => {
             <Route index element={<Dashboard />} />
             <Route path="products/*" element={<Products />} />
             <Route path="orders/*" element={<Orders />} />
-            <Route path="users/*" element={<Users />} />
+            <Route path="users/*" element={<UsersManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
-            <Route path="settings/*" element={<Settings />} />
+            <Route path="settings/*" element={<SettingsPanel />} />
           </Routes>
         </div>
       </div>
