@@ -15,6 +15,12 @@ interface CategorySectionProps {
 export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionProps>(
   ({ category, products, onProductSelect }, ref) => {
     const isSpecialsCategory = category.toLowerCase() === "specials";
+    const isPopularCategory = category.toLowerCase() === "popular";
+
+    // Filter products for Popular category
+    const displayProducts = isPopularCategory 
+      ? products.filter(product => product.is_popular)
+      : products;
 
     return (
       <div ref={ref} className="scroll-mt-24">
@@ -26,12 +32,12 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
             ? "grid-cols-1 md:grid-cols-2" 
             : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         }`}>
-          {products.map((item) => (
+          {displayProducts.map((item) => (
             isSpecialsCategory ? (
               <SpecialCard
                 key={item.id}
                 title={item.title}
-                price={24.00}
+                price={item.price || 24.00}
                 description={item.description || ''}
                 image={item.image_url || '/placeholder.svg'}
                 onClick={() => onProductSelect({
@@ -44,7 +50,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
               <MenuCard 
                 key={item.id}
                 title={item.title}
-                price={24.00}
+                price={item.price || 24.00}
                 description={item.description || ''}
                 image={item.image_url || '/placeholder.svg'}
                 onClick={() => onProductSelect({
