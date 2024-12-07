@@ -70,7 +70,7 @@ const Index = () => {
         isAdmin={isAdmin} 
         onCategoryClick={handleCategoryClick}
       />
-      <div className="flex justify-between">
+      <div className="relative flex">
         {/* Main content area */}
         <main className="w-[calc(100%-400px)] px-4 py-8">
           <div className="flex justify-between items-center mb-8">
@@ -120,7 +120,7 @@ const Index = () => {
         </main>
 
         {/* Sidebar */}
-        <aside className="w-[400px] fixed top-0 right-0 h-screen">
+        <aside className="w-[400px] fixed top-0 right-0 h-screen z-50">
           <OrderSidebar 
             selectedProduct={selectedProduct}
             onClose={() => setSelectedProduct(null)}
