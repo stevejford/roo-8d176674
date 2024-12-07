@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ProductDialog } from './ProductDialog';
 import { CategoryDialog } from './CategoryDialog';
-import { useToast } from '@/components/ui/use-toast';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { CategorizedProducts } from './CategorizedProducts';
 import { UncategorizedProducts } from './UncategorizedProducts';
+import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 import type { Product, Category } from './types';
 
 export const ProductList = () => {
@@ -17,55 +16,9 @@ export const ProductList = () => {
   const [isProductDialogOpen, setIsProductDialogOpen] = React.useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = React.useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<string | null>(null);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('position');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('position');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const updateProductOrder = useMutation({
-    mutationFn: async ({ sourceIndex, destinationIndex, productId, categoryId }: any) => {
-      const { error } = await supabase
-        .from('products')
-        .update({ 
-          position: destinationIndex,
-          category_id: categoryId
-        })
-        .eq('id', productId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast({
-        title: "Order updated",
-        description: "The product order has been updated successfully.",
-      });
-    },
-  });
+  const { products, isLoading, updateProductOrder, deleteProduct } = useProducts();
+  const { categories, deleteCategory } = useCategories();
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -92,48 +45,6 @@ export const ProductList = () => {
     setSelectedProduct(product);
     setSelectedCategoryId(product.category_id);
     setIsProductDialogOpen(true);
-  };
-
-  const handleDeleteProduct = async (id: string) => {
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete product",
-        variant: "destructive",
-      });
-    } else {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast({
-        title: "Product deleted",
-        description: "The product has been deleted successfully.",
-      });
-    }
-  };
-
-  const handleDeleteCategory = async (id: string) => {
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete category",
-        variant: "destructive",
-      });
-    } else {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast({
-        title: "Category deleted",
-        description: "The category has been deleted successfully.",
-      });
-    }
   };
 
   if (isLoading) {
@@ -174,9 +85,9 @@ export const ProductList = () => {
             category={category}
             products={categorizedProducts[category.id] || []}
             onEdit={handleEditProduct}
-            onDelete={handleDeleteProduct}
+            onDelete={deleteProduct}
             onEditCategory={setSelectedCategory}
-            onDeleteCategory={handleDeleteCategory}
+            onDeleteCategory={deleteCategory}
             onAddProduct={handleAddProduct}
           />
         ))}
@@ -184,7 +95,7 @@ export const ProductList = () => {
         <UncategorizedProducts
           products={categorizedProducts['uncategorized'] || []}
           onEdit={handleEditProduct}
-          onDelete={handleDeleteProduct}
+          onDelete={deleteProduct}
         />
       </DragDropContext>
 

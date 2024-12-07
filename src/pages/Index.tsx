@@ -11,30 +11,7 @@ import { CategorySection } from "@/components/index/CategorySection";
 import { AppFooter } from "@/components/index/AppFooter";
 
 type Product = Database['public']['Tables']['products']['Row'];
-
-const categories = [
-  "Popular",
-  "Specials",
-  "Entrée",
-  "Traditional Pizza",
-  "Gourmet Pizza",
-  "Pasta & Risotto",
-  "Garlic Bread",
-  "Mains",
-  "Desserts",
-  "Shakes",
-  "Soft Drinks",
-];
-
-const fetchProducts = async (): Promise<Product[]> => {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('active', true);
-  
-  if (error) throw error;
-  return data || [];
-};
+type Category = Database['public']['Tables']['categories']['Row'];
 
 const Index = () => {
   const navigate = useNavigate();
@@ -48,9 +25,31 @@ const Index = () => {
   const menuScrollRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('position');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
-    queryFn: fetchProducts,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('active', true)
+        .order('position');
+      
+      if (error) throw error;
+      return data;
+    },
   });
 
   const handleSignOut = async () => {
@@ -83,6 +82,16 @@ const Index = () => {
   if (isLoading) {
     return null;
   }
+
+  // Group products by category
+  const productsByCategory = products.reduce((acc: { [key: string]: Product[] }, product) => {
+    const categoryId = product.category_id || 'uncategorized';
+    if (!acc[categoryId]) {
+      acc[categoryId] = [];
+    }
+    acc[categoryId].push(product);
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -120,11 +129,11 @@ const Index = () => {
               >
                 {categories.map((category) => (
                   <button
-                    key={category}
-                    onClick={() => handleCategoryClick(category)}
+                    key={category.id}
+                    onClick={() => handleCategoryClick(category.title)}
                     className="text-gray-900 whitespace-nowrap font-medium hover:text-primary transition-colors"
                   >
-                    {category}
+                    {category.title}
                   </button>
                 ))}
               </div>
@@ -153,10 +162,10 @@ const Index = () => {
           <div className="space-y-12 px-4">
             {categories.map((category) => (
               <CategorySection
-                key={category}
-                ref={el => categoryRefs.current[category] = el}
-                category={category}
-                products={products}
+                key={category.id}
+                ref={el => categoryRefs.current[category.title] = el}
+                category={category.title}
+                products={productsByCategory[category.id] || []}
                 onProductSelect={setSelectedProduct}
               />
             ))}
