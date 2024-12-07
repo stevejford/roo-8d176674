@@ -9,6 +9,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { CategorySection } from "@/components/index/CategorySection";
 import { AppFooter } from "@/components/index/AppFooter";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Product = Database['public']['Tables']['products']['Row'];
 type Category = Database['public']['Tables']['categories']['Row'];
@@ -22,6 +23,7 @@ const Index = () => {
     image: string;
   } | null>(null);
 
+  const isMobile = useIsMobile();
   const menuScrollRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -101,7 +103,7 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
       <div className="flex flex-1">
-        <main className="w-[calc(100%-400px)] pb-16">
+        <main className={`${isMobile ? 'w-full' : 'w-[calc(100%-400px)]'} pb-16`}>
           <div className="sticky top-16 bg-gray-50 z-40 px-4">
             <div className="relative py-4">
               <button 
@@ -172,12 +174,23 @@ const Index = () => {
           </div>
         </main>
 
-        <aside className="w-[400px] fixed top-0 right-0 h-screen z-50">
-          <OrderSidebar 
-            selectedProduct={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
-          />
-        </aside>
+        {!isMobile && (
+          <aside className="w-[400px] fixed top-0 right-0 h-screen z-50">
+            <OrderSidebar 
+              selectedProduct={selectedProduct}
+              onClose={() => setSelectedProduct(null)}
+            />
+          </aside>
+        )}
+
+        {isMobile && selectedProduct && (
+          <div className="fixed inset-0 z-50 animate-slide-in-right">
+            <OrderSidebar 
+              selectedProduct={selectedProduct}
+              onClose={() => setSelectedProduct(null)}
+            />
+          </div>
+        )}
       </div>
 
       <AppFooter 

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Clock, Plus } from "lucide-react";
 import { ProductDetails } from "./ProductDetails";
 import { OrderLocation } from "./OrderLocation";
 import { PickupTimeModal } from "./PickupTimeModal";
 import { ComplementaryItems } from "./ComplementaryItems";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -19,6 +19,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   const [showVoucherInput, setShowVoucherInput] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
+  const isMobile = useIsMobile();
 
   const handleTimeSchedule = (date: string, time: string) => {
     setSelectedTime(`${date} - ${time}`);
@@ -27,7 +28,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
 
   if (selectedProduct) {
     return (
-      <div className="fixed top-0 right-0 w-full md:w-[400px] bg-white border-l border-gray-200 h-screen overflow-hidden">
+      <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`}>
         <ProductDetails
           title={selectedProduct.title}
           description={selectedProduct.description}
@@ -39,28 +40,54 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   }
 
   return (
-    <div className="fixed top-0 right-0 w-full md:w-[400px] bg-white border-l border-gray-200 h-screen flex flex-col">
+    <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen flex flex-col`}>
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
-            <div className="flex p-1 bg-gray-100 rounded-full">
+          {isMobile && (
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
               <button 
-                className={`flex-1 py-2 px-4 rounded-full ${mode === 'pickup' ? 'bg-white shadow-sm font-medium' : 'text-gray-600 hover:bg-white/50 transition-colors'}`}
-                onClick={() => setMode('pickup')}
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full"
               >
-                Pickup
-              </button>
-              <button 
-                className={`flex-1 py-2 px-4 rounded-full ${mode === 'delivery' ? 'bg-white shadow-sm font-medium' : 'text-gray-600 hover:bg-white/50 transition-colors'}`}
-                onClick={() => setMode('delivery')}
-              >
-                Delivery
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
+          )}
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[#2D3648] text-lg">Pickup/Delivery</span>
+              <div className="flex items-center">
+                <button 
+                  onClick={() => setMode('pickup')}
+                  className={`px-4 py-2 rounded-full ${mode === 'pickup' ? 'bg-[#10B981] text-white' : 'bg-gray-100'}`}
+                >
+                  Pickup
+                </button>
+                <button 
+                  onClick={() => setMode('delivery')}
+                  className={`px-4 py-2 rounded-full ${mode === 'delivery' ? 'bg-[#10B981] text-white' : 'bg-gray-100'}`}
+                >
+                  Delivery
+                </button>
+              </div>
+            </div>
+            <OrderLocation mode={mode} />
           </div>
-
-          <OrderLocation mode={mode} />
 
           <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
             <Clock className="h-5 w-5 text-gray-400 mt-1" />

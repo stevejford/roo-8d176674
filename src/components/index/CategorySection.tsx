@@ -2,6 +2,7 @@ import React from "react";
 import { MenuCard } from "@/components/MenuCard";
 import { SpecialCard } from "./SpecialCard";
 import type { Database } from "@/integrations/supabase/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -16,6 +17,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
   ({ category, products, onProductSelect }, ref) => {
     const isSpecialsCategory = category.toLowerCase() === "specials";
     const isPopularCategory = category.toLowerCase() === "popular";
+    const isMobile = useIsMobile();
 
     // Filter products for Popular category
     const displayProducts = isPopularCategory 
@@ -29,8 +31,8 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
         </h3>
         <div className={`grid gap-6 ${
           isSpecialsCategory 
-            ? "grid-cols-1 md:grid-cols-2" 
-            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ? isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
+            : isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         }`}>
           {displayProducts.map((item) => (
             isSpecialsCategory ? (
