@@ -18,6 +18,15 @@ const Login = () => {
   };
 
   useEffect(() => {
+    // Check for password reset hash in URL
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      console.log('Password reset detected');
+      toast.info("Please enter your new password");
+    }
+  }, []);
+
+  useEffect(() => {
     if (session && !isLoading) {
       console.log("Login redirect check - IsAdmin:", isAdmin);
       if (isAdmin) {
