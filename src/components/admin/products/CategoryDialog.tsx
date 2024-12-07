@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/AuthProvider';
 
 interface CategoryDialogProps {
   open: boolean;
@@ -18,6 +19,7 @@ export const CategoryDialog = ({ open, onOpenChange, category, onClose }: Catego
   const [title, setTitle] = React.useState(category?.title || '');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { session, isAdmin } = useAuth();
 
   React.useEffect(() => {
     if (category) {
@@ -28,6 +30,17 @@ export const CategoryDialog = ({ open, onOpenChange, category, onClose }: Catego
   }, [category]);
 
   const handleSave = async () => {
+    if (!session || !isAdmin) {
+      console.log("User session:", session);
+      console.log("Is admin:", isAdmin);
+      toast({
+        title: "Error",
+        description: "You must be an admin to perform this action",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!title.trim()) {
       toast({
         title: "Error",
@@ -42,12 +55,14 @@ export const CategoryDialog = ({ open, onOpenChange, category, onClose }: Catego
     };
 
     if (category?.id) {
+      console.log("Updating category:", category.id);
       const { error } = await supabase
         .from('categories')
         .update(categoryData)
         .eq('id', category.id);
 
       if (error) {
+        console.error("Error updating category:", error);
         toast({
           title: "Error",
           description: "Failed to update category",
@@ -56,11 +71,13 @@ export const CategoryDialog = ({ open, onOpenChange, category, onClose }: Catego
         return;
       }
     } else {
+      console.log("Creating new category");
       const { error } = await supabase
         .from('categories')
         .insert([categoryData]);
 
       if (error) {
+        console.error("Error creating category:", error);
         toast({
           title: "Error",
           description: "Failed to create category",
