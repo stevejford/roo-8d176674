@@ -5,15 +5,16 @@ export const OrderSidebar = () => {
   return (
     <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen">
       <div className="p-6 space-y-6">
-        <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
-        
-        <div className="flex p-1 bg-gray-100 rounded-full">
-          <button className="flex-1 py-2 px-4 rounded-full bg-white shadow-sm font-medium">
-            Pickup
-          </button>
-          <button className="flex-1 py-2 px-4 rounded-full text-gray-600 hover:bg-white/50 transition-colors">
-            Delivery
-          </button>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
+          <div className="flex p-1 bg-gray-100 rounded-full">
+            <button className="flex-1 py-2 px-4 rounded-full bg-white shadow-sm font-medium">
+              Pickup
+            </button>
+            <button className="flex-1 py-2 px-4 rounded-full text-gray-600 hover:bg-white/50 transition-colors">
+              Delivery
+            </button>
+          </div>
         </div>
 
         <div className="space-y-4">
