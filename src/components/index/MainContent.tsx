@@ -18,7 +18,7 @@ export const MainContent = ({
   onProductSelect 
 }: MainContentProps) => {
   return (
-    <div className="space-y-12 px-4">
+    <div className="space-y-12 px-4 max-w-[1400px] mx-auto">
       {categories.map((category) => (
         <CategorySection
           key={category.id}
