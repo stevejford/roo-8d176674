@@ -22,12 +22,17 @@ export default {
         inter: ['Inter', 'Arial', 'sans-serif'],
       },
       fontSize: {
+        '5.5': '1.375rem',    // 22px
+        '5.75': '1.4375rem',  // 23px
         '7': '1.75rem',      // 28px
         '7.375': '1.84375rem', // 29.5px
         '8.125': '2.03125rem', // 32.5px
       },
       spacing: {
         '4.5': '1.125rem',   // 18px
+      },
+      letterSpacing: {
+        's-tight': '-0.01em',
       },
       colors: {
         border: "hsl(var(--border))",

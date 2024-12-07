@@ -71,47 +71,47 @@ export const OrderSidebar = () => {
             </div>
           </div>
 
-          <div className="space-y-4">
-            {mode === 'pickup' ? (
-              <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-                <MapPin className="h-5 w-5 text-gray-400 mt-1" />
-                <div>
-                  <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
-                  <p className="text-sm text-gray-600">
-                    Gateway Plaza, G65/621-659 Bellarine Hwy Leopold
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-                <Search className="h-5 w-5 text-gray-400 mt-1" />
-                <div className="flex-1">
-                  <input 
-                    type="text" 
-                    placeholder="Enter delivery address"
-                    className="w-full text-sm text-gray-600 bg-transparent border-none focus:outline-none p-0"
-                  />
-                </div>
-              </div>
-            )}
-
+          {mode === 'pickup' ? (
             <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-              <Clock className="h-5 w-5 text-gray-400 mt-1" />
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-[#2D3648]">{mode === 'pickup' ? 'Pickup Time' : 'Delivery Time'}</h3>
-                  <button className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors">
-                    CHANGE
-                  </button>
-                </div>
-                <p className="text-sm text-gray-600">Today - 20 Minutes</p>
+              <MapPin className="h-5 w-5 text-gray-400 mt-1" />
+              <div>
+                <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
+                <p className="text-sm text-gray-600">
+                  Gateway Plaza, G65/621-659 Bellarine Hwy Leopold
+                </p>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
+              <Search className="h-5 w-5 text-gray-400 mt-1" />
+              <div className="flex-1">
+                <input 
+                  type="text" 
+                  placeholder="Enter delivery address"
+                  className="w-full text-sm text-gray-600 bg-transparent border-none focus:outline-none p-0"
+                />
+              </div>
+            </div>
+          )}
 
+          <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
+            <Clock className="h-5 w-5 text-gray-400 mt-1" />
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-[#2D3648]">{mode === 'pickup' ? 'Pickup Time' : 'Delivery Time'}</h3>
+                <button className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors">
+                  CHANGE
+                </button>
+              </div>
+              <p className="text-sm text-gray-600">Today - 20 Minutes</p>
+            </div>
+          </div>
+          
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-[#2D3648]">Items</h3>
+              <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
+                Items
+              </h3>
               {!showVoucherInput && (
                 <button 
                   onClick={() => setShowVoucherInput(true)}
@@ -148,7 +148,9 @@ export const OrderSidebar = () => {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium text-[#2D3648]">Compliment your Order</h3>
+            <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
+              Compliment your Order
+            </h3>
             <div className="relative">
               <button 
                 onClick={() => scroll('left')}
