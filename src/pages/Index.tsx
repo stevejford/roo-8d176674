@@ -34,6 +34,7 @@ const Index = () => {
   useEffect(() => {
     if (!session) {
       navigate("/login");
+      return;
     }
   }, [session, navigate]);
 
@@ -42,7 +43,10 @@ const Index = () => {
     navigate("/login");
   };
 
-  if (!session || isLoading) return null;
+  // Don't render anything while checking authentication or loading products
+  if (!session || isLoading) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -68,7 +72,7 @@ const Index = () => {
                 <MenuCard 
                   key={item.id}
                   title={item.title}
-                  price={24.00} // This should come from the sizes array in a real implementation
+                  price={24.00}
                   description={item.description || ''}
                   image={item.image_url || '/placeholder.svg'}
                   onClick={() => setSelectedProduct({
