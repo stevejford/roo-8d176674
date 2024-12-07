@@ -51,7 +51,7 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-[#2D3648]">
             Select a Pickup Time
@@ -62,14 +62,18 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
             value={selectedDate.toISOString()}
             onValueChange={(value) => setSelectedDate(new Date(value))}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-white border-gray-300 text-gray-900 shadow-sm">
               <SelectValue>
                 {format(selectedDate, "EEEE, MMMM d")}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200">
               {availableDays.map((day) => (
-                <SelectItem key={day.toISOString()} value={day.toISOString()}>
+                <SelectItem 
+                  key={day.toISOString()} 
+                  value={day.toISOString()}
+                  className="hover:bg-gray-100 cursor-pointer text-gray-900"
+                >
                   {format(day, "EEEE, MMMM d")}
                 </SelectItem>
               ))}
@@ -80,14 +84,18 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
             value={selectedTime}
             onValueChange={setSelectedTime}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-white border-gray-300 text-gray-900 shadow-sm">
               <SelectValue>
                 {selectedTime ? format(parse(selectedTime, 'HH:mm', new Date()), "h:mm aa") : "Select time"}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200">
               {availableTimes.map((time) => (
-                <SelectItem key={time} value={time}>
+                <SelectItem 
+                  key={time} 
+                  value={time}
+                  className="hover:bg-gray-100 cursor-pointer text-gray-900"
+                >
                   {format(parse(time, 'HH:mm', new Date()), "h:mm aa")}
                 </SelectItem>
               ))}
