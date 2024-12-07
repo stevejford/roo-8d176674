@@ -26,6 +26,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
   const [selectedCategoryId, setCategoryId] = React.useState(categoryId || product?.category_id || 'uncategorized');
   const [isPopular, setIsPopular] = React.useState(product?.is_popular || false);
   const [isComplementary, setIsComplementary] = React.useState(product?.is_complementary || false);
+  const [price, setPrice] = React.useState(product?.price || '0.00');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -50,6 +51,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       setCategoryId(product.category_id || 'uncategorized');
       setIsPopular(product.is_popular || false);
       setIsComplementary(product.is_complementary || false);
+      setPrice(product.price || '0.00');
     } else {
       setTitle('');
       setDescription('');
@@ -57,8 +59,17 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       setCategoryId(categoryId || 'uncategorized');
       setIsPopular(false);
       setIsComplementary(false);
+      setPrice('0.00');
     }
   }, [product, categoryId]);
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow numbers and one decimal point
+    if (/^\d*\.?\d{0,2}$/.test(value)) {
+      setPrice(value);
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -77,6 +88,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       category_id: selectedCategoryId === 'uncategorized' ? null : selectedCategoryId,
       is_popular: isPopular,
       is_complementary: isComplementary,
+      price: parseFloat(price) || 0.00,
     };
 
     if (product?.id) {
@@ -147,12 +159,23 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="price">Price ($)</Label>
+            <Input
+              id="price"
+              type="text"
+              value={price}
+              onChange={handlePriceChange}
+              placeholder="0.00"
+            />
+          </div>
+
+          <div className="grid gap-2">
             <Label htmlFor="category">Category</Label>
             <Select value={selectedCategoryId} onValueChange={setCategoryId}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="uncategorized">Uncategorized</SelectItem>
                 {categories?.map((category: any) => (
                   <SelectItem key={category.id} value={category.id}>

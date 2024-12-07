@@ -44,6 +44,7 @@ export type Database = {
           is_complementary: boolean | null
           is_popular: boolean | null
           position: number | null
+          price: number | null
           sizes: Json | null
           title: string
           updated_at: string | null
@@ -58,6 +59,7 @@ export type Database = {
           is_complementary?: boolean | null
           is_popular?: boolean | null
           position?: number | null
+          price?: number | null
           sizes?: Json | null
           title: string
           updated_at?: string | null
@@ -72,6 +74,7 @@ export type Database = {
           is_complementary?: boolean | null
           is_popular?: boolean | null
           position?: number | null
+          price?: number | null
           sizes?: Json | null
           title?: string
           updated_at?: string | null
