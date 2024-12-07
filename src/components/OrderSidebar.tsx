@@ -62,7 +62,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
 
   if (selectedProduct) {
     return (
-      <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen overflow-hidden">
+      <div className="fixed top-0 right-0 w-full md:w-[400px] bg-white border-l border-gray-200 h-screen overflow-hidden">
         <ProductDetails
           title={selectedProduct.title}
           description={selectedProduct.description}
@@ -74,7 +74,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   }
 
   return (
-    <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen flex flex-col">
+    <div className="fixed top-0 right-0 w-full md:w-[400px] bg-white border-l border-gray-200 h-screen flex flex-col">
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6">
           <div className="flex items-center justify-between">
