@@ -6,6 +6,7 @@ import { OrderSidebar } from "@/components/OrderSidebar";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const categories = [
   "Popular",
@@ -40,6 +41,7 @@ const Index = () => {
     image: string;
   } | null>(null);
 
+  const menuScrollRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const { data: products, isLoading } = useQuery({
@@ -57,6 +59,20 @@ const Index = () => {
       behavior: 'smooth',
       block: 'start'
     });
+  };
+
+  const scrollMenu = (direction: 'left' | 'right') => {
+    if (menuScrollRef.current) {
+      const scrollAmount = 300;
+      const newScrollLeft = direction === 'left' 
+        ? menuScrollRef.current.scrollLeft - scrollAmount
+        : menuScrollRef.current.scrollLeft + scrollAmount;
+      
+      menuScrollRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
   };
 
   if (isLoading) {
@@ -87,7 +103,40 @@ const Index = () => {
             )}
           </div>
 
-          <div className="space-y-12">
+          <div className="relative">
+            <button 
+              onClick={() => scrollMenu('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+
+            <div 
+              ref={menuScrollRef}
+              className="overflow-x-auto scrollbar-hide py-4 px-8 flex space-x-6 scroll-smooth relative"
+            >
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => handleCategoryClick(category)}
+                  className="text-gray-900 whitespace-nowrap font-medium hover:text-primary transition-colors"
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => scrollMenu('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="space-y-12 mt-8">
             {categories.map((category) => (
               <div 
                 key={category}
