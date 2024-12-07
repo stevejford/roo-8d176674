@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Search, ChevronLeft, ChevronRight, HopOff } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, HopOff, LogOut } from "lucide-react";
 import { Input } from "./ui/input";
 
 const categories = [
@@ -16,7 +16,12 @@ const categories = [
   "Soft Drinks",
 ];
 
-export const Navbar = () => {
+interface NavbarProps {
+  onSignOut: () => void;
+  isAdmin: boolean;
+}
+
+export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -50,6 +55,18 @@ export const Navbar = () => {
                 </button>
               </div>
             </div>
+          </div>
+          <div className="flex items-center gap-4 ml-auto">
+            {isAdmin && (
+              <span className="text-sm font-medium text-primary">Admin</span>
+            )}
+            <button
+              onClick={onSignOut}
+              className="p-2 text-gray-600 hover:text-primary transition-colors"
+              aria-label="Sign out"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
           </div>
         </div>
         <div className="relative flex items-center">
