@@ -40,11 +40,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       console.log("Checking admin status for user:", session.user.id);
+      
+      // First check if the profile exists
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', session.user.id)
-        .single();
+        .eq('id', session.user.id);
 
       if (error) {
         console.error('Error checking admin status:', error);
@@ -52,8 +53,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      console.log("Profile data:", profiles);
-      const isUserAdmin = profiles?.role === 'admin';
+      // Check if we got any profiles back
+      if (!profiles || profiles.length === 0) {
+        console.log("No profile found for user");
+        setIsAdmin(false);
+        return;
+      }
+
+      const profile = profiles[0];
+      console.log("Profile data:", profile);
+      const isUserAdmin = profile.role === 'admin';
       console.log("Is user admin?", isUserAdmin);
       setIsAdmin(isUserAdmin);
     } catch (error) {
