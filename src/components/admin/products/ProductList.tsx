@@ -1,5 +1,5 @@
 import React from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ProductDialog } from './ProductDialog';
@@ -7,8 +7,8 @@ import { CategoryDialog } from './CategoryDialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { CategoryHeader } from './CategoryHeader';
-import { ProductCard } from './ProductCard';
+import { CategorizedProducts } from './CategorizedProducts';
+import { UncategorizedProducts } from './UncategorizedProducts';
 import type { Product, Category } from './types';
 
 export const ProductList = () => {
@@ -79,16 +79,6 @@ export const ProductList = () => {
       productId: result.draggableId,
       categoryId,
     });
-  };
-
-  const handleEditProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setIsProductDialogOpen(true);
-  };
-
-  const handleEditCategory = (category: Category) => {
-    setSelectedCategory(category);
-    setIsCategoryDialogOpen(true);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -163,76 +153,23 @@ export const ProductList = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         {/* Categories */}
         {categories?.map((category: Category) => (
-          <div key={category.id} className="mb-6">
-            <CategoryHeader
-              title={category.title}
-              onEdit={() => handleEditCategory(category)}
-              onDelete={() => handleDeleteCategory(category.id)}
-            />
-            
-            <Droppable droppableId={category.id}>
-              {(provided) => (
-                <div 
-                  {...provided.droppableProps} 
-                  ref={provided.innerRef} 
-                  className="space-y-2 min-h-[100px] bg-gray-50 p-4 rounded-lg"
-                >
-                  {categorizedProducts[category.id]?.map((product: Product, index: number) => (
-                    <Draggable key={product.id} draggableId={product.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                        >
-                          <ProductCard
-                            product={product}
-                            dragHandleProps={provided.dragHandleProps}
-                            onEdit={handleEditProduct}
-                            onDelete={handleDeleteProduct}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
+          <CategorizedProducts
+            key={category.id}
+            category={category}
+            products={categorizedProducts[category.id] || []}
+            onEdit={setSelectedProduct}
+            onDelete={handleDeleteProduct}
+            onEditCategory={setSelectedCategory}
+            onDeleteCategory={handleDeleteCategory}
+          />
         ))}
 
         {/* Uncategorized Products */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">Uncategorized</h3>
-          <Droppable droppableId="uncategorized">
-            {(provided) => (
-              <div 
-                {...provided.droppableProps} 
-                ref={provided.innerRef} 
-                className="space-y-2 min-h-[100px] bg-gray-50 p-4 rounded-lg"
-              >
-                {categorizedProducts['uncategorized']?.map((product: Product, index: number) => (
-                  <Draggable key={product.id} draggableId={product.id} index={index}>
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                      >
-                        <ProductCard
-                          product={product}
-                          dragHandleProps={provided.dragHandleProps}
-                          onEdit={handleEditProduct}
-                          onDelete={handleDeleteProduct}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </div>
+        <UncategorizedProducts
+          products={categorizedProducts['uncategorized'] || []}
+          onEdit={setSelectedProduct}
+          onDelete={handleDeleteProduct}
+        />
       </DragDropContext>
 
       <ProductDialog
