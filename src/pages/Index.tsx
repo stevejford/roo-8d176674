@@ -7,6 +7,9 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type Product = Database['public']['Tables']['products']['Row'];
 
 const categories = [
   "Popular",
@@ -22,6 +25,16 @@ const categories = [
   "Soft Drinks",
 ];
 
+const fetchProducts = async (): Promise<Product[]> => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('active', true);
+  
+  if (error) throw error;
+  return data || [];
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const { session, isAdmin } = useAuth();
@@ -34,7 +47,7 @@ const Index = () => {
   const menuScrollRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts,
   });
@@ -137,21 +150,20 @@ const Index = () => {
                   {category}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products?.filter(item => true) // Replace with actual category filtering when available
-                    .map((item) => (
-                      <MenuCard 
-                        key={item.id}
-                        title={item.title}
-                        price={24.00}
-                        description={item.description || ''}
-                        image={item.image_url || '/placeholder.svg'}
-                        onClick={() => setSelectedProduct({
-                          title: item.title,
-                          description: item.description || '',
-                          image: item.image_url || '/placeholder.svg'
-                        })}
-                      />
-                    ))}
+                  {products.map((item) => (
+                    <MenuCard 
+                      key={item.id}
+                      title={item.title}
+                      price={24.00}
+                      description={item.description || ''}
+                      image={item.image_url || '/placeholder.svg'}
+                      onClick={() => setSelectedProduct({
+                        title: item.title,
+                        description: item.description || '',
+                        image: item.image_url || '/placeholder.svg'
+                      })}
+                    />
+                  ))}
                 </div>
               </div>
             ))}
