@@ -5,7 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Plus, Minus, ChevronLeft, ChevronRight } from "lucide-react";
+import { CategoryNav } from "./extras/CategoryNav";
+import { CategoryList } from "./extras/CategoryList";
 
 interface Extra {
   name: string;
@@ -159,36 +160,12 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
           <DialogTitle className="text-2xl font-semibold text-[#2D3648]">Add Extras</DialogTitle>
         </DialogHeader>
 
-        <div className="relative mb-4">
-          <button 
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          
-          <div 
-            ref={scrollContainerRef}
-            className="overflow-x-auto scrollbar-hide py-2 px-8 flex space-x-6 scroll-smooth"
-          >
-            {extrasData.map((category) => (
-              <button
-                key={category.name}
-                onClick={() => scrollToCategory(category.name)}
-                className="text-[#2D3648] whitespace-nowrap text-sm font-medium hover:text-primary transition-colors"
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-
-          <button 
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+        <CategoryNav 
+          ref={scrollContainerRef}
+          categories={extrasData.map(cat => cat.name)}
+          onCategoryClick={scrollToCategory}
+          onScroll={scroll}
+        />
 
         <div className="overflow-y-auto">
           <div className="space-y-6">
@@ -198,43 +175,12 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
                 ref={el => categoryRefs.current[category.name] = el}
                 id={`category-${category.name.toLowerCase()}`}
               >
-                <h3 className="text-lg font-semibold text-[#2D3648] mb-3 capitalize">
-                  {category.name}
-                </h3>
-                <div className="space-y-3">
-                  {category.items.map((item) => (
-                    <div 
-                      key={item.name}
-                      className="flex items-center justify-between py-2 border-b border-gray-100"
-                    >
-                      <div>
-                        <span className="text-[#2D3648]">{item.name}</span>
-                        <span className="ml-2 text-sm text-gray-500">
-                          ${item.price.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={() => handleQuantityChange(item.name, false)}
-                          className="p-1 rounded-full hover:bg-gray-100"
-                          type="button"
-                        >
-                          <Minus className="h-5 w-5 text-gray-400" />
-                        </button>
-                        <span className="w-4 text-center">
-                          {quantities[item.name] || 0}
-                        </span>
-                        <button
-                          onClick={() => handleQuantityChange(item.name, true)}
-                          className="p-1 rounded-full hover:bg-gray-100"
-                          type="button"
-                        >
-                          <Plus className="h-5 w-5 text-[#E86452]" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <CategoryList
+                  name={category.name}
+                  items={category.items}
+                  quantities={quantities}
+                  onQuantityChange={handleQuantityChange}
+                />
               </div>
             ))}
           </div>
