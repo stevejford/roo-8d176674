@@ -4,6 +4,9 @@ export interface Product {
   description: string;
   image_url: string;
   category_id: string | null;
+  is_popular: boolean;
+  is_complementary: boolean;
+  price: number;
 }
 
 export interface Category {
