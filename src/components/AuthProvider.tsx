@@ -36,10 +36,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       let { data: profiles, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', session.user.id);
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
+      }
 
       // If no profile exists, create one
-      if (!profiles || profiles.length === 0) {
+      if (!profiles) {
         console.log("No profile found, creating one...");
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
@@ -56,20 +64,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        profiles = [newProfile];
+        profiles = newProfile;
       }
 
-      if (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-        setIsLoading(false);
-        return;
-      }
-
-      const profile = profiles[0];
-      console.log("Profile data:", profile);
-      const isUserAdmin = profile.role === 'admin';
+      console.log("Profile data:", profiles);
+      const isUserAdmin = profiles.role === 'admin';
       console.log("Is user admin?", isUserAdmin);
+
+      // Set the role claim in the JWT
+      const { error: claimsError } = await supabase.auth.refreshSession({
+        refresh_token: session.refresh_token,
+      });
+
+      if (claimsError) {
+        console.error('Error refreshing session:', claimsError);
+      }
+
       setIsAdmin(isUserAdmin);
       setIsLoading(false);
     } catch (error) {
