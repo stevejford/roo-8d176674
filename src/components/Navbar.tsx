@@ -46,7 +46,7 @@ export const Navbar = () => {
             {categories.map((category) => (
               <button
                 key={category}
-                className="text-gray-600 hover:text-gray-900 whitespace-nowrap"
+                className="text-gray-900 font-semibold text-[15px] leading-[18.75px] tracking-[-0.375px] capitalize whitespace-nowrap font-inter antialiased hover:text-primary transition-colors cursor-pointer"
               >
                 {category}
               </button>
