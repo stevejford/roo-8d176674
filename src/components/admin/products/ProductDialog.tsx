@@ -1,20 +1,19 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/components/ui/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ImageUpload } from './ImageUpload';
-import { Checkbox } from "@/components/ui/checkbox";
+import { ProductImageSection } from './ProductImageSection';
+import { ProductBasicInfo } from './ProductBasicInfo';
+import { ProductCategorySelect } from './ProductCategorySelect';
+import { ProductFlags } from './ProductFlags';
+import type { Product } from './types';
 
 interface ProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product?: any;
+  product?: Product;
   categoryId?: string | null;
   onClose: () => void;
 }
@@ -26,7 +25,8 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
   const [selectedCategoryId, setCategoryId] = React.useState(categoryId || product?.category_id || 'uncategorized');
   const [isPopular, setIsPopular] = React.useState(product?.is_popular || false);
   const [isComplementary, setIsComplementary] = React.useState(product?.is_complementary || false);
-  const [price, setPrice] = React.useState(product?.price || '0.00');
+  const [price, setPrice] = React.useState(product?.price?.toString() || '0.00');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -51,7 +51,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       setCategoryId(product.category_id || 'uncategorized');
       setIsPopular(product.is_popular || false);
       setIsComplementary(product.is_complementary || false);
-      setPrice(product.price || '0.00');
+      setPrice(product.price?.toString() || '0.00');
     } else {
       setTitle('');
       setDescription('');
@@ -65,7 +65,6 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Only allow numbers and one decimal point
     if (/^\d*\.?\d{0,2}$/.test(value)) {
       setPrice(value);
     }
@@ -135,74 +134,32 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
           <DialogTitle>{product ? 'Edit Product' : 'Add Product'}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <ImageUpload
-            currentImage={imageUrl}
+          <ProductImageSection
+            imageUrl={imageUrl}
             onImageUploaded={setImageUrl}
           />
           
-          <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+          <ProductBasicInfo
+            title={title}
+            description={description}
+            price={price}
+            onTitleChange={setTitle}
+            onDescriptionChange={setDescription}
+            onPriceChange={handlePriceChange}
+          />
 
-          <div className="grid gap-2">
-            <Label htmlFor="price">Price ($)</Label>
-            <Input
-              id="price"
-              type="text"
-              value={price}
-              onChange={handlePriceChange}
-              placeholder="0.00"
-            />
-          </div>
+          <ProductCategorySelect
+            selectedCategoryId={selectedCategoryId}
+            categories={categories || []}
+            onCategoryChange={setCategoryId}
+          />
 
-          <div className="grid gap-2">
-            <Label htmlFor="category">Category</Label>
-            <Select value={selectedCategoryId} onValueChange={setCategoryId}>
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="uncategorized">Uncategorized</SelectItem>
-                {categories?.map((category: any) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="is_popular"
-              checked={isPopular}
-              onCheckedChange={(checked) => setIsPopular(checked as boolean)}
-            />
-            <Label htmlFor="is_popular">Popular Item</Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="is_complementary"
-              checked={isComplementary}
-              onCheckedChange={(checked) => setIsComplementary(checked as boolean)}
-            />
-            <Label htmlFor="is_complementary">Complementary Item</Label>
-          </div>
+          <ProductFlags
+            isPopular={isPopular}
+            isComplementary={isComplementary}
+            onPopularChange={setIsPopular}
+            onComplementaryChange={setIsComplementary}
+          />
         </div>
         
         <div className="flex justify-end gap-2">
