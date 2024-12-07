@@ -12,7 +12,6 @@ import { AppFooter } from "@/components/index/AppFooter";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type Product = Database['public']['Tables']['products']['Row'];
-type Category = Database['public']['Tables']['categories']['Row'];
 
 const Index = () => {
   const navigate = useNavigate();
@@ -22,8 +21,9 @@ const Index = () => {
     description: string;
     image: string;
   } | null>(null);
-
+  const [showSidebar, setShowSidebar] = useState(false);
   const isMobile = useIsMobile();
+
   const menuScrollRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -79,6 +79,18 @@ const Index = () => {
         behavior: 'smooth'
       });
     }
+  };
+
+  const handleProductSelect = (product: { title: string; description: string; image: string }) => {
+    setSelectedProduct(product);
+    if (isMobile) {
+      setShowSidebar(true);
+    }
+  };
+
+  const handleCloseSidebar = () => {
+    setSelectedProduct(null);
+    setShowSidebar(false);
   };
 
   if (isLoading) {
@@ -168,7 +180,7 @@ const Index = () => {
                 ref={el => categoryRefs.current[category.title] = el}
                 category={category.title}
                 products={productsByCategory[category.id] || []}
-                onProductSelect={setSelectedProduct}
+                onProductSelect={handleProductSelect}
               />
             ))}
           </div>
@@ -178,16 +190,16 @@ const Index = () => {
           <aside className="w-[400px] fixed top-0 right-0 h-screen z-50">
             <OrderSidebar 
               selectedProduct={selectedProduct}
-              onClose={() => setSelectedProduct(null)}
+              onClose={handleCloseSidebar}
             />
           </aside>
         )}
 
-        {isMobile && selectedProduct && (
+        {isMobile && (showSidebar || selectedProduct) && (
           <div className="fixed inset-0 z-50 animate-slide-in-right">
             <OrderSidebar 
               selectedProduct={selectedProduct}
-              onClose={() => setSelectedProduct(null)}
+              onClose={handleCloseSidebar}
             />
           </div>
         )}
