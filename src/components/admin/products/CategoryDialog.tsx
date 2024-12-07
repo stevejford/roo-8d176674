@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/components/ui/use-toast';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -50,49 +50,46 @@ export const CategoryDialog = ({ open, onOpenChange, category, onClose }: Catego
       return;
     }
 
-    const categoryData = {
-      title,
-    };
+    try {
+      const categoryData = {
+        title,
+      };
 
-    if (category?.id) {
-      console.log("Updating category:", category.id);
-      const { error } = await supabase
-        .from('categories')
-        .update(categoryData)
-        .eq('id', category.id);
+      if (category?.id) {
+        console.log("Updating category:", category.id);
+        const { error } = await supabase
+          .from('categories')
+          .update(categoryData)
+          .eq('id', category.id)
+          .single();
 
-      if (error) {
-        console.error("Error updating category:", error);
-        toast({
-          title: "Error",
-          description: "Failed to update category",
-          variant: "destructive",
-        });
-        return;
+        if (error) throw error;
+      } else {
+        console.log("Creating new category");
+        const { error } = await supabase
+          .from('categories')
+          .insert([categoryData])
+          .single();
+
+        if (error) throw error;
       }
-    } else {
-      console.log("Creating new category");
-      const { error } = await supabase
-        .from('categories')
-        .insert([categoryData]);
 
-      if (error) {
-        console.error("Error creating category:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create category",
-          variant: "destructive",
-        });
-        return;
-      }
+      await queryClient.invalidateQueries({ queryKey: ['categories'] });
+      
+      toast({
+        title: category ? "Category updated" : "Category created",
+        description: `The category has been ${category ? 'updated' : 'created'} successfully.`,
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error("Error creating/updating category:", error);
+      toast({
+        title: "Error",
+        description: `Failed to ${category ? 'update' : 'create'} category`,
+        variant: "destructive",
+      });
     }
-
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
-    toast({
-      title: category ? "Category updated" : "Category created",
-      description: `The category has been ${category ? 'updated' : 'created'} successfully.`,
-    });
-    onClose();
   };
 
   return (
