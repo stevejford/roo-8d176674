@@ -1,5 +1,5 @@
-import React from "react";
-import { Search } from "lucide-react";
+import React, { useRef } from "react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "./ui/input";
 
 const categories = [
@@ -17,6 +17,18 @@ const categories = [
 ];
 
 export const Navbar = () => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 200;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="container mx-auto px-4">
@@ -35,8 +47,19 @@ export const Navbar = () => {
             </div>
           </div>
         </div>
-        <div className="overflow-x-auto -mb-px">
-          <div className="flex space-x-8 py-4">
+        <div className="relative flex items-center">
+          <button 
+            onClick={() => scroll('left')}
+            className="absolute left-0 z-10 p-2 bg-white shadow-lg rounded-full hover:bg-gray-50"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div 
+            ref={scrollContainerRef}
+            className="overflow-x-auto scrollbar-hide py-4 px-8 flex space-x-8 w-full scroll-smooth"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {categories.map((category) => (
               <button
                 key={category}
@@ -46,6 +69,13 @@ export const Navbar = () => {
               </button>
             ))}
           </div>
+          <button 
+            onClick={() => scroll('right')}
+            className="absolute right-0 z-10 p-2 bg-white shadow-lg rounded-full hover:bg-gray-50"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </nav>

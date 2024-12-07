@@ -32,8 +32,8 @@ const popularItems = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <div className="flex-1">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      <div className="flex-1 min-w-0">
         <Navbar />
         <main>
           <div className="container mx-auto px-4 py-8">
