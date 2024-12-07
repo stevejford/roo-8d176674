@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
-import { Clock, Plus, ChevronLeft, ChevronRight } from "lucide-react";
-import { ComplementaryItem } from "./ComplementaryItem";
+import React, { useState } from "react";
+import { Clock, Plus } from "lucide-react";
 import { ProductDetails } from "./ProductDetails";
 import { OrderLocation } from "./OrderLocation";
 import { PickupTimeModal } from "./PickupTimeModal";
+import { ComplementaryItems } from "./ComplementaryItems";
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -19,50 +19,6 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   const [showVoucherInput, setShowVoucherInput] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const complementaryItems = [
-    {
-      name: "The Stewart",
-      price: 24.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png",
-      description: "Tomato, Cheese, Pepperoni And A Sprinkle Of Parmesan. Topped With A Generous Amount Of Hot Honey!"
-    },
-    {
-      name: "The Duncan",
-      price: 24.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    },
-    {
-      name: "Arancini",
-      price: 11.90,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    },
-    {
-      name: "Southwest...",
-      price: 28.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    },
-    {
-      name: "Matte",
-      price: 24.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
-    }
-  ];
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 200;
-      const newScrollLeft = direction === 'left' 
-        ? scrollContainerRef.current.scrollLeft - scrollAmount
-        : scrollContainerRef.current.scrollLeft + scrollAmount;
-      
-      scrollContainerRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   const handleTimeSchedule = (date: string, time: string) => {
     setSelectedTime(`${date} - ${time}`);
@@ -161,40 +117,8 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
               </div>
             )}
           </div>
-          <div className="space-y-4">
-            <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
-              Compliment your Order
-            </h3>
-            <div className="relative">
-              <button 
-                onClick={() => scroll('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-1 hover:bg-gray-50"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              
-              <div 
-                ref={scrollContainerRef}
-                className="flex overflow-x-auto gap-3 pb-2 -mx-6 px-6 scrollbar-hide relative scroll-smooth snap-x"
-              >
-                {complementaryItems.map((item, index) => (
-                  <ComplementaryItem
-                    key={index}
-                    name={item.name}
-                    price={item.price}
-                    image={item.image}
-                  />
-                ))}
-              </div>
 
-              <button 
-                onClick={() => scroll('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-1 hover:bg-gray-50"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-          </div>
+          <ComplementaryItems />
         </div>
       </div>
 

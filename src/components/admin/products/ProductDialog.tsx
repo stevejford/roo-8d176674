@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageUpload } from './ImageUpload';
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ProductDialogProps {
   open: boolean;
@@ -23,6 +24,8 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
   const [description, setDescription] = React.useState(product?.description || '');
   const [imageUrl, setImageUrl] = React.useState(product?.image_url || '');
   const [selectedCategoryId, setCategoryId] = React.useState(categoryId || product?.category_id || 'uncategorized');
+  const [isPopular, setIsPopular] = React.useState(product?.is_popular || false);
+  const [isComplementary, setIsComplementary] = React.useState(product?.is_complementary || false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -45,11 +48,15 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       setDescription(product.description || '');
       setImageUrl(product.image_url || '');
       setCategoryId(product.category_id || 'uncategorized');
+      setIsPopular(product.is_popular || false);
+      setIsComplementary(product.is_complementary || false);
     } else {
       setTitle('');
       setDescription('');
       setImageUrl('');
       setCategoryId(categoryId || 'uncategorized');
+      setIsPopular(false);
+      setIsComplementary(false);
     }
   }, [product, categoryId]);
 
@@ -68,6 +75,8 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       description,
       image_url: imageUrl,
       category_id: selectedCategoryId === 'uncategorized' ? null : selectedCategoryId,
+      is_popular: isPopular,
+      is_complementary: isComplementary,
     };
 
     if (product?.id) {
@@ -152,6 +161,24 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="is_popular"
+              checked={isPopular}
+              onCheckedChange={(checked) => setIsPopular(checked as boolean)}
+            />
+            <Label htmlFor="is_popular">Popular Item</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="is_complementary"
+              checked={isComplementary}
+              onCheckedChange={(checked) => setIsComplementary(checked as boolean)}
+            />
+            <Label htmlFor="is_complementary">Complementary Item</Label>
           </div>
         </div>
         

@@ -41,6 +41,8 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          is_complementary: boolean | null
+          is_popular: boolean | null
           position: number | null
           sizes: Json | null
           title: string
@@ -53,6 +55,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_complementary?: boolean | null
+          is_popular?: boolean | null
           position?: number | null
           sizes?: Json | null
           title: string
@@ -65,6 +69,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_complementary?: boolean | null
+          is_popular?: boolean | null
           position?: number | null
           sizes?: Json | null
           title?: string
