@@ -11,7 +11,7 @@ export const AppFooter = ({ isAdmin, isLoggedIn, onSignOut }: AppFooterProps) =>
   const navigate = useNavigate();
   
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 z-40">
+    <footer className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 z-40">
       <div className="container mx-auto px-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {isLoggedIn && (
