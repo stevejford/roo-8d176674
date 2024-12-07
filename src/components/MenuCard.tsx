@@ -6,11 +6,16 @@ interface MenuItemProps {
   price: number;
   description: string;
   image: string;
+  onClick?: () => void;
 }
 
-export const MenuCard = ({ title, price, description, image }: MenuItemProps) => {
+export const MenuCard = ({ title, price, description, image, onClick }: MenuItemProps) => {
   return (
-    <button type="button" className="block w-full text-left">
+    <button 
+      type="button" 
+      className="block w-full text-left"
+      onClick={onClick}
+    >
       <div className="relative overflow-hidden rounded-lg 2xl:rounded-2.25">
         <div className="relative z-1 w-full pb-[100%] overflow-hidden rounded-lg bg-stone-300 2xl:rounded-2.25 after:absolute after:bottom-0 after:left-0 after:z-2 after:h-1/2 after:w-full after:bg-gradient-to-b after:from-neutral-200/0 after:to-black/50">
           <img

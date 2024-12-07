@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { MenuCard } from "@/components/MenuCard";
 import { OrderSidebar } from "@/components/OrderSidebar";
@@ -31,6 +31,12 @@ const popularItems = [
 ];
 
 const Index = () => {
+  const [selectedProduct, setSelectedProduct] = useState<{
+    title: string;
+    description: string;
+    image: string;
+  } | null>(null);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       <div className="flex-1 min-w-0">
@@ -42,13 +48,20 @@ const Index = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {popularItems.map((item) => (
-                <MenuCard key={item.title} {...item} />
+                <MenuCard 
+                  key={item.title} 
+                  {...item} 
+                  onClick={() => setSelectedProduct(item)}
+                />
               ))}
             </div>
           </div>
         </main>
       </div>
-      <OrderSidebar />
+      <OrderSidebar 
+        selectedProduct={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
     </div>
   );
 };

@@ -3,14 +3,18 @@ import { Clock, MapPin, Plus, Search, ChevronLeft, ChevronRight } from "lucide-r
 import { ComplementaryItem } from "./ComplementaryItem";
 import { ProductDetails } from "./ProductDetails";
 
-export const OrderSidebar = () => {
-  const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
-  const [showVoucherInput, setShowVoucherInput] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<{
+interface OrderSidebarProps {
+  selectedProduct: {
     title: string;
     description: string;
     image: string;
-  } | null>(null);
+  } | null;
+  onClose: () => void;
+}
+
+export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) => {
+  const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
+  const [showVoucherInput, setShowVoucherInput] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const complementaryItems = [
@@ -58,12 +62,12 @@ export const OrderSidebar = () => {
 
   if (selectedProduct) {
     return (
-      <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen">
+      <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen overflow-hidden">
         <ProductDetails
           title={selectedProduct.title}
           description={selectedProduct.description}
           image={selectedProduct.image}
-          onClose={() => setSelectedProduct(null)}
+          onClose={onClose}
         />
       </div>
     );
