@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { MenuCard } from "@/components/MenuCard";
@@ -31,20 +31,13 @@ const Index = () => {
     queryFn: fetchProducts,
   });
 
-  useEffect(() => {
-    if (!session) {
-      navigate("/login");
-      return;
-    }
-  }, [session, navigate]);
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/login");
   };
 
-  // Don't render anything while checking authentication or loading products
-  if (!session || isLoading) {
+  // Don't render anything while loading products
+  if (isLoading) {
     return null;
   }
 
