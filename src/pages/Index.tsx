@@ -6,7 +6,6 @@ import { OrderSidebar } from "@/components/OrderSidebar";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type Product = Database['public']['Tables']['products']['Row'];
@@ -90,8 +89,8 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
       <div className="relative flex">
-        <main className="w-[calc(100%-400px)] px-4 py-8">
-          <div className="flex justify-between items-center mb-8">
+        <main className="w-[calc(100%-400px)] px-4">
+          <div className="flex justify-between items-center mb-2">
             {isAdmin && (
               <button
                 onClick={() => navigate("/admin")}
@@ -108,12 +107,23 @@ const Index = () => {
               className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
               aria-label="Scroll left"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </button>
 
             <div 
               ref={menuScrollRef}
-              className="overflow-x-auto scrollbar-hide py-4 px-8 flex space-x-6 scroll-smooth relative"
+              className="overflow-x-auto scrollbar-hide py-2 px-8 flex space-x-6 scroll-smooth"
             >
               {categories.map((category) => (
                 <button
@@ -131,7 +141,18 @@ const Index = () => {
               className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
               aria-label="Scroll right"
             >
-              <ChevronRight className="h-5 w-5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
           </div>
 
