@@ -1,14 +1,15 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { MenuCard } from "@/components/MenuCard";
 import { OrderSidebar } from "@/components/OrderSidebar";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
-import { LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { AdminButton } from "@/components/index/AdminButton";
+import { CategorySection } from "@/components/index/CategorySection";
+import { AppFooter } from "@/components/index/AppFooter";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -94,14 +95,7 @@ const Index = () => {
       <div className="flex flex-1">
         <main className="w-[calc(100%-400px)] px-4 pb-16">
           <div className="flex justify-between items-center mb-2">
-            {isAdmin && (
-              <button
-                onClick={() => navigate("/admin")}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              >
-                Admin Dashboard
-              </button>
-            )}
+            {isAdmin && <AdminButton />}
           </div>
 
           <div className="relative">
@@ -161,31 +155,13 @@ const Index = () => {
 
           <div className="space-y-12 mt-8">
             {categories.map((category) => (
-              <div 
+              <CategorySection
                 key={category}
                 ref={el => categoryRefs.current[category] = el}
-                className="scroll-mt-24"
-              >
-                <h3 className="text-2xl font-bold text-primary-title mb-6">
-                  {category}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products.map((item) => (
-                    <MenuCard 
-                      key={item.id}
-                      title={item.title}
-                      price={24.00}
-                      description={item.description || ''}
-                      image={item.image_url || '/placeholder.svg'}
-                      onClick={() => setSelectedProduct({
-                        title: item.title,
-                        description: item.description || '',
-                        image: item.image_url || '/placeholder.svg'
-                      })}
-                    />
-                  ))}
-                </div>
-              </div>
+                category={category}
+                products={products}
+                onProductSelect={setSelectedProduct}
+              />
             ))}
           </div>
         </main>
@@ -198,25 +174,11 @@ const Index = () => {
         </aside>
       </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 z-40">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {session && (
-              <button
-                onClick={handleSignOut}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-2 text-sm"
-                aria-label="Sign out"
-              >
-                <LogOut className="h-4 w-4" />
-                {isAdmin && <span>Admin Logout</span>}
-              </button>
-            )}
-          </div>
-          <div className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Roo Restaurant. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <AppFooter 
+        isAdmin={isAdmin}
+        isLoggedIn={!!session}
+        onSignOut={handleSignOut}
+      />
     </div>
   );
 };
