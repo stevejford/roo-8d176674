@@ -1,6 +1,12 @@
 import React from "react";
 import { X } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 
 interface Ingredient {
   name: string;
@@ -20,14 +26,12 @@ export const IngredientsEditor = ({
   onIngredientToggle,
   ingredients 
 }: IngredientsEditorProps) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="absolute inset-0 bg-white animate-slide-in-right">
-      <div className="flex flex-col h-full">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-[#2D3648]">Edit Ingredients</h2>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl font-semibold text-[#2D3648]">Edit Ingredients</DialogTitle>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -35,24 +39,23 @@ export const IngredientsEditor = ({
               <X className="h-6 w-6 text-gray-500" />
             </button>
           </div>
-          
-          <div className="space-y-4">
-            {ingredients.map((ingredient) => (
-              <div 
-                key={ingredient.name}
-                className="flex items-center justify-between py-3 border-b border-gray-100"
-              >
-                <span className="text-[#2D3648] text-lg">{ingredient.name}</span>
-                <Checkbox
-                  checked={ingredient.checked}
-                  onCheckedChange={() => onIngredientToggle(ingredient.name)}
-                  className="h-5 w-5 border-2 border-[#E86452] data-[state=checked]:bg-[#E86452] data-[state=checked]:border-[#E86452]"
-                />
-              </div>
-            ))}
-          </div>
+        </DialogHeader>
+        <div className="space-y-4 mt-4">
+          {ingredients.map((ingredient) => (
+            <div 
+              key={ingredient.name}
+              className="flex items-center justify-between py-3 border-b border-gray-100"
+            >
+              <span className="text-[#2D3648] text-lg">{ingredient.name}</span>
+              <Checkbox
+                checked={ingredient.checked}
+                onCheckedChange={() => onIngredientToggle(ingredient.name)}
+                className="h-5 w-5 border-2 border-[#E86452] data-[state=checked]:bg-[#E86452] data-[state=checked]:border-[#E86452]"
+              />
+            </div>
+          ))}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
