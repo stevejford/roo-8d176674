@@ -70,63 +70,62 @@ const Index = () => {
         isAdmin={isAdmin} 
         onCategoryClick={handleCategoryClick}
       />
-      <div className="flex">
+      <div className="flex justify-between">
         {/* Main content area */}
-        <div className="flex-1 max-w-[calc(100%-400px)]">
-          <main className="container mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="font-bold leading-tight tracking-normal text-left last:mb-0 text-primary-title text-7 capitalize lg:text-7.375 lg:tracking-tight 2xl:text-8.125">
-                Menu
-              </h2>
-              {isAdmin && (
-                <button
-                  onClick={() => navigate("/admin")}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-                >
-                  Admin Dashboard
-                </button>
-              )}
-            </div>
+        <main className="w-[calc(100%-400px)] px-4 py-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="font-bold leading-tight tracking-normal text-left last:mb-0 text-primary-title text-7 capitalize lg:text-7.375 lg:tracking-tight 2xl:text-8.125">
+              Menu
+            </h2>
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Admin Dashboard
+              </button>
+            )}
+          </div>
 
-            <div className="space-y-12">
-              {categories.map((category) => (
-                <div 
-                  key={category}
-                  ref={el => categoryRefs.current[category] = el}
-                  className="scroll-mt-24"
-                >
-                  <h3 className="text-2xl font-bold text-primary-title mb-6">
-                    {category}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {products?.filter(item => true) // Replace with actual category filtering when available
-                      .map((item) => (
-                        <MenuCard 
-                          key={item.id}
-                          title={item.title}
-                          price={24.00}
-                          description={item.description || ''}
-                          image={item.image_url || '/placeholder.svg'}
-                          onClick={() => setSelectedProduct({
-                            title: item.title,
-                            description: item.description || '',
-                            image: item.image_url || '/placeholder.svg'
-                          })}
-                        />
-                      ))}
-                  </div>
+          <div className="space-y-12">
+            {categories.map((category) => (
+              <div 
+                key={category}
+                ref={el => categoryRefs.current[category] = el}
+                className="scroll-mt-24"
+              >
+                <h3 className="text-2xl font-bold text-primary-title mb-6">
+                  {category}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {products?.filter(item => true) // Replace with actual category filtering when available
+                    .map((item) => (
+                      <MenuCard 
+                        key={item.id}
+                        title={item.title}
+                        price={24.00}
+                        description={item.description || ''}
+                        image={item.image_url || '/placeholder.svg'}
+                        onClick={() => setSelectedProduct({
+                          title: item.title,
+                          description: item.description || '',
+                          image: item.image_url || '/placeholder.svg'
+                        })}
+                      />
+                    ))}
                 </div>
-              ))}
-            </div>
-          </main>
-        </div>
-        {/* Fixed sidebar */}
-        <div className="w-[400px] fixed top-0 right-0 h-screen">
+              </div>
+            ))}
+          </div>
+        </main>
+
+        {/* Sidebar */}
+        <aside className="w-[400px] fixed top-0 right-0 h-screen">
           <OrderSidebar 
             selectedProduct={selectedProduct}
             onClose={() => setSelectedProduct(null)}
           />
-        </div>
+        </aside>
       </div>
     </div>
   );
