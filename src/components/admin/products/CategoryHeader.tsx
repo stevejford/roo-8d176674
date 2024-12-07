@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 interface CategoryHeaderProps {
   title: string;
@@ -9,6 +11,24 @@ interface CategoryHeaderProps {
 }
 
 export const CategoryHeader = ({ title, onEdit, onDelete }: CategoryHeaderProps) => {
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the category "${title}"?`);
+    if (!confirmDelete) return;
+
+    try {
+      onDelete();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete category. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex justify-between items-center mb-2">
       <h3 className="text-lg font-semibold">{title}</h3>
@@ -23,7 +43,7 @@ export const CategoryHeader = ({ title, onEdit, onDelete }: CategoryHeaderProps)
         <Button
           variant="outline"
           size="sm"
-          onClick={onDelete}
+          onClick={handleDelete}
         >
           <Trash2 className="h-4 w-4" />
         </Button>

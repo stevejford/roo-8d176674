@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, GripVertical } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import type { Product } from './types';
 
 interface ProductCardProps {
@@ -12,6 +13,24 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, dragHandleProps, onEdit, onDelete }: ProductCardProps) => {
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${product.title}"?`);
+    if (!confirmDelete) return;
+
+    try {
+      onDelete(product.id);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete product. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="bg-white">
       <CardContent className="flex items-center p-4">
@@ -45,7 +64,7 @@ export const ProductCard = ({ product, dragHandleProps, onEdit, onDelete }: Prod
           <Button
             variant="outline"
             size="icon"
-            onClick={() => onDelete(product.id)}
+            onClick={handleDelete}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
