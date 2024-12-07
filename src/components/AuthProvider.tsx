@@ -32,20 +32,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Checking admin status for user:", session.user.id);
       
-      const { data: profiles, error } = await supabase
+      // First try to get the profile
+      let { data: profiles, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', session.user.id);
 
-      if (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-        setIsLoading(false);
-        return;
+      // If no profile exists, create one
+      if (!profiles || profiles.length === 0) {
+        console.log("No profile found, creating one...");
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            { id: session.user.id, role: 'user' }
+          ])
+          .select('role')
+          .single();
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          setIsAdmin(false);
+          setIsLoading(false);
+          return;
+        }
+
+        profiles = [newProfile];
       }
 
-      if (!profiles || profiles.length === 0) {
-        console.log("No profile found for user");
+      if (error) {
+        console.error('Error checking admin status:', error);
         setIsAdmin(false);
         setIsLoading(false);
         return;
