@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
-import { Clock, MapPin, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { ComplementaryItem } from "./ComplementaryItem";
 import { ProductDetails } from "./ProductDetails";
+import { OrderLocation } from "./OrderLocation";
+import { PickupTimeModal } from "./PickupTimeModal";
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -15,6 +17,8 @@ interface OrderSidebarProps {
 export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) => {
   const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
   const [showVoucherInput, setShowVoucherInput] = useState(false);
+  const [showTimeModal, setShowTimeModal] = useState(false);
+  const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const complementaryItems = [
@@ -60,6 +64,11 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     }
   };
 
+  const handleTimeSchedule = (date: string, time: string) => {
+    setSelectedTime(`${date} - ${time}`);
+    setShowTimeModal(false);
+  };
+
   if (selectedProduct) {
     return (
       <div className="fixed top-0 right-0 w-full md:w-[400px] bg-white border-l border-gray-200 h-screen overflow-hidden">
@@ -94,40 +103,25 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
               </button>
             </div>
           </div>
-          {mode === 'pickup' ? (
-            <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-              <MapPin className="h-5 w-5 text-gray-400 mt-1" />
-              <div>
-                <h3 className="font-medium text-[#2D3648]">Roo Restaurant</h3>
-                <p className="text-sm text-gray-600">
-                  7A Rockingham Beach Rd, Rockingham WA 6168
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-              <Search className="h-5 w-5 text-gray-400 mt-1" />
-              <div className="flex-1">
-                <input 
-                  type="text" 
-                  placeholder="Enter delivery address"
-                  className="w-full text-sm text-gray-600 bg-transparent border-none focus:outline-none p-0"
-                />
-              </div>
-            </div>
-          )}
+
+          <OrderLocation mode={mode} />
+
           <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
             <Clock className="h-5 w-5 text-gray-400 mt-1" />
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-[#2D3648]">{mode === 'pickup' ? 'Pickup Time' : 'Delivery Time'}</h3>
-                <button className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors">
+                <button 
+                  onClick={() => setShowTimeModal(true)}
+                  className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors"
+                >
                   CHANGE
                 </button>
               </div>
-              <p className="text-sm text-gray-600">Today - 20 Minutes</p>
+              <p className="text-sm text-gray-600">{selectedTime}</p>
             </div>
           </div>
+
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
@@ -210,6 +204,12 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
           <span>→</span>
         </button>
       </div>
+
+      <PickupTimeModal 
+        isOpen={showTimeModal}
+        onClose={() => setShowTimeModal(false)}
+        onSchedule={handleTimeSchedule}
+      />
     </div>
   );
 };
