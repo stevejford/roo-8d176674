@@ -7,11 +7,11 @@ export const OrderSidebar = () => {
       <div className="p-6 space-y-6">
         <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
         
-        <div className="flex space-x-2">
-          <button className="flex-1 py-2 px-4 rounded-md bg-primary text-white">
+        <div className="flex p-1 bg-gray-100 rounded-full">
+          <button className="flex-1 py-2 px-4 rounded-full bg-white shadow-sm font-medium">
             Pickup
           </button>
-          <button className="flex-1 py-2 px-4 rounded-md border border-gray-200">
+          <button className="flex-1 py-2 px-4 rounded-full text-gray-600 hover:bg-white/50 transition-colors">
             Delivery
           </button>
         </div>
