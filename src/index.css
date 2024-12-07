@@ -48,15 +48,15 @@
   scrollbar-width: none;  /* Firefox */
 }
 
-@keyframes slide-in-bottom {
+@keyframes slide-in-right {
   from {
-    transform: translateY(100%);
+    transform: translateX(100%);
   }
   to {
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
-.animate-slide-in-bottom {
-  animation: slide-in-bottom 0.3s ease-out forwards;
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
 }
