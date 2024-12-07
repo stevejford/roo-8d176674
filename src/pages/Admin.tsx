@@ -20,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ProductList } from '@/components/admin/products/ProductList';
 
 // Placeholder components for each section
 const Dashboard = () => (
@@ -57,7 +58,9 @@ const Dashboard = () => (
 );
 
 const Products = () => (
-  <div>Products management coming soon</div>
+  <div className="space-y-6">
+    <ProductList />
+  </div>
 );
 
 const Orders = () => (
