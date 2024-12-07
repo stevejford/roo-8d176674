@@ -14,14 +14,15 @@ interface ProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product?: any;
+  categoryId?: string | null;
   onClose: () => void;
 }
 
-export const ProductDialog = ({ open, onOpenChange, product, onClose }: ProductDialogProps) => {
+export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose }: ProductDialogProps) => {
   const [title, setTitle] = React.useState(product?.title || '');
   const [description, setDescription] = React.useState(product?.description || '');
   const [imageUrl, setImageUrl] = React.useState(product?.image_url || '');
-  const [categoryId, setCategoryId] = React.useState(product?.category_id || 'uncategorized');
+  const [selectedCategoryId, setCategoryId] = React.useState(categoryId || product?.category_id || 'uncategorized');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -48,9 +49,9 @@ export const ProductDialog = ({ open, onOpenChange, product, onClose }: ProductD
       setTitle('');
       setDescription('');
       setImageUrl('');
-      setCategoryId('uncategorized');
+      setCategoryId(categoryId || 'uncategorized');
     }
-  }, [product]);
+  }, [product, categoryId]);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -66,7 +67,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onClose }: ProductD
       title,
       description,
       image_url: imageUrl,
-      category_id: categoryId === 'uncategorized' ? null : categoryId,
+      category_id: selectedCategoryId === 'uncategorized' ? null : selectedCategoryId,
     };
 
     if (product?.id) {
@@ -138,7 +139,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onClose }: ProductD
 
           <div className="grid gap-2">
             <Label htmlFor="category">Category</Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select value={selectedCategoryId} onValueChange={setCategoryId}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
