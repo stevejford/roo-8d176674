@@ -31,17 +31,16 @@ const Index = () => {
     queryFn: fetchProducts,
   });
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/login");
-  };
-
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!session) {
       navigate("/login");
     }
   }, [session, navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
 
   if (!session || isLoading) return null;
 
