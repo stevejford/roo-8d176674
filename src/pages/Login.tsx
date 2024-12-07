@@ -26,11 +26,15 @@ const Login = () => {
     const error = hashParams.get('error');
     const errorDescription = hashParams.get('error_description');
 
+    console.log('Auth flow check - Type:', type, 'Error:', error);
+
     if (error) {
       console.log('Auth error:', error, errorDescription);
       if (error === 'access_denied' && errorDescription?.includes('expired')) {
         toast.error("Password reset link has expired. Please request a new one.");
         navigate('/reset-password');
+      } else if (error === 'invalid_credentials') {
+        toast.error("Invalid login credentials. Please check your email and password.");
       } else {
         toast.error(errorDescription || "An error occurred during authentication");
       }
@@ -59,6 +63,8 @@ const Login = () => {
   }, [navigate]);
 
   useEffect(() => {
+    console.log("Login page - Session check:", !!session, "IsAdmin:", isAdmin, "IsLoading:", isLoading);
+    
     if (session && !isLoading) {
       console.log("Login redirect check - IsAdmin:", isAdmin);
       if (isAdmin) {
@@ -93,6 +99,11 @@ const Login = () => {
               }
             }}
             providers={[]}
+            redirectTo={window.location.origin}
+            onError={(error) => {
+              console.error('Auth error:', error);
+              toast.error(error.message || "An error occurred during authentication");
+            }}
           />
           <div className="mt-4 text-center">
             <a 
