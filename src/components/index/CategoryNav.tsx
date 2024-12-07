@@ -22,7 +22,7 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
 
         <div 
           ref={scrollRef}
-          className="overflow-x-auto scrollbar-hide py-2 px-8 flex space-x-6 scroll-smooth"
+          className="overflow-x-auto scrollbar-hide py-2 px-8 flex justify-center space-x-6 scroll-smooth"
         >
           {categories.map((category) => (
             <button
