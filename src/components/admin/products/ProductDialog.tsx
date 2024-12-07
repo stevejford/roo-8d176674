@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/components/ui/use-toast';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageUpload } from './ImageUpload';
 
@@ -20,18 +21,34 @@ export const ProductDialog = ({ open, onOpenChange, product, onClose }: ProductD
   const [title, setTitle] = React.useState(product?.title || '');
   const [description, setDescription] = React.useState(product?.description || '');
   const [imageUrl, setImageUrl] = React.useState(product?.image_url || '');
+  const [categoryId, setCategoryId] = React.useState(product?.category_id || '');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('position');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   React.useEffect(() => {
     if (product) {
       setTitle(product.title);
       setDescription(product.description || '');
       setImageUrl(product.image_url || '');
+      setCategoryId(product.category_id || '');
     } else {
       setTitle('');
       setDescription('');
       setImageUrl('');
+      setCategoryId('');
     }
   }, [product]);
 
@@ -49,6 +66,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onClose }: ProductD
       title,
       description,
       image_url: imageUrl,
+      category_id: categoryId || null,
     };
 
     if (product?.id) {
@@ -116,6 +134,23 @@ export const ProductDialog = ({ open, onOpenChange, product, onClose }: ProductD
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="category">Category</Label>
+            <Select value={categoryId} onValueChange={setCategoryId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Uncategorized</SelectItem>
+                {categories?.map((category: any) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         
