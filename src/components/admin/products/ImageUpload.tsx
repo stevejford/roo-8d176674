@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, X } from 'lucide-react';
+import { Trash2, Upload } from 'lucide-react';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -14,14 +15,25 @@ export const ImageUpload = ({ currentImage, onImageUploaded }: ImageUploadProps)
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Error",
-        description: "Please select an image file",
+        description: "File must be an image",
         variant: "destructive",
       });
       return;
@@ -29,10 +41,10 @@ export const ImageUpload = ({ currentImage, onImageUploaded }: ImageUploadProps)
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('products')
         .upload(filePath, file);
 
@@ -51,51 +63,80 @@ export const ImageUpload = ({ currentImage, onImageUploaded }: ImageUploadProps)
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to upload image",
+        description: error.message || "Failed to upload image",
         variant: "destructive",
       });
     }
   };
 
-  const handleRemoveImage = () => {
-    onImageUploaded('');
+  const handleRemoveImage = async () => {
+    if (!currentImage) return;
+
+    try {
+      const fileName = currentImage.split('/').pop();
+      if (!fileName) return;
+
+      const { error } = await supabase.storage
+        .from('products')
+        .remove([fileName]);
+
+      if (error) throw error;
+
+      onImageUploaded('');
+      
+      toast({
+        title: "Success",
+        description: "Image removed successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove image",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <div className="grid gap-2">
-      <Label>Product Image</Label>
-      <div className="flex items-center gap-4">
+    <div className="space-y-4">
+      <div className="grid w-full max-w-sm items-center gap-1.5">
+        <Label htmlFor="image">Image</Label>
+        <Input
+          id="image"
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+        
         {currentImage ? (
           <div className="relative">
             <img
               src={currentImage}
               alt="Product"
-              className="w-24 h-24 object-cover rounded"
+              className="w-full h-48 object-cover rounded-lg"
             />
             <Button
               variant="destructive"
               size="icon"
-              className="absolute -top-2 -right-2 h-6 w-6"
+              className="absolute top-2 right-2"
               onClick={handleRemoveImage}
             >
-              <X className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         ) : (
           <Button
+            type="button"
             variant="outline"
+            className="w-full h-48"
             onClick={() => fileInputRef.current?.click()}
           >
-            <Upload className="mr-2 h-4 w-4" /> Upload Image
+            <Upload className="mr-2 h-4 w-4" />
+            Upload Image
           </Button>
         )}
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept="image/*"
-          onChange={handleFileSelect}
-        />
       </div>
     </div>
   );
