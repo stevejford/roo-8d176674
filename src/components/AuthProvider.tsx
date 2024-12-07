@@ -35,13 +35,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single();
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id);
 
-    setIsAdmin(profile?.role === 'admin');
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+        return;
+      }
+
+      // Check if we have any profiles and if the first one has role 'admin'
+      setIsAdmin(profiles && profiles.length > 0 && profiles[0].role === 'admin');
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    }
   };
 
   return (
