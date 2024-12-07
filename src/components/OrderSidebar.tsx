@@ -1,17 +1,24 @@
 import React, { useState, useRef } from "react";
 import { Clock, MapPin, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { ComplementaryItem } from "./ComplementaryItem";
+import { ProductDetails } from "./ProductDetails";
 
 export const OrderSidebar = () => {
   const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
   const [showVoucherInput, setShowVoucherInput] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<{
+    title: string;
+    description: string;
+    image: string;
+  } | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const complementaryItems = [
     {
       name: "The Stewart",
       price: 24.00,
-      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png"
+      image: "/lovable-uploads/3be9a342-0e5f-4842-a771-093fa2d2dbc8.png",
+      description: "Tomato, Cheese, Pepperoni And A Sprinkle Of Parmesan. Topped With A Generous Amount Of Hot Honey!"
     },
     {
       name: "The Duncan",
@@ -49,6 +56,19 @@ export const OrderSidebar = () => {
     }
   };
 
+  if (selectedProduct) {
+    return (
+      <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen">
+        <ProductDetails
+          title={selectedProduct.title}
+          description={selectedProduct.description}
+          image={selectedProduct.image}
+          onClose={() => setSelectedProduct(null)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full md:w-[400px] bg-white border-l border-gray-200 h-screen flex flex-col">
       <div className="flex-1 overflow-auto">
@@ -70,7 +90,6 @@ export const OrderSidebar = () => {
               </button>
             </div>
           </div>
-
           {mode === 'pickup' ? (
             <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
               <MapPin className="h-5 w-5 text-gray-400 mt-1" />
@@ -93,7 +112,6 @@ export const OrderSidebar = () => {
               </div>
             </div>
           )}
-
           <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
             <Clock className="h-5 w-5 text-gray-400 mt-1" />
             <div className="flex-1">
@@ -106,7 +124,6 @@ export const OrderSidebar = () => {
               <p className="text-sm text-gray-600">Today - 20 Minutes</p>
             </div>
           </div>
-          
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
@@ -146,7 +163,6 @@ export const OrderSidebar = () => {
               </div>
             )}
           </div>
-
           <div className="space-y-4">
             <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
               Compliment your Order
