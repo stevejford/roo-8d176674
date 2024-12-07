@@ -17,11 +17,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session?.user.id);
       setSession(session);
       checkAdminStatus(session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", session?.user.id);
       setSession(session);
       checkAdminStatus(session);
     });
@@ -31,15 +33,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const checkAdminStatus = async (session: Session | null) => {
     if (!session) {
+      console.log("No session, setting isAdmin to false");
       setIsAdmin(false);
       return;
     }
 
     try {
+      console.log("Checking admin status for user:", session.user.id);
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', session.user.id);
+        .eq('id', session.user.id)
+        .single();
 
       if (error) {
         console.error('Error checking admin status:', error);
@@ -47,8 +52,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // Check if we have any profiles and if the first one has role 'admin'
-      setIsAdmin(profiles && profiles.length > 0 && profiles[0].role === 'admin');
+      console.log("Profile data:", profiles);
+      const isUserAdmin = profiles?.role === 'admin';
+      console.log("Is user admin?", isUserAdmin);
+      setIsAdmin(isUserAdmin);
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);

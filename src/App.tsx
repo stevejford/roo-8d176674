@@ -14,14 +14,19 @@ const queryClient = new QueryClient();
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, isAdmin } = useAuth();
   
+  console.log("AdminRoute check - Session:", !!session, "IsAdmin:", isAdmin);
+  
   if (!session) {
+    console.log("No session, redirecting to login");
     return <Navigate to="/login" replace />;
   }
   
   if (!isAdmin) {
+    console.log("User is not admin, redirecting to index");
     return <Navigate to="/" replace />;
   }
   
+  console.log("User is admin, allowing access to admin route");
   return <>{children}</>;
 };
 
