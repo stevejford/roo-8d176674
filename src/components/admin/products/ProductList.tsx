@@ -1,26 +1,15 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ProductDialog } from './ProductDialog';
 import { CategoryDialog } from './CategoryDialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
-interface Product {
-  id: string;
-  title: string;
-  description: string;
-  image_url: string;
-  category_id: string | null;
-}
-
-interface Category {
-  id: string;
-  title: string;
-}
+import { CategoryHeader } from './CategoryHeader';
+import { ProductCard } from './ProductCard';
+import type { Product, Category } from './types';
 
 export const ProductList = () => {
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
@@ -175,25 +164,11 @@ export const ProductList = () => {
         {/* Categories */}
         {categories?.map((category: Category) => (
           <div key={category.id} className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold">{category.title}</h3>
-              <div className="space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEditCategory(category)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDeleteCategory(category.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <CategoryHeader
+              title={category.title}
+              onEdit={() => handleEditCategory(category)}
+              onDelete={() => handleDeleteCategory(category.id)}
+            />
             
             <Droppable droppableId={category.id}>
               {(provided) => (
@@ -205,49 +180,17 @@ export const ProductList = () => {
                   {categorizedProducts[category.id]?.map((product: Product, index: number) => (
                     <Draggable key={product.id} draggableId={product.id} index={index}>
                       {(provided) => (
-                        <Card
+                        <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="bg-white"
                         >
-                          <CardContent className="flex items-center p-4">
-                            <div {...provided.dragHandleProps} className="mr-4">
-                              <GripVertical className="text-gray-400" />
-                            </div>
-                            
-                            {product.image_url && (
-                              <img
-                                src={product.image_url}
-                                alt={product.title}
-                                className="w-16 h-16 object-cover rounded mr-4"
-                              />
-                            )}
-                            
-                            <div className="flex-1">
-                              <h3 className="font-semibold">{product.title}</h3>
-                              <p className="text-sm text-gray-500 line-clamp-1">
-                                {product.description}
-                              </p>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => handleEditProduct(product)}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => handleDeleteProduct(product.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
+                          <ProductCard
+                            product={product}
+                            dragHandleProps={provided.dragHandleProps}
+                            onEdit={handleEditProduct}
+                            onDelete={handleDeleteProduct}
+                          />
+                        </div>
                       )}
                     </Draggable>
                   ))}
@@ -271,49 +214,17 @@ export const ProductList = () => {
                 {categorizedProducts['uncategorized']?.map((product: Product, index: number) => (
                   <Draggable key={product.id} draggableId={product.id} index={index}>
                     {(provided) => (
-                      <Card
+                      <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className="bg-white"
                       >
-                        <CardContent className="flex items-center p-4">
-                          <div {...provided.dragHandleProps} className="mr-4">
-                            <GripVertical className="text-gray-400" />
-                          </div>
-                          
-                          {product.image_url && (
-                            <img
-                              src={product.image_url}
-                              alt={product.title}
-                              className="w-16 h-16 object-cover rounded mr-4"
-                            />
-                          )}
-                          
-                          <div className="flex-1">
-                            <h3 className="font-semibold">{product.title}</h3>
-                            <p className="text-sm text-gray-500 line-clamp-1">
-                              {product.description}
-                            </p>
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleEditProduct(product)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        <ProductCard
+                          product={product}
+                          dragHandleProps={provided.dragHandleProps}
+                          onEdit={handleEditProduct}
+                          onDelete={handleDeleteProduct}
+                        />
+                      </div>
                     )}
                   </Draggable>
                 ))}
