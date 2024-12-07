@@ -18,10 +18,18 @@ const Login = () => {
   };
 
   useEffect(() => {
-    // Check for password reset hash in URL
-    const hash = window.location.hash;
-    if (hash && hash.includes('type=recovery')) {
-      console.log('Password reset detected');
+    // Check URL for auth flow type
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    const accessToken = hashParams.get('access_token');
+
+    if (type === 'recovery' && accessToken) {
+      console.log('Password reset flow detected with token');
+      // Set the session with the access token
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: hashParams.get('refresh_token') || '',
+      });
       toast.info("Please enter your new password");
     }
   }, []);
