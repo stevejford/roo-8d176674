@@ -11,6 +11,7 @@ interface CategorizedProductsProps {
   onDelete: (id: string) => void;
   onEditCategory: (category: Category) => void;
   onDeleteCategory: (id: string) => void;
+  onAddProduct: (categoryId: string) => void;
 }
 
 export const CategorizedProducts = ({ 
@@ -19,7 +20,8 @@ export const CategorizedProducts = ({
   onEdit, 
   onDelete,
   onEditCategory,
-  onDeleteCategory 
+  onDeleteCategory,
+  onAddProduct
 }: CategorizedProductsProps) => {
   return (
     <div className="mb-6">
@@ -27,6 +29,7 @@ export const CategorizedProducts = ({
         title={category.title}
         onEdit={() => onEditCategory(category)}
         onDelete={() => onDeleteCategory(category.id)}
+        onAddProduct={() => onAddProduct(category.id)}
       />
       
       <Droppable droppableId={category.id}>

@@ -1,16 +1,21 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from '@/integrations/supabase/client';
 
 interface CategoryHeaderProps {
   title: string;
   onEdit: () => void;
   onDelete: () => void;
+  onAddProduct: () => void;
 }
 
-export const CategoryHeader = ({ title, onEdit, onDelete }: CategoryHeaderProps) => {
+export const CategoryHeader = ({ 
+  title, 
+  onEdit, 
+  onDelete,
+  onAddProduct 
+}: CategoryHeaderProps) => {
   const { toast } = useToast();
 
   const handleDelete = async () => {
@@ -33,6 +38,13 @@ export const CategoryHeader = ({ title, onEdit, onDelete }: CategoryHeaderProps)
     <div className="flex justify-between items-center mb-2">
       <h3 className="text-lg font-semibold">{title}</h3>
       <div className="space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onAddProduct}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
         <Button
           variant="outline"
           size="sm"

@@ -16,6 +16,7 @@ export const ProductList = () => {
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const [isProductDialogOpen, setIsProductDialogOpen] = React.useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = React.useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -81,8 +82,15 @@ export const ProductList = () => {
     });
   };
 
+  const handleAddProduct = (categoryId: string) => {
+    setSelectedProduct(null);
+    setSelectedCategoryId(categoryId);
+    setIsProductDialogOpen(true);
+  };
+
   const handleEditProduct = (product: Product) => {
     setSelectedProduct(product);
+    setSelectedCategoryId(product.category_id);
     setIsProductDialogOpen(true);
   };
 
@@ -151,6 +159,7 @@ export const ProductList = () => {
           </Button>
           <Button onClick={() => {
             setSelectedProduct(null);
+            setSelectedCategoryId(null);
             setIsProductDialogOpen(true);
           }}>
             <Plus className="mr-2 h-4 w-4" /> Add Product
@@ -168,6 +177,7 @@ export const ProductList = () => {
             onDelete={handleDeleteProduct}
             onEditCategory={setSelectedCategory}
             onDeleteCategory={handleDeleteCategory}
+            onAddProduct={handleAddProduct}
           />
         ))}
 
@@ -182,8 +192,10 @@ export const ProductList = () => {
         open={isProductDialogOpen}
         onOpenChange={setIsProductDialogOpen}
         product={selectedProduct}
+        categoryId={selectedCategoryId}
         onClose={() => {
           setSelectedProduct(null);
+          setSelectedCategoryId(null);
           setIsProductDialogOpen(false);
         }}
       />
