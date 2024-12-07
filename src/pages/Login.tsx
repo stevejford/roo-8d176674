@@ -30,6 +30,7 @@ const Login = () => {
       console.log('Auth error:', error, errorDescription);
       if (error === 'access_denied' && errorDescription?.includes('expired')) {
         toast.error("Password reset link has expired. Please request a new one.");
+        navigate('/reset-password');
       } else {
         toast.error(errorDescription || "An error occurred during authentication");
       }
@@ -51,10 +52,11 @@ const Login = () => {
         } else {
           console.log('Session set successfully:', data);
           toast.info("Please enter your new password");
+          navigate('/update-password');
         }
       });
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (session && !isLoading) {
@@ -92,6 +94,14 @@ const Login = () => {
             }}
             providers={[]}
           />
+          <div className="mt-4 text-center">
+            <a 
+              href="/reset-password" 
+              className="text-sm text-emerald-600 hover:text-emerald-700"
+            >
+              Forgot your password?
+            </a>
+          </div>
         </div>
       </div>
       
