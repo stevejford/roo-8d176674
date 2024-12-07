@@ -28,7 +28,7 @@ export const OrderSidebar = () => {
             </div>
           </div>
 
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
             <Clock className="h-5 w-5 text-gray-400 mt-1" />
             <div className="flex-1">
               <div className="flex items-center justify-between">
