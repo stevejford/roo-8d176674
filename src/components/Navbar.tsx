@@ -42,9 +42,13 @@ export const Navbar = () => {
               <Input
                 type="text"
                 placeholder="Search Menu"
-                className="w-full pl-9 h-9 text-sm rounded-full border-gray-200"
+                className="w-full pr-12 h-9 text-sm rounded-full border-gray-200 placeholder:text-gray-500"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <div className="absolute right-1.5 top-1/2 transform -translate-y-1/2">
+                <button className="p-1.5 bg-primary rounded-full hover:bg-primary/90 transition-colors">
+                  <Search className="h-3.5 w-3.5 text-white" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
