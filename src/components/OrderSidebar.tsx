@@ -18,7 +18,7 @@ export const OrderSidebar = () => {
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
             <MapPin className="h-5 w-5 text-gray-400 mt-1" />
             <div>
               <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
@@ -30,10 +30,10 @@ export const OrderSidebar = () => {
 
           <div className="flex items-start space-x-3">
             <Clock className="h-5 w-5 text-gray-400 mt-1" />
-            <div>
+            <div className="flex-1">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-[#2D3648]">Pickup Time</h3>
-                <button className="text-[#10B981] text-sm font-medium hover:text-[#10B981]/90">
+                <button className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors">
                   CHANGE
                 </button>
               </div>
