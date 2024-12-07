@@ -103,8 +103,9 @@ const Index = () => {
     return acc;
   }, {});
 
-  const shouldShowSidebar = (!isMobile && selectedProduct) || (isMobile && selectedProduct);
-  const mainContentClass = shouldShowSidebar && !isMobile ? 'lg:w-[calc(100%-400px)]' : 'w-full';
+  // Show sidebar on mobile only when product is selected, always show on desktop
+  const shouldShowSidebar = !isMobile || (isMobile && selectedProduct);
+  const mainContentClass = !isMobile ? 'lg:w-[calc(100%-400px)]' : 'w-full';
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
