@@ -98,9 +98,9 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
             <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
               <MapPin className="h-5 w-5 text-gray-400 mt-1" />
               <div>
-                <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
+                <h3 className="font-medium text-[#2D3648]">Roo Restaurant</h3>
                 <p className="text-sm text-gray-600">
-                  Gateway Plaza, G65/621-659 Bellarine Hwy Leopold
+                  7A Rockingham Beach Rd, Rockingham WA 6168
                 </p>
               </div>
             </div>
