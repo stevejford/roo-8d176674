@@ -106,40 +106,7 @@ const Index = () => {
             )}
           </div>
 
-          <div className="relative">
-            <button 
-              onClick={() => scrollMenu('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-
-            <div 
-              ref={menuScrollRef}
-              className="overflow-x-auto scrollbar-hide py-4 px-8 flex space-x-6 scroll-smooth relative"
-            >
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => handleCategoryClick(category)}
-                  className="text-gray-900 whitespace-nowrap font-medium hover:text-primary transition-colors"
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-
-            <button 
-              onClick={() => scrollMenu('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="space-y-12 mt-8">
+          <div className="space-y-12">
             {categories.map((category) => (
               <div 
                 key={category}
