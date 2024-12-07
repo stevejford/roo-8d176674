@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
-import { LogOut, LogIn } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { session, isAdmin } = useAuth();
+  const { session, isAdmin, isLoading } = useAuth();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -18,11 +18,17 @@ const Login = () => {
   };
 
   useEffect(() => {
-    if (session) {
-      // Redirect admin users to admin dashboard, regular users to index
-      navigate(isAdmin ? "/admin" : "/");
+    if (session && !isLoading) {
+      console.log("Login redirect check - IsAdmin:", isAdmin);
+      if (isAdmin) {
+        console.log("Redirecting admin to admin dashboard");
+        navigate("/admin");
+      } else {
+        console.log("Redirecting user to main page");
+        navigate("/");
+      }
     }
-  }, [session, isAdmin, navigate]);
+  }, [session, isAdmin, isLoading, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
