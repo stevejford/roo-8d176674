@@ -81,6 +81,11 @@ export const ProductList = () => {
     });
   };
 
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setIsProductDialogOpen(true);
+  };
+
   const handleDeleteProduct = async (id: string) => {
     const { error } = await supabase
       .from('products')
@@ -144,30 +149,31 @@ export const ProductList = () => {
           <Button onClick={() => setIsCategoryDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Add Category
           </Button>
-          <Button onClick={() => setIsProductDialogOpen(true)}>
+          <Button onClick={() => {
+            setSelectedProduct(null);
+            setIsProductDialogOpen(true);
+          }}>
             <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
         </div>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        {/* Categories */}
         {categories?.map((category: Category) => (
           <CategorizedProducts
             key={category.id}
             category={category}
             products={categorizedProducts[category.id] || []}
-            onEdit={setSelectedProduct}
+            onEdit={handleEditProduct}
             onDelete={handleDeleteProduct}
             onEditCategory={setSelectedCategory}
             onDeleteCategory={handleDeleteCategory}
           />
         ))}
 
-        {/* Uncategorized Products */}
         <UncategorizedProducts
           products={categorizedProducts['uncategorized'] || []}
-          onEdit={setSelectedProduct}
+          onEdit={handleEditProduct}
           onDelete={handleDeleteProduct}
         />
       </DragDropContext>
