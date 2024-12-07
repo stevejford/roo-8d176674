@@ -13,7 +13,7 @@ export const MenuCard = ({ title, price, description, image, onClick }: MenuItem
   return (
     <button 
       type="button" 
-      className="block w-full text-left"
+      className="block w-full text-left h-full"
       onClick={onClick}
     >
       <div className="relative overflow-hidden rounded-lg 2xl:rounded-2.25">
@@ -56,7 +56,7 @@ export const MenuCard = ({ title, price, description, image, onClick }: MenuItem
           </h4>
         </div>
       </div>
-      <div className="mt-1.5 px-0.5 xl:mt-2 2xl:mt-2.25">
+      <div className="mt-1.5 px-0.5 xl:mt-2 2xl:mt-2.25 h-[48px]">
         <p className="mb-1 line-clamp-2 text-3.375 font-normal leading-normal text-neutral-525 last:mb-0 xl:text-3.625 xl:tracking-s-tight">
           {description}
         </p>
