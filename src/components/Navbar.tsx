@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, HopOff } from "lucide-react";
 import { Input } from "./ui/input";
 
 const categories = [
@@ -33,8 +33,9 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
-            <h1 className="text-xl font-bold">Pizza & Pasta</h1>
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <HopOff className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-bold">Roo Restaurant</h1>
           </div>
           <div className="flex-1 max-w-md mx-4">
             <div className="relative">
