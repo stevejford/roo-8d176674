@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin, Plus } from "lucide-react";
 
 export const OrderSidebar = () => {
   return (
@@ -33,7 +33,9 @@ export const OrderSidebar = () => {
             <div>
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-[#2D3648]">Pickup Time</h3>
-                <button className="text-primary text-sm">CHANGE</button>
+                <button className="text-[#10B981] text-sm font-medium hover:text-[#10B981]/90">
+                  CHANGE
+                </button>
               </div>
               <p className="text-sm text-gray-600">Today - 20 Minutes</p>
             </div>
@@ -43,7 +45,10 @@ export const OrderSidebar = () => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium text-[#2D3648]">Items</h3>
-            <button className="text-primary text-sm">+ Add Voucher</button>
+            <button className="text-[#E86452] text-sm font-medium flex items-center gap-1 hover:text-[#E86452]/90">
+              <Plus className="h-4 w-4" />
+              Add Voucher
+            </button>
           </div>
           <div className="text-center py-12 text-gray-500">
             <p>Your cart is empty</p>
