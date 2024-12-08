@@ -7,6 +7,7 @@ import { VoucherSection } from "../VoucherSection";
 import { ComplementaryItems } from "../../ComplementaryItems";
 import { PickupTimeModal } from "../../PickupTimeModal";
 import { useIsMobile } from "@/hooks/use-mobile";
+import type { PricingConfig } from "@/types/pricing/interfaces";
 
 interface SizeBasedOrderSidebarProps {
   product: {
@@ -16,9 +17,7 @@ interface SizeBasedOrderSidebarProps {
     price: number;
     category_id?: string;
   };
-  pricing: {
-    sizes: Array<{ name: string; price: number }>;
-  };
+  pricing: PricingConfig;
   onClose: () => void;
 }
 

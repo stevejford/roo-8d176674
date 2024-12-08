@@ -2,16 +2,9 @@ import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { PricingConfig } from "@/types/pricing";
 import { ProductDetails } from "./ProductDetails";
-import { OrderLocation } from "./OrderLocation";
-import { PickupTimeModal } from "./PickupTimeModal";
-import { ComplementaryItems } from "./ComplementaryItems";
-import { OrderHeader } from "./order/OrderHeader";
-import { DeliveryModeSelector } from "./order/DeliveryModeSelector";
-import { TimeSelector } from "./order/TimeSelector";
-import { VoucherSection } from "./order/VoucherSection";
 import { SizeBasedOrderSidebar } from "./order/sidebars/SizeBasedOrderSidebar";
+import type { CategoryPricing, ProductPricing } from "@/types/pricing/interfaces";
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -22,19 +15,6 @@ interface OrderSidebarProps {
     category_id?: string;
   } | null;
   onClose: () => void;
-}
-
-interface CategoryPricing {
-  id: string;
-  category_id: string;
-  strategy_id: string;
-  config: PricingConfig;
-  pricing_strategies: {
-    id: string;
-    name: string;
-    type: string;
-    config: PricingConfig;
-  };
 }
 
 export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) => {
@@ -60,13 +40,13 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         .limit(1);
       
       if (error) throw error;
-      return data?.[0] || null;
+      return data?.[0] as CategoryPricing || null;
     },
     enabled: !!selectedProduct?.category_id
   });
 
   // Fetch product pricing override if it exists
-  const { data: productPricing } = useQuery<CategoryPricing | null>({
+  const { data: productPricing } = useQuery<ProductPricing | null>({
     queryKey: ['product-pricing', selectedProduct?.title],
     queryFn: async () => {
       if (!selectedProduct?.title) return null;
@@ -90,7 +70,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         .limit(1);
 
       if (pricingError) throw pricingError;
-      return pricing?.[0] || null;
+      return pricing?.[0] as ProductPricing || null;
     },
     enabled: !!selectedProduct?.title
   });
@@ -112,7 +92,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     return (
       <SizeBasedOrderSidebar
         product={selectedProduct}
-        pricing={pricingConfig as Required<PricingConfig>}
+        pricing={pricingConfig}
         onClose={onClose}
       />
     );
