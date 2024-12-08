@@ -165,38 +165,46 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
             </div>
           </div>
 
-          <button
-            onClick={() => setIsIngredientsOpen(true)}
-            className="w-full px-4 py-2 text-sm font-medium text-[#2D3648] bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-          >
-            Edit Ingredients
-          </button>
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-md border border-gray-200">
+              <h3 className="text-lg font-semibold text-[#2D3648] mb-4">Ingredients</h3>
+              <div className="space-y-2">
+                {ingredients.map((ingredient) => (
+                  <div 
+                    key={ingredient.name}
+                    className="flex items-center justify-between py-2"
+                  >
+                    <span className="text-[#2D3648]">{ingredient.name}</span>
+                    <input
+                      type="checkbox"
+                      checked={ingredient.checked}
+                      onChange={() => handleIngredientToggle(ingredient.name)}
+                      className="h-5 w-5 border-2 border-[#E86452] rounded text-[#E86452] focus:ring-[#E86452]"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          <PricingStrategySelect
-            selectedStrategyId={selectedStrategyId}
-            onStrategyChange={setSelectedStrategyId}
-          />
-
-          {selectedStrategy && (
-            <PricingModelConfig
-              type={selectedStrategy.type}
-              config={config}
-              onChange={setConfig}
+            <PricingStrategySelect
+              selectedStrategyId={selectedStrategyId}
+              onStrategyChange={setSelectedStrategyId}
             />
-          )}
+
+            {selectedStrategy && (
+              <PricingModelConfig
+                type={selectedStrategy.type}
+                config={config}
+                onChange={setConfig}
+              />
+            )}
+          </div>
         </div>
         
         <DialogActions
           onClose={onClose}
           onSave={handleSave}
           disabled={!selectedStrategyId}
-        />
-
-        <IngredientsEditor
-          isOpen={isIngredientsOpen}
-          onClose={() => setIsIngredientsOpen(false)}
-          ingredients={ingredients}
-          onIngredientToggle={handleIngredientToggle}
         />
       </DialogContent>
     </Dialog>
