@@ -21,6 +21,7 @@ const Index = () => {
     description: string;
     image: string;
     price: number;
+    category_id?: string;
   } | null>(null);
 
   // Transform products into category-based structure
@@ -42,7 +43,9 @@ const Index = () => {
     description: string;
     image: string;
     price: number;
+    category_id?: string;
   }) => {
+    console.log('Selected product:', product); // Debug log
     setSelectedProduct(product);
   };
 

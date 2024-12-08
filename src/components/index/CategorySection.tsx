@@ -12,7 +12,7 @@ type Product = Database['public']['Tables']['products']['Row'];
 interface CategorySectionProps {
   category: string;
   products: Product[];
-  onProductSelect: (product: { title: string; description: string; image: string; price: number }) => void;
+  onProductSelect: (product: { title: string; description: string; image: string; price: number; category_id?: string }) => void;
   ref?: React.RefObject<HTMLDivElement>;
 }
 
@@ -31,8 +31,12 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const { data: productPricingMap } = useProductPricing(products);
 
     const calculatePrice = (product: Product) => {
+      console.log('Calculating price for:', product.title);
+      console.log('Product base price:', product.price);
+      
       // First check for product-specific pricing override
       const productPricing = productPricingMap?.[product.id];
+      console.log('Product pricing override:', productPricing);
       
       if (productPricing?.is_override) {
         const strategy = productPricing.pricing_strategies;
@@ -60,6 +64,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       }
 
       // Use category pricing if available
+      console.log('Category pricing:', categoryPricing);
       if (categoryPricing?.pricing_strategies) {
         const strategy = categoryPricing.pricing_strategies;
         const config = categoryPricing.config as PricingConfig;
@@ -81,7 +86,10 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       }
 
       // Fallback to product's default price
-      return product.price || 0;
+      console.log('Using product default price:', product.price);
+      const finalPrice = product.price || 0;
+      console.log('Final calculated price:', finalPrice);
+      return finalPrice;
     };
 
     // Filter products for Popular category
@@ -117,7 +125,8 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
                   title: item.title,
                   description: item.description || '',
                   image: item.image_url || '/placeholder.svg',
-                  price
+                  price,
+                  category_id: item.category_id || undefined
                 })}
               />
             ) : (
@@ -131,7 +140,8 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
                   title: item.title,
                   description: item.description || '',
                   image: item.image_url || '/placeholder.svg',
-                  price
+                  price,
+                  category_id: item.category_id || undefined
                 })}
               />
             );
