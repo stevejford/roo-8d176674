@@ -87,20 +87,24 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     ? productPricing.config
     : categoryPricing?.config;
 
+  const baseClassName = `fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`;
+
   // Render size-based sidebar if applicable
   if (pricingStrategy?.type === 'size_based' && pricingConfig?.sizes) {
     return (
-      <SizeBasedOrderSidebar
-        product={selectedProduct}
-        pricing={pricingConfig}
-        onClose={onClose}
-      />
+      <div className={baseClassName}>
+        <SizeBasedOrderSidebar
+          product={selectedProduct}
+          pricing={pricingConfig}
+          onClose={onClose}
+        />
+      </div>
     );
   }
 
   // Default to ProductDetails for other pricing types
   return (
-    <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`}>
+    <div className={baseClassName}>
       <ProductDetails
         title={selectedProduct.title}
         description={selectedProduct.description}
