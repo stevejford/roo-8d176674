@@ -2,8 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
-type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
+type PricingStrategy = Database['public']['Tables']['pricing_strategies']['Row'];
+type ProductPricing = Database['public']['Tables']['product_pricing']['Row'];
+
+type ProductPricingRow = ProductPricing & {
+  pricing_strategies: PricingStrategy;
 };
 
 export const useProductPricing = (products: any[] | null) => {
@@ -41,16 +44,7 @@ export const useProductPricing = (products: any[] | null) => {
           .from('product_pricing')
           .select(`
             *,
-            pricing_strategies (
-              id,
-              name,
-              type,
-              config,
-              created_at,
-              updated_at,
-              preview_config,
-              preview_enabled
-            )
+            pricing_strategies (*)
           `)
           .in('product_id', productIds);
 
