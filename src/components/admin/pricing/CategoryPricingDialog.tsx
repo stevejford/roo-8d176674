@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PricingModelConfig } from './PricingModelConfig';
 import { PricingStrategySelect } from './shared/PricingStrategySelect';
 import { DialogActions } from './shared/DialogActions';
+import { IngredientsEditor } from '@/components/IngredientsEditor';
 
 interface CategoryPricingDialogProps {
   open: boolean;
@@ -17,6 +18,14 @@ interface CategoryPricingDialogProps {
 export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }: CategoryPricingDialogProps) => {
   const [selectedStrategyId, setSelectedStrategyId] = React.useState<string>('');
   const [config, setConfig] = React.useState({});
+  const [isIngredientsOpen, setIsIngredientsOpen] = React.useState(false);
+  const [ingredients, setIngredients] = React.useState([
+    { name: "Cheese", checked: true },
+    { name: "Tomato Sauce", checked: true },
+    { name: "Pepperoni", checked: false },
+    { name: "Mushrooms", checked: false },
+    { name: "Onions", checked: false },
+  ]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -44,6 +53,9 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
     if (existingPricing) {
       setSelectedStrategyId(existingPricing.strategy_id);
       setConfig(existingPricing.config);
+      if (existingPricing.ingredients) {
+        setIngredients(existingPricing.ingredients);
+      }
     } else {
       setSelectedStrategyId('');
       setConfig({});
@@ -65,15 +77,28 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
 
   const selectedStrategy = strategies?.find(s => s.id === selectedStrategyId);
 
+  const handleIngredientToggle = (ingredientName: string) => {
+    setIngredients(prevIngredients =>
+      prevIngredients.map(ingredient =>
+        ingredient.name === ingredientName
+          ? { ...ingredient, checked: !ingredient.checked }
+          : ingredient
+      )
+    );
+  };
+
   const handleSave = async () => {
     try {
+      const pricingData = {
+        strategy_id: selectedStrategyId,
+        config,
+        ingredients,
+      };
+
       if (existingPricing) {
         const { error } = await supabase
           .from('category_pricing')
-          .update({
-            strategy_id: selectedStrategyId,
-            config,
-          })
+          .update(pricingData)
           .eq('id', existingPricing.id);
 
         if (error) throw error;
@@ -82,8 +107,7 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
           .from('category_pricing')
           .insert([{
             category_id: category.id,
-            strategy_id: selectedStrategyId,
-            config,
+            ...pricingData,
           }]);
 
         if (error) throw error;
@@ -136,6 +160,13 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
             </div>
           </div>
 
+          <button
+            onClick={() => setIsIngredientsOpen(true)}
+            className="w-full px-4 py-2 text-sm font-medium text-[#2D3648] bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            Edit Ingredients
+          </button>
+
           <PricingStrategySelect
             selectedStrategyId={selectedStrategyId}
             onStrategyChange={setSelectedStrategyId}
@@ -154,6 +185,13 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
           onClose={onClose}
           onSave={handleSave}
           disabled={!selectedStrategyId}
+        />
+
+        <IngredientsEditor
+          isOpen={isIngredientsOpen}
+          onClose={() => setIsIngredientsOpen(false)}
+          ingredients={ingredients}
+          onIngredientToggle={handleIngredientToggle}
         />
       </DialogContent>
     </Dialog>
