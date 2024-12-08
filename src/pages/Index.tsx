@@ -18,7 +18,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const categoryRefs = useRef({});
 
-  const { categories, products, isLoading, hasError } = useMenuData();
+  const { categories = [], products = [], hasError } = useMenuData();
 
   const handleSignOut = async () => {
     try {
