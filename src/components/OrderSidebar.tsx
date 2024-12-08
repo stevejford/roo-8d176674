@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,10 +18,6 @@ interface OrderSidebarProps {
 }
 
 export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) => {
-  const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
-  const [showVoucherInput, setShowVoucherInput] = useState(false);
-  const [showTimeModal, setShowTimeModal] = useState(false);
-  const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
   const isMobile = useIsMobile();
 
   // Fetch category pricing if product has a category
@@ -87,32 +83,26 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     ? productPricing.config
     : categoryPricing?.config;
 
-  const baseClassName = `fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`;
+  const baseClassName = `fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen`;
 
-  // Render size-based sidebar if applicable
-  if (pricingStrategy?.type === 'size_based' && pricingConfig?.sizes) {
-    return (
-      <div className={baseClassName}>
+  return (
+    <div className={baseClassName}>
+      {pricingStrategy?.type === 'size_based' && pricingConfig?.sizes ? (
         <SizeBasedOrderSidebar
           product={selectedProduct}
           pricing={pricingConfig}
           onClose={onClose}
         />
-      </div>
-    );
-  }
-
-  // Default to ProductDetails for other pricing types
-  return (
-    <div className={baseClassName}>
-      <ProductDetails
-        title={selectedProduct.title}
-        description={selectedProduct.description}
-        image={selectedProduct.image}
-        price={selectedProduct.price}
-        category_id={selectedProduct.category_id}
-        onClose={onClose}
-      />
+      ) : (
+        <ProductDetails
+          title={selectedProduct.title}
+          description={selectedProduct.description}
+          image={selectedProduct.image}
+          price={selectedProduct.price}
+          category_id={selectedProduct.category_id}
+          onClose={onClose}
+        />
+      )}
     </div>
   );
 };
