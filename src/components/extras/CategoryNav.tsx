@@ -3,10 +3,11 @@ import React from "react";
 interface CategoryNavProps {
   categories: string[];
   onCategoryClick: (category: string) => void;
+  onScroll?: (direction: 'left' | 'right') => void;
 }
 
 export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(
-  ({ categories, onCategoryClick }, ref) => {
+  ({ categories, onCategoryClick, onScroll }, ref) => {
     return (
       <div 
         ref={ref}
