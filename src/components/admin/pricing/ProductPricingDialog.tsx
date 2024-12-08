@@ -1,13 +1,13 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/components/ui/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PricingModelConfig } from './PricingModelConfig';
+import { PricingStrategySelect } from './shared/PricingStrategySelect';
+import { DialogActions } from './shared/DialogActions';
 
 interface ProductPricingDialogProps {
   open: boolean;
@@ -22,19 +22,6 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
   const [isOverride, setIsOverride] = React.useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const { data: strategies } = useQuery({
-    queryKey: ['pricing-strategies'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pricing_strategies')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const { data: existingPricing } = useQuery({
     queryKey: ['product-pricing', product?.id],
@@ -64,6 +51,19 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
       setIsOverride(true);
     }
   }, [existingPricing]);
+
+  const { data: strategies } = useQuery({
+    queryKey: ['pricing-strategies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('pricing_strategies')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const selectedStrategy = strategies?.find(s => s.id === selectedStrategyId);
 
@@ -129,24 +129,10 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
 
           {isOverride && (
             <>
-              <div className="grid gap-2">
-                <Label>Pricing Strategy</Label>
-                <Select 
-                  value={selectedStrategyId} 
-                  onValueChange={setSelectedStrategyId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a pricing strategy" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {strategies?.map((strategy) => (
-                      <SelectItem key={strategy.id} value={strategy.id}>
-                        {strategy.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <PricingStrategySelect
+                selectedStrategyId={selectedStrategyId}
+                onStrategyChange={setSelectedStrategyId}
+              />
 
               {selectedStrategy && (
                 <PricingModelConfig
@@ -159,17 +145,11 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
           )}
         </div>
         
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={isOverride && !selectedStrategyId}
-          >
-            Save
-          </Button>
-        </div>
+        <DialogActions
+          onClose={onClose}
+          onSave={handleSave}
+          disabled={isOverride && !selectedStrategyId}
+        />
       </DialogContent>
     </Dialog>
   );
