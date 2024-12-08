@@ -1,11 +1,5 @@
 import React from 'react';
-import { CategoryPricingRow } from '../types';
-
-interface DebugSectionProps {
-  category: any;
-  existingPricing: CategoryPricingRow | null;
-  config: any;
-}
+import { DebugSectionProps } from '../types';
 
 export const DebugSection = ({ category, existingPricing, config }: DebugSectionProps) => {
   return (
