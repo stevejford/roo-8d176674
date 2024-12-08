@@ -5,6 +5,7 @@ import { ExtrasEditor } from "./ExtrasEditor";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PricingOptions } from "./product/PricingOptions";
+import { PastaTypeSelector } from "./product/PastaTypeSelector";
 import type { PricingConfig } from "@/types/pricing";
 import { cn } from "@/lib/utils";
 
@@ -30,14 +31,6 @@ export const ProductDetails = ({
   const [showExtrasEditor, setShowExtrasEditor] = useState(false);
   const [showPastaTypes, setShowPastaTypes] = useState(false);
   const [selectedPastaType, setSelectedPastaType] = useState<string>("");
-  
-  const pastaTypes = [
-    { name: "Gnocchi", price: 0 },
-    { name: "Spaghetti", price: 0 },
-    { name: "Spiral", price: 0 },
-    { name: "Gluten Free Penne", price: 2.00 },
-    { name: "Fettuccine", price: 0 },
-  ];
 
   const [ingredients, setIngredients] = useState([
     { name: "Tomato Sauce Base", checked: true },
@@ -55,7 +48,7 @@ export const ProductDetails = ({
     ));
   };
 
-  // First get category pricing
+  // Fetch category pricing
   const { data: categoryPricing } = useQuery({
     queryKey: ['category-pricing', category_id],
     queryFn: async () => {
@@ -83,7 +76,7 @@ export const ProductDetails = ({
     enabled: !!category_id
   });
 
-  // Then get product pricing override if it exists
+  // Fetch product pricing override
   const { data: productPricing } = useQuery({
     queryKey: ['product-pricing', title],
     queryFn: async () => {
@@ -116,7 +109,7 @@ export const ProductDetails = ({
     enabled: !!title
   });
 
-  // Determine which pricing strategy to use
+  // Determine pricing strategy
   const pricingStrategy = productPricing?.is_override 
     ? productPricing.pricing_strategies
     : categoryPricing?.pricing_strategies;
@@ -175,48 +168,12 @@ export const ProductDetails = ({
         </div>
       </div>
 
-      {/* Pasta Types Selection */}
-      <div className={cn(
-        "fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 transform transition-transform duration-300 ease-in-out",
-        showPastaTypes ? "translate-y-0" : "translate-y-full"
-      )}>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-[#2D3648] mb-4">Select Pasta Type</h3>
-          <div className="space-y-3">
-            {pastaTypes.map((pasta) => (
-              <div
-                key={pasta.name}
-                className="flex items-center justify-between py-3 border-b border-gray-100"
-              >
-                <div>
-                  <span className="text-[#2D3648]">{pasta.name}</span>
-                  {pasta.price > 0 && (
-                    <span className="ml-2 text-sm text-gray-500">
-                      +${pasta.price.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    setSelectedPastaType(pasta.name);
-                    setShowPastaTypes(false);
-                  }}
-                  className={cn(
-                    "w-6 h-6 rounded-full border-2 flex items-center justify-center",
-                    selectedPastaType === pasta.name
-                      ? "border-[#E86452] bg-[#E86452]"
-                      : "border-gray-300"
-                  )}
-                >
-                  {selectedPastaType === pasta.name && (
-                    <div className="w-3 h-3 bg-white rounded-full" />
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <PastaTypeSelector
+        isOpen={showPastaTypes}
+        selectedType={selectedPastaType}
+        onSelect={setSelectedPastaType}
+        onClose={() => setShowPastaTypes(false)}
+      />
 
       <div className="border-t border-gray-200 p-4 mt-auto">
         <div className="grid grid-cols-2 gap-4">
