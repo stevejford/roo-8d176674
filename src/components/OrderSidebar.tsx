@@ -11,6 +11,7 @@ interface OrderSidebarProps {
     title: string;
     description: string;
     image: string;
+    price: number;
   } | null;
   onClose: () => void;
 }
@@ -34,6 +35,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
           title={selectedProduct.title}
           description={selectedProduct.description}
           image={selectedProduct.image}
+          price={selectedProduct.price}
           onClose={onClose}
         />
       </div>

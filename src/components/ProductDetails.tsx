@@ -12,10 +12,11 @@ interface ProductDetailsProps {
   title: string;
   description: string;
   image: string;
+  price: number;
   onClose: () => void;
 }
 
-export const ProductDetails = ({ title, description, image, onClose }: ProductDetailsProps) => {
+export const ProductDetails = ({ title, description, image, price, onClose }: ProductDetailsProps) => {
   const [quantities, setQuantities] = useState<Record<string, number>>({
     King: 0,
     Family: 0,
@@ -35,11 +36,11 @@ export const ProductDetails = ({ title, description, image, onClose }: ProductDe
   ]);
 
   const sizes: Size[] = [
-    { name: "King", price: 34.00 },
-    { name: "Family", price: 29.00 },
-    { name: "Large", price: 24.00 },
-    { name: "Medium", price: 19.00 },
-    { name: "Small", price: 15.00 }
+    { name: "King", price: price * 2.25 },
+    { name: "Family", price: price * 1.9 },
+    { name: "Large", price: price * 1.6 },
+    { name: "Medium", price: price * 1.25 },
+    { name: "Small", price }
   ];
 
   const handleQuantityChange = (size: string, increment: boolean) => {
