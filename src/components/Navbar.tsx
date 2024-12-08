@@ -1,14 +1,13 @@
 import React from "react";
-import { HopOff, LogOut } from "lucide-react";
+import { HopOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavbarProps {
-  onSignOut: () => void;
   isAdmin: boolean;
   onCategoryClick: (category: string) => void;
 }
 
-export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
+export const Navbar = ({ isAdmin }: NavbarProps) => {
   const isMobile = useIsMobile();
   
   return (
@@ -23,13 +22,6 @@ export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
             {isAdmin && (
               <span className="text-sm font-medium text-primary">Admin</span>
             )}
-            <button
-              onClick={onSignOut}
-              className="p-2 text-gray-600 hover:text-primary transition-colors"
-              aria-label="Sign out"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>
