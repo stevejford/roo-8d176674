@@ -23,44 +23,46 @@ export const useProductPricing = (products: any[] | null) => {
       }
 
       try {
-        // Instead of using .in(), let's fetch all product pricing and filter in JS
-        // This avoids potential issues with the IN clause and response format
+        console.log('Constructing Supabase query for product IDs:', productIds);
+        
         const { data, error, status, statusText } = await supabase
           .from('product_pricing')
-          .select(`
-            *,
-            pricing_strategies (*)
-          `);
+          .select('*, pricing_strategies (*)')
+          .in('product_id', productIds);
 
-        console.log('Supabase response status:', status, statusText);
-        console.log('Raw response data:', data);
+        console.log('Supabase query complete');
+        console.log('Response status:', status, statusText);
+        console.log('Response error:', error);
+        console.log('Response data:', data);
 
         if (error) {
           console.error('Error fetching product pricing:', {
             error,
             status,
             statusText,
-            query: 'product_pricing?select=*,pricing_strategies(*)'
+            productIds,
+            query: 'product_pricing.select().in()',
+            errorMessage: error.message,
+            errorDetails: error.details,
+            errorHint: error.hint
           });
           throw error;
         }
 
-        // Filter the data for our product IDs and transform into a map
-        const pricingMap = (data || [])
-          .filter(pricing => productIds.includes(pricing.product_id))
-          .reduce((acc: { [key: string]: ProductPricingRow }, pricing) => {
-            console.log('Processing pricing data for product:', pricing.product_id);
-            acc[pricing.product_id] = pricing;
-            return acc;
-          }, {});
+        const pricingMap = (data || []).reduce((acc: { [key: string]: ProductPricingRow }, pricing) => {
+          console.log('Processing pricing for product:', pricing.product_id);
+          acc[pricing.product_id] = pricing;
+          return acc;
+        }, {});
 
-        console.log('Final transformed pricing map:', pricingMap);
+        console.log('Final pricing map:', pricingMap);
         return pricingMap;
       } catch (error) {
         console.error('Unexpected error in useProductPricing:', error);
         throw error;
       }
     },
-    enabled: productIds.length > 0
+    enabled: productIds.length > 0,
+    retry: false // Disable retries to avoid flooding logs
   });
 };
