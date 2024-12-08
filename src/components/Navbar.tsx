@@ -130,6 +130,7 @@ export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => 
           placeholder="Search menu items..." 
           value={searchQuery}
           onValueChange={setSearchQuery}
+          aria-label="Search menu items"
         />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
