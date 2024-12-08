@@ -10,12 +10,17 @@ interface MenuItemProps {
 }
 
 export const MenuCard = ({ title, price, description, image, onClick }: MenuItemProps) => {
-  console.log('MenuCard price:', price); // Debug log
+  console.log(`MenuCard rendering for ${title} with price:`, price);
+  
+  // Ensure price is a valid number
+  const displayPrice = typeof price === 'number' && !isNaN(price) ? price : 0;
+  console.log(`MenuCard display price for ${title}:`, displayPrice);
+
   return (
     <button 
       type="button" 
       className="block w-full text-left h-full"
-      onClick={() => onClick?.({ title, description, image, price })}
+      onClick={() => onClick?.({ title, description, image, price: displayPrice })}
     >
       <div className="relative overflow-hidden rounded-lg 2xl:rounded-2.25">
         <div className="relative z-1 w-full pb-[100%] overflow-hidden rounded-lg bg-stone-300 2xl:rounded-2.25 after:absolute after:bottom-0 after:left-0 after:z-2 after:h-1/2 after:w-full after:bg-gradient-to-b after:from-neutral-200/0 after:to-black/50">
@@ -48,7 +53,7 @@ export const MenuCard = ({ title, price, description, image, onClick }: MenuItem
           <div className="flex flex-wrap justify-start items-start gap-2 mb-1.5 last:mb-0 2xl:mb-1.625 2xl:gap-2.25">
             <span className="overflow-hidden max-w-full relative inline-flex items-center justify-center space-x-1.75 border px-4 bg-white border-white text-black font-semibold h-4 text-xs !px-0.75 rounded-1.25 2xl:h-4.5 2xl:text-3.25 2xl:rounded-1.375">
               <span className="block py-0.5 leading-tight tracking-tight uppercase relative top-0.5px !leading-4 !py-0">
-                L {price?.toFixed(2)}
+                L {displayPrice.toFixed(2)}
               </span>
             </span>
           </div>
