@@ -1,6 +1,5 @@
-import React, { useEffect, useCallback, useRef } from "react";
+import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { debounce } from "lodash";
 
 interface CategoryNavProps {
   categories: any[];
@@ -10,41 +9,26 @@ interface CategoryNavProps {
 }
 
 export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }: CategoryNavProps) => {
-  const isScrolling = useRef(false);
-
-  // Add error handling for ResizeObserver
-  useEffect(() => {
-    const handleError = (error: ErrorEvent) => {
-      if (error.message === 'ResizeObserver loop completed with undelivered notifications.' ||
-          error.message === 'ResizeObserver loop limit exceeded') {
-        error.stopImmediatePropagation();
-        return false;
-      }
-    };
-
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
-
-  // Debounce the scroll handler with useCallback to maintain reference
-  const debouncedScroll = useCallback(
-    debounce((direction: 'left' | 'right') => {
-      if (scrollRef.current && !isScrolling.current) {
-        isScrolling.current = true;
-        onScroll(direction);
-        setTimeout(() => {
-          isScrolling.current = false;
-        }, 200);
-      }
-    }, 150),
-    [onScroll, scrollRef]
-  );
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 300;
+      const container = scrollRef.current;
+      const newScrollLeft = direction === 'left' 
+        ? container.scrollLeft - scrollAmount 
+        : container.scrollLeft + scrollAmount;
+      
+      container.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
     <div className="sticky top-16 bg-gray-50 z-40">
       <div className="relative py-4 max-w-[1400px] mx-auto px-4">
         <button 
-          onClick={() => debouncedScroll('left')}
+          onClick={() => handleScroll('left')}
           className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
           aria-label="Scroll left"
         >
@@ -53,7 +37,8 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
 
         <div 
           ref={scrollRef}
-          className="overflow-x-auto scrollbar-hide py-2 px-8 flex justify-center space-x-6 scroll-smooth"
+          className="overflow-x-auto py-2 px-8 flex justify-center space-x-6"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {categories.map((category) => (
             <button
@@ -67,7 +52,7 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
         </div>
 
         <button 
-          onClick={() => debouncedScroll('right')}
+          onClick={() => handleScroll('right')}
           className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
           aria-label="Scroll right"
         >
