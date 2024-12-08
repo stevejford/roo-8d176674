@@ -48,8 +48,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      console.log("Profile data received:", profile);
       const isUserAdmin = profile?.role === 'admin';
-      console.log("User admin status:", isUserAdmin);
+      console.log("Is user admin?", isUserAdmin);
       setIsAdmin(isUserAdmin);
 
     } catch (error) {
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event, currentSession?.user.id);
+      console.log("Auth state changed:", event, "User ID:", currentSession?.user?.id);
       
       if (event === 'SIGNED_OUT') {
         console.log("User signed out, redirecting to login");
@@ -83,7 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Initial session check
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      console.log("Initial session check:", initialSession?.user.id);
+      console.log("Initial session check:", initialSession?.user?.id);
       setSession(initialSession);
       checkAdminStatus(initialSession);
     });
@@ -93,8 +94,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [navigate]);
 
+  const contextValue = {
+    session,
+    isAdmin,
+    isLoading
+  };
+
+  console.log("AuthProvider state:", contextValue);
+
   return (
-    <AuthContext.Provider value={{ session, isAdmin, isLoading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
