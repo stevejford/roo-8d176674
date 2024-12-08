@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { debounce } from "lodash";
 
@@ -13,8 +13,10 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
   // Add error handling for ResizeObserver
   useEffect(() => {
     const handleError = (error: ErrorEvent) => {
-      if (error.message === 'ResizeObserver loop completed with undelivered notifications.') {
+      if (error.message === 'ResizeObserver loop completed with undelivered notifications.' ||
+          error.message === 'ResizeObserver loop limit exceeded') {
         error.stopImmediatePropagation();
+        return false;
       }
     };
 
@@ -22,10 +24,15 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
     return () => window.removeEventListener('error', handleError);
   }, []);
 
-  // Debounce the scroll handler
-  const debouncedScroll = debounce((direction: 'left' | 'right') => {
-    onScroll(direction);
-  }, 100);
+  // Debounce the scroll handler with useCallback to maintain reference
+  const debouncedScroll = useCallback(
+    debounce((direction: 'left' | 'right') => {
+      if (scrollRef.current) {
+        onScroll(direction);
+      }
+    }, 150),
+    [onScroll, scrollRef]
+  );
 
   return (
     <div className="sticky top-16 bg-gray-50 z-40">
