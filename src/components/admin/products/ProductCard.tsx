@@ -36,7 +36,7 @@ export const ProductCard = ({ product, dragHandleProps, onEdit, onDelete }: Prod
   return (
     <Card className="bg-white">
       <CardContent className="flex items-center p-4">
-        <div {...dragHandleProps} className="mr-4">
+        <div {...dragHandleProps} className="cursor-grab mr-4">
           <GripVertical className="text-gray-400" />
         </div>
         
