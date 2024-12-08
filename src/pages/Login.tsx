@@ -67,14 +67,13 @@ const Login = () => {
     
     if (session && !isLoading) {
       console.log("Login redirect check - IsAdmin:", isAdmin);
-      // Always redirect admin users to /admin
       if (isAdmin) {
         console.log("Redirecting admin to admin dashboard");
-        navigate("/admin");
-      } else {
-        console.log("Redirecting user to main page");
-        navigate("/");
+        navigate("/admin", { replace: true });
+        return;
       }
+      console.log("Redirecting user to main page");
+      navigate("/", { replace: true });
     }
   }, [session, isAdmin, isLoading, navigate]);
 
