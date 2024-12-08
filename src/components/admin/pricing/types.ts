@@ -11,3 +11,8 @@ export interface DebugSectionProps {
   existingPricing: CategoryPricingRow | null;
   config: PricingConfig;
 }
+
+export interface IngredientsState {
+  name: string;
+  checked: boolean;
+}

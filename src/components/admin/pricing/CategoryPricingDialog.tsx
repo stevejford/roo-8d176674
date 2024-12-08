@@ -5,16 +5,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { DialogActions } from './shared/DialogActions';
 import { IngredientsEditor } from '@/components/IngredientsEditor';
-import { Database } from '@/integrations/supabase/types';
 import { DebugSection } from './sections/DebugSection';
 import { IngredientsSection } from './sections/IngredientsSection';
 import { PricingSection } from './sections/PricingSection';
 import { PricingConfig } from '@/types/pricing/interfaces';
 import { Json } from '@/integrations/supabase/types';
-
-type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
-};
+import type { CategoryPricingRow, IngredientsState } from './types';
 
 interface CategoryPricingDialogProps {
   open: boolean;
@@ -32,13 +28,14 @@ export const CategoryPricingDialog = ({
   const [selectedStrategyId, setSelectedStrategyId] = React.useState<string>('');
   const [config, setConfig] = React.useState<PricingConfig>({});
   const [isIngredientsOpen, setIsIngredientsOpen] = React.useState(false);
-  const [ingredients, setIngredients] = React.useState([
+  const [ingredients, setIngredients] = React.useState<IngredientsState[]>([
     { name: "Cheese", checked: true },
     { name: "Tomato Sauce", checked: true },
     { name: "Pepperoni", checked: false },
     { name: "Mushrooms", checked: false },
     { name: "Onions", checked: false },
   ]);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -67,28 +64,13 @@ export const CategoryPricingDialog = ({
       setSelectedStrategyId(existingPricing.strategy_id);
       setConfig(existingPricing.config as unknown as PricingConfig);
       if (existingPricing.ingredients) {
-        setIngredients(existingPricing.ingredients as Array<{ name: string; checked: boolean }>);
+        setIngredients(existingPricing.ingredients as IngredientsState[]);
       }
     } else {
       setSelectedStrategyId('');
       setConfig({});
     }
   }, [existingPricing]);
-
-  const { data: strategies } = useQuery({
-    queryKey: ['pricing-strategies'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pricing_strategies')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const selectedStrategy = strategies?.find(s => s.id === selectedStrategyId);
 
   const handleIngredientToggle = (ingredientName: string) => {
     setIngredients(prevIngredients =>
