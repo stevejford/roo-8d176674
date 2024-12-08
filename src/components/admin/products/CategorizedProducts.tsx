@@ -12,6 +12,7 @@ interface CategorizedProductsProps {
   onEditCategory: (category: Category) => void;
   onDeleteCategory: (id: string) => void;
   onAddProduct: (categoryId: string) => void;
+  dragHandleProps?: any;
 }
 
 export const CategorizedProducts = ({ 
@@ -21,7 +22,8 @@ export const CategorizedProducts = ({
   onDelete,
   onEditCategory,
   onDeleteCategory,
-  onAddProduct
+  onAddProduct,
+  dragHandleProps
 }: CategorizedProductsProps) => {
   const isPopularCategory = category.title.toLowerCase() === 'popular';
   
@@ -32,6 +34,7 @@ export const CategorizedProducts = ({
         onEdit={() => onEditCategory(category)}
         onDelete={() => onDeleteCategory(category.id)}
         onAddProduct={() => onAddProduct(category.id)}
+        dragHandleProps={dragHandleProps}
       />
       
       <Droppable droppableId={category.id}>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface CategoryHeaderProps {
@@ -8,13 +8,15 @@ interface CategoryHeaderProps {
   onEdit: () => void;
   onDelete: () => void;
   onAddProduct: () => void;
+  dragHandleProps?: any;
 }
 
 export const CategoryHeader = ({ 
   title, 
   onEdit, 
   onDelete,
-  onAddProduct 
+  onAddProduct,
+  dragHandleProps
 }: CategoryHeaderProps) => {
   const { toast } = useToast();
   const isPopularCategory = title.toLowerCase() === 'popular';
@@ -46,7 +48,14 @@ export const CategoryHeader = ({
 
   return (
     <div className="flex justify-between items-center mb-2">
-      <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="flex items-center gap-2">
+        {!isPopularCategory && dragHandleProps && (
+          <div {...dragHandleProps} className="cursor-grab">
+            <GripVertical className="h-4 w-4 text-gray-400" />
+          </div>
+        )}
+        <h3 className="text-lg font-semibold">{title}</h3>
+      </div>
       <div className="space-x-2">
         <Button
           variant="outline"
