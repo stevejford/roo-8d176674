@@ -119,7 +119,6 @@ const extrasData: ExtrasCategory[] = [
 
 export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
   const [quantities, setQuantities] = React.useState<Record<string, number>>({});
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleQuantityChange = (itemName: string, increment: boolean) => {
@@ -127,16 +126,6 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
       ...prev,
       [itemName]: Math.max(0, (prev[itemName] || 0) + (increment ? 1 : -1))
     }));
-  };
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 200;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
   };
 
   const scrollToCategory = (categoryName: string) => {
@@ -161,10 +150,8 @@ export const ExtrasEditor = ({ isOpen, onClose }: ExtrasEditorProps) => {
         </DialogHeader>
 
         <CategoryNav 
-          ref={scrollContainerRef}
           categories={extrasData.map(cat => cat.name)}
           onCategoryClick={scrollToCategory}
-          onScroll={scroll}
         />
 
         <div className="overflow-y-auto">
