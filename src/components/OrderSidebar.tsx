@@ -85,7 +85,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
 
   const baseClassName = `fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen`;
 
-  // Determine which sidebar to show based on pricing strategy
+  // Show size-based sidebar for products with size-based pricing
   if (pricingStrategy?.type === 'size_based' && pricingConfig?.sizes) {
     return (
       <div className={baseClassName}>
@@ -98,7 +98,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     );
   }
 
-  // Default to ProductDetails if no size-based pricing is configured
+  // Show regular product details for other products
   return (
     <div className={baseClassName}>
       <ProductDetails

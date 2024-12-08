@@ -1,11 +1,4 @@
 import React, { useState } from "react";
-import { OrderHeader } from "../OrderHeader";
-import { DeliveryModeSelector } from "../DeliveryModeSelector";
-import { OrderLocation } from "../../OrderLocation";
-import { TimeSelector } from "../TimeSelector";
-import { VoucherSection } from "../VoucherSection";
-import { ComplementaryItems } from "../../ComplementaryItems";
-import { PickupTimeModal } from "../../PickupTimeModal";
 import { X } from "lucide-react";
 import type { PricingConfig } from "@/types/pricing/interfaces";
 
@@ -22,16 +15,7 @@ interface SizeBasedOrderSidebarProps {
 }
 
 export const SizeBasedOrderSidebar = ({ product, pricing, onClose }: SizeBasedOrderSidebarProps) => {
-  const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
-  const [showVoucherInput, setShowVoucherInput] = useState(false);
-  const [showTimeModal, setShowTimeModal] = useState(false);
-  const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
   const [selectedSize, setSelectedSize] = useState(pricing.sizes?.[0]?.name || '');
-
-  const handleTimeSchedule = (date: string, time: string) => {
-    setSelectedTime(`${date} - ${time}`);
-    setShowTimeModal(false);
-  };
 
   const getCurrentPrice = () => {
     const size = pricing.sizes?.find(s => s.name === selectedSize);
@@ -80,19 +64,6 @@ export const SizeBasedOrderSidebar = ({ product, pricing, onClose }: SizeBasedOr
               ))}
             </div>
           </div>
-
-          <DeliveryModeSelector mode={mode} setMode={setMode} />
-          <OrderLocation mode={mode} />
-          <TimeSelector 
-            mode={mode} 
-            selectedTime={selectedTime} 
-            onTimeChange={() => setShowTimeModal(true)} 
-          />
-          <VoucherSection 
-            showVoucherInput={showVoucherInput}
-            setShowVoucherInput={setShowVoucherInput}
-          />
-          <ComplementaryItems />
         </div>
       </div>
 
@@ -102,12 +73,6 @@ export const SizeBasedOrderSidebar = ({ product, pricing, onClose }: SizeBasedOr
           <span>${getCurrentPrice().toFixed(2)}</span>
         </button>
       </div>
-
-      <PickupTimeModal 
-        isOpen={showTimeModal}
-        onClose={() => setShowTimeModal(false)}
-        onSchedule={handleTimeSchedule}
-      />
     </div>
   );
 };
