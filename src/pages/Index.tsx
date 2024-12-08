@@ -10,6 +10,7 @@ import { AppFooter } from "@/components/index/AppFooter";
 import { CategoryNav } from "@/components/index/CategoryNav";
 import { MainContent } from "@/components/index/MainContent";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const Index = () => {
 
   console.log("Index component rendering with search query:", searchQuery);
 
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       console.log("Fetching categories");
@@ -39,7 +40,7 @@ const Index = () => {
     },
   });
 
-  const { data: products = [], isLoading: productsLoading } = useQuery({
+  const { data: products = [], isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
       console.log("Fetching products");
@@ -86,8 +87,30 @@ const Index = () => {
     setSearchQuery(query);
   };
 
+  // Handle loading states
   if (categoriesLoading || productsLoading) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-gray-600">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle errors
+  if (categoriesError || productsError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto px-4">
+          <p className="text-red-600 font-medium mb-2">Unable to load the menu</p>
+          <p className="text-gray-600 text-sm">
+            Please try refreshing the page. If the problem persists, contact support.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Filter products based on search query
