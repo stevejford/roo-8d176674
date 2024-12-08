@@ -39,6 +39,6 @@ export const useProductPricing = (products: Product[]) => {
     },
     enabled: products.length > 0,
     staleTime: 1000 * 60, // Consider data fresh for 1 minute
-    cacheTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes (formerly cacheTime)
   });
 };
