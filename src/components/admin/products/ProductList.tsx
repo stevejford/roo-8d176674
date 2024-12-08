@@ -37,37 +37,53 @@ export const ProductList = () => {
     const { source, destination } = result;
     const categoryId = result.draggableId;
 
+    console.log('Drag operation:', {
+      categoryId,
+      sourceIndex: source.index,
+      destinationIndex: destination.index
+    });
+
     // Get all categories except Popular
     const reorderableCategories = categories
       ?.filter(cat => cat.title.toLowerCase() !== 'popular')
       .sort((a, b) => (a.position || 0) - (b.position || 0));
 
+    console.log('Reorderable categories before update:', reorderableCategories);
+
     if (!reorderableCategories) return;
 
     try {
-      // Calculate new positions for all categories
-      const updates = reorderableCategories.map((category, index) => {
-        let newPosition = index;
+      // First, update the dragged category's position
+      const { error: draggedError } = await supabase
+        .from('categories')
+        .update({ position: destination.index })
+        .eq('id', categoryId);
 
-        // Adjust positions based on the drag destination
-        if (category.id === categoryId) {
-          newPosition = destination.index;
-        } else if (index >= destination.index && index < source.index) {
-          newPosition = index + 1;
-        } else if (index <= destination.index && index > source.index) {
-          newPosition = index - 1;
-        }
+      if (draggedError) {
+        console.error('Error updating dragged category:', draggedError);
+        throw draggedError;
+      }
 
-        return supabase
-          .from('categories')
-          .update({ position: newPosition })
-          .eq('id', category.id);
-      });
+      // Then update other categories' positions
+      const updates = reorderableCategories
+        .filter(category => category.id !== categoryId) // Exclude the dragged category
+        .map((category, index) => {
+          let newPosition = index;
 
-      // Execute all position updates
+          if (index >= destination.index) {
+            newPosition = index + 1;
+          }
+
+          console.log(`Updating category ${category.title} to position ${newPosition}`);
+
+          return supabase
+            .from('categories')
+            .update({ position: newPosition })
+            .eq('id', category.id);
+        });
+
       const results = await Promise.all(updates);
       
-      // Check for any errors in the results
       const errors = results.filter(result => result.error);
       if (errors.length > 0) {
         console.error('Errors updating category positions:', errors);
@@ -103,9 +119,10 @@ export const ProductList = () => {
   const popularCategory = categories?.find(cat => cat.title.toLowerCase() === 'popular');
 
   // Sort categories by position, ensuring null positions are handled
-  const sortedCategories = [...(categories || [])].sort((a, b) => 
-    ((a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER))
-  );
+  const sortedCategories = [...(categories || [])].sort((a, b) => {
+    console.log(`Comparing positions: ${a.title}(${a.position}) vs ${b.title}(${b.position})`);
+    return (a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER);
+  });
 
   return (
     <div className="space-y-4">
