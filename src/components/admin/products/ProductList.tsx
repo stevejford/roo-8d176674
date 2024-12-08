@@ -42,32 +42,38 @@ export const ProductList = () => {
       ?.filter(cat => cat.title.toLowerCase() !== 'popular')
       .sort((a, b) => (a.position || 0) - (b.position || 0));
 
-    // Update positions for all affected categories
-    const updates = reorderableCategories.map((category, index) => {
-      let newPosition = index;
-      
-      if (index >= destination.index && category.id !== categoryId) {
-        newPosition = index + 1;
-      }
-      
-      return supabase
-        .from('categories')
-        .update({ position: newPosition })
-        .eq('id', category.id);
-    });
+    if (!reorderableCategories) return;
 
     try {
-      // Update the dragged category's position
-      const { error } = await supabase
-        .from('categories')
-        .update({ position: destination.index })
-        .eq('id', categoryId);
+      // Calculate new positions for all categories
+      const updates = reorderableCategories.map((category, index) => {
+        let newPosition = index;
 
-      if (error) throw error;
+        // Adjust positions based on the drag destination
+        if (category.id === categoryId) {
+          newPosition = destination.index;
+        } else if (index >= destination.index && index < source.index) {
+          newPosition = index + 1;
+        } else if (index <= destination.index && index > source.index) {
+          newPosition = index - 1;
+        }
 
-      // Execute all other position updates
-      await Promise.all(updates);
+        return supabase
+          .from('categories')
+          .update({ position: newPosition })
+          .eq('id', category.id);
+      });
+
+      // Execute all position updates
+      const results = await Promise.all(updates);
       
+      // Check for any errors in the results
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        console.error('Errors updating category positions:', errors);
+        throw new Error('Failed to update some category positions');
+      }
+
       toast.success("Category order updated successfully");
     } catch (error) {
       console.error('Error updating category positions:', error);
@@ -96,9 +102,9 @@ export const ProductList = () => {
   // Find the Popular category
   const popularCategory = categories?.find(cat => cat.title.toLowerCase() === 'popular');
 
-  // Sort categories by position
+  // Sort categories by position, ensuring null positions are handled
   const sortedCategories = [...(categories || [])].sort((a, b) => 
-    (a.position || 0) - (b.position || 0)
+    ((a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER))
   );
 
   return (
