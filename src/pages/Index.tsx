@@ -11,8 +11,6 @@ import { MainContent } from "@/components/index/MainContent";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2 } from "lucide-react";
 import { useMenuData } from "@/hooks/useMenuData";
-// import { SearchBar } from "@/components/index/SearchBar";
-// import { useSearch } from "@/hooks/useSearch";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -22,9 +20,6 @@ const Index = () => {
   const categoryRefs = useRef({});
 
   const { categories, products, isLoading, hasError } = useMenuData();
-  
-  // Temporarily comment out search functionality
-  // const { searchQuery, setSearchQuery, filteredProducts } = useSearch(products);
 
   const handleSignOut = async () => {
     try {
@@ -105,12 +100,6 @@ const Index = () => {
       />
       <div className="flex flex-1">
         <main className={`${mainContentClass} pb-16`}>
-          {/* Search temporarily disabled */}
-          {/* <SearchBar 
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            className="max-w-md mx-auto mt-4 px-4"
-          /> */}
           <CategoryNav
             categories={categories}
             onCategoryClick={handleCategoryClick}
