@@ -5,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface NavbarProps {
   isAdmin: boolean;
   onCategoryClick: (category: string) => void;
+  onSignOut?: () => Promise<void>;
 }
 
 export const Navbar = ({ isAdmin }: NavbarProps) => {
