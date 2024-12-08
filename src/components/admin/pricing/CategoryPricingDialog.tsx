@@ -54,7 +54,7 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
       setSelectedStrategyId(existingPricing.strategy_id);
       setConfig(existingPricing.config);
       if (existingPricing.ingredients) {
-        setIngredients(existingPricing.ingredients);
+        setIngredients(existingPricing.ingredients as Array<{ name: string; checked: boolean }>);
       }
     } else {
       setSelectedStrategyId('');

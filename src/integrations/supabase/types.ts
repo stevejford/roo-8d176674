@@ -39,6 +39,7 @@ export type Database = {
           config: Json
           created_at: string | null
           id: string
+          ingredients: Json | null
           strategy_id: string
           updated_at: string | null
         }
@@ -47,6 +48,7 @@ export type Database = {
           config?: Json
           created_at?: string | null
           id?: string
+          ingredients?: Json | null
           strategy_id: string
           updated_at?: string | null
         }
@@ -55,6 +57,7 @@ export type Database = {
           config?: Json
           created_at?: string | null
           id?: string
+          ingredients?: Json | null
           strategy_id?: string
           updated_at?: string | null
         }
