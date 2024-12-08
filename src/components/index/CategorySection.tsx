@@ -3,6 +3,8 @@ import { MenuCard } from "@/components/MenuCard";
 import { SpecialCard } from "./SpecialCard";
 import type { Database } from "@/integrations/supabase/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -18,6 +20,98 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isSpecialsCategory = category.toLowerCase() === "specials";
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
+
+    // Fetch category pricing
+    const { data: categoryPricing } = useQuery({
+      queryKey: ['category-pricing', products[0]?.category_id],
+      queryFn: async () => {
+        if (!products[0]?.category_id) return null;
+        
+        const { data, error } = await supabase
+          .from('category_pricing')
+          .select(`
+            *,
+            pricing_strategies (*)
+          `)
+          .eq('category_id', products[0].category_id)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+      },
+      enabled: !!products[0]?.category_id,
+    });
+
+    // Fetch product pricing overrides
+    const { data: productPricingMap } = useQuery({
+      queryKey: ['product-pricing', products.map(p => p.id)],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('product_pricing')
+          .select(`
+            *,
+            pricing_strategies (*)
+          `)
+          .in('product_id', products.map(p => p.id));
+        
+        if (error) throw error;
+        
+        // Convert to map for easier lookup
+        return data.reduce((acc, pricing) => {
+          acc[pricing.product_id] = pricing;
+          return acc;
+        }, {} as Record<string, any>);
+      },
+      enabled: products.length > 0,
+    });
+
+    const calculatePrice = (product: Product) => {
+      // Check for product-specific pricing override
+      const productPricing = productPricingMap?.[product.id];
+      if (productPricing?.is_override) {
+        const strategy = productPricing.pricing_strategies;
+        const config = productPricing.config;
+
+        switch (strategy.type) {
+          case 'simple':
+            return config.price || product.price || 0;
+          case 'size_based':
+            return config.sizes?.[0]?.price || product.price || 0;
+          case 'portion_based':
+            return config.portions?.[0]?.price || product.price || 0;
+          case 'selection_based':
+            return config.options?.[0]?.price || product.price || 0;
+          case 'volume_based':
+            return config.volumes?.[0]?.price || product.price || 0;
+          default:
+            return product.price || 0;
+        }
+      }
+
+      // Use category pricing if available
+      if (categoryPricing?.pricing_strategies) {
+        const strategy = categoryPricing.pricing_strategies;
+        const config = categoryPricing.config;
+
+        switch (strategy.type) {
+          case 'simple':
+            return config.price || product.price || 0;
+          case 'size_based':
+            return config.sizes?.[0]?.price || product.price || 0;
+          case 'portion_based':
+            return config.portions?.[0]?.price || product.price || 0;
+          case 'selection_based':
+            return config.options?.[0]?.price || product.price || 0;
+          case 'volume_based':
+            return config.volumes?.[0]?.price || product.price || 0;
+          default:
+            return product.price || 0;
+        }
+      }
+
+      // Fallback to product's default price
+      return product.price || 0;
+    };
 
     // Add more detailed debug logs
     console.log('CategorySection Render:', {
@@ -59,7 +153,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
               <SpecialCard
                 key={item.id}
                 title={item.title}
-                price={item.price || 24.00}
+                price={calculatePrice(item)}
                 description={item.description || ''}
                 image={item.image_url || '/placeholder.svg'}
                 onClick={() => onProductSelect({
@@ -72,7 +166,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
               <MenuCard 
                 key={item.id}
                 title={item.title}
-                price={item.price || 24.00}
+                price={calculatePrice(item)}
                 description={item.description || ''}
                 image={item.image_url || '/placeholder.svg'}
                 onClick={() => onProductSelect({
