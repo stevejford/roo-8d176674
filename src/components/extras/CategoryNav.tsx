@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CategoryNavProps {
@@ -9,10 +9,35 @@ interface CategoryNavProps {
 
 export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(
   ({ categories, onCategoryClick, onScroll }, ref) => {
+    const isScrolling = useRef(false);
+
+    useEffect(() => {
+      const handleError = (error: ErrorEvent) => {
+        if (error.message === 'ResizeObserver loop completed with undelivered notifications.' ||
+            error.message === 'ResizeObserver loop limit exceeded') {
+          error.stopImmediatePropagation();
+          return false;
+        }
+      };
+
+      window.addEventListener('error', handleError);
+      return () => window.removeEventListener('error', handleError);
+    }, []);
+
+    const handleScroll = useCallback((direction: 'left' | 'right') => {
+      if (!isScrolling.current) {
+        isScrolling.current = true;
+        onScroll(direction);
+        setTimeout(() => {
+          isScrolling.current = false;
+        }, 200);
+      }
+    }, [onScroll]);
+
     return (
       <div className="relative mb-4">
         <button 
-          onClick={() => onScroll('left')}
+          onClick={() => handleScroll('left')}
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -34,7 +59,7 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(
         </div>
 
         <button 
-          onClick={() => onScroll('right')}
+          onClick={() => handleScroll('right')}
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
         >
           <ChevronRight className="h-4 w-4" />

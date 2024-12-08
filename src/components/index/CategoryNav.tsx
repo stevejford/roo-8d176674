@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { debounce } from "lodash";
 
@@ -10,6 +10,8 @@ interface CategoryNavProps {
 }
 
 export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }: CategoryNavProps) => {
+  const isScrolling = useRef(false);
+
   // Add error handling for ResizeObserver
   useEffect(() => {
     const handleError = (error: ErrorEvent) => {
@@ -27,8 +29,12 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
   // Debounce the scroll handler with useCallback to maintain reference
   const debouncedScroll = useCallback(
     debounce((direction: 'left' | 'right') => {
-      if (scrollRef.current) {
+      if (scrollRef.current && !isScrolling.current) {
+        isScrolling.current = true;
         onScroll(direction);
+        setTimeout(() => {
+          isScrolling.current = false;
+        }, 200);
       }
     }, 150),
     [onScroll, scrollRef]
