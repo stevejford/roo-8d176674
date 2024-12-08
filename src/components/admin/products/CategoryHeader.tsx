@@ -19,13 +19,13 @@ export const CategoryHeader = ({
   dragHandleProps
 }: CategoryHeaderProps) => {
   const { toast } = useToast();
-  const isPopularCategory = title.toLowerCase() === 'popular';
+  const isDefaultCategory = title.toLowerCase() === 'popular' || title.toLowerCase() === 'specials';
 
   const handleDelete = async () => {
-    if (isPopularCategory) {
+    if (isDefaultCategory) {
       toast({
-        title: "Cannot Delete Popular Category",
-        description: "The Popular category is a default category and cannot be deleted.",
+        title: `Cannot Delete ${title} Category`,
+        description: `The ${title} category is a default category and cannot be deleted.`,
         variant: "destructive",
       });
       return;
@@ -49,7 +49,7 @@ export const CategoryHeader = ({
   return (
     <div className="flex justify-between items-center mb-2">
       <div className="flex items-center gap-2">
-        {!isPopularCategory && dragHandleProps && (
+        {!isDefaultCategory && dragHandleProps && (
           <div {...dragHandleProps} className="cursor-grab">
             <GripVertical className="h-4 w-4 text-gray-400" />
           </div>
@@ -71,7 +71,7 @@ export const CategoryHeader = ({
         >
           <Pencil className="h-4 w-4" />
         </Button>
-        {!isPopularCategory && (
+        {!isDefaultCategory && (
           <Button
             variant="outline"
             size="sm"
