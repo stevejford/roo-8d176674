@@ -4,7 +4,7 @@ import type { Product } from '@/components/admin/products/types';
 
 export const useProductPricing = (products: Product[]) => {
   return useQuery({
-    queryKey: ['product-pricing', products.map(p => p.id).join(',')],
+    queryKey: ['product-pricing', products.map(p => p.id).sort().join(',')],
     queryFn: async () => {
       if (products.length === 0) return {};
       
@@ -25,17 +25,20 @@ export const useProductPricing = (products: Product[]) => {
         console.error('Error fetching product pricing:', error);
         throw error;
       }
-      
-      // Convert to map for easier lookup and add debug logging
+
+      // Convert to map for easier lookup
       const pricingMap = (pricingData || []).reduce((acc, pricing) => {
-        console.log(`Adding pricing for product ${pricing.product_id}:`, pricing);
-        acc[pricing.product_id] = pricing;
+        acc[pricing.product_id] = {
+          ...pricing,
+          pricing_strategies: pricing.pricing_strategies || null
+        };
         return acc;
       }, {} as Record<string, any>);
 
-      console.log('Final pricing map:', pricingMap);
       return pricingMap;
     },
     enabled: products.length > 0,
+    staleTime: 1000 * 60, // Consider data fresh for 1 minute
+    cacheTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
   });
 };
