@@ -9,13 +9,15 @@ interface ProductCardProps {
   product: Product;
   dragHandleProps: any;
   onEdit: (product: Product) => void;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const ProductCard = ({ product, dragHandleProps, onEdit, onDelete }: ProductCardProps) => {
   const { toast } = useToast();
 
   const handleDelete = async () => {
+    if (!onDelete) return;
+    
     const confirmDelete = window.confirm(`Are you sure you want to delete "${product.title}"?`);
     if (!confirmDelete) return;
 
@@ -61,13 +63,15 @@ export const ProductCard = ({ product, dragHandleProps, onEdit, onDelete }: Prod
           >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {onDelete && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

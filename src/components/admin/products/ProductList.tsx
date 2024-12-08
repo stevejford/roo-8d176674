@@ -51,7 +51,12 @@ export const ProductList = () => {
     return <div>Loading...</div>;
   }
 
+  // Get all products that are marked as popular
+  const popularProducts = products?.filter(product => product.is_popular) || [];
+
+  // Group remaining products by category
   const categorizedProducts = products?.reduce((acc: any, product: Product) => {
+    // Skip popular products in regular categories if they're already shown in Popular
     const categoryId = product.category_id || 'uncategorized';
     if (!acc[categoryId]) {
       acc[categoryId] = [];
@@ -59,6 +64,9 @@ export const ProductList = () => {
     acc[categoryId].push(product);
     return acc;
   }, {});
+
+  // Find the Popular category
+  const popularCategory = categories?.find(cat => cat.title.toLowerCase() === 'popular');
 
   return (
     <div className="space-y-4">
@@ -79,7 +87,22 @@ export const ProductList = () => {
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        {categories?.map((category: Category) => (
+        {/* Always show Popular category first if it exists */}
+        {popularCategory && (
+          <CategorizedProducts
+            key={popularCategory.id}
+            category={popularCategory}
+            products={popularProducts}
+            onEdit={handleEditProduct}
+            onDelete={deleteProduct}
+            onEditCategory={setSelectedCategory}
+            onDeleteCategory={deleteCategory}
+            onAddProduct={handleAddProduct}
+          />
+        )}
+
+        {/* Show other categories */}
+        {categories?.filter(cat => cat.title.toLowerCase() !== 'popular').map((category: Category) => (
           <CategorizedProducts
             key={category.id}
             category={category}

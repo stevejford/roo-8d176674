@@ -23,6 +23,8 @@ export const CategorizedProducts = ({
   onDeleteCategory,
   onAddProduct
 }: CategorizedProductsProps) => {
+  const isPopularCategory = category.title.toLowerCase() === 'popular';
+  
   return (
     <div className="mb-6">
       <CategoryHeader
@@ -50,13 +52,18 @@ export const CategorizedProducts = ({
                       product={product}
                       dragHandleProps={provided.dragHandleProps}
                       onEdit={onEdit}
-                      onDelete={onDelete}
+                      onDelete={isPopularCategory ? undefined : onDelete}
                     />
                   </div>
                 )}
               </Draggable>
             ))}
             {provided.placeholder}
+            {isPopularCategory && products.length === 0 && (
+              <div className="text-center text-gray-500 py-4">
+                No popular products yet. Mark products as popular to see them here.
+              </div>
+            )}
           </div>
         )}
       </Droppable>
