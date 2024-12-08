@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { MenuCard } from "@/components/MenuCard";
 import { SpecialCard } from "./SpecialCard";
 import type { Database } from "@/integrations/supabase/types";
@@ -18,6 +18,16 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isSpecialsCategory = category.toLowerCase() === "specials";
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
+    const resizeRef = useRef<ResizeObserver>();
+
+    useEffect(() => {
+      // Cleanup previous observer
+      return () => {
+        if (resizeRef.current) {
+          resizeRef.current.disconnect();
+        }
+      };
+    }, []);
 
     // Add more detailed debug logs
     console.log('CategorySection Render:', {
