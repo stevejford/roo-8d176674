@@ -20,49 +20,76 @@ const Index = () => {
   const isMobile = useIsMobile();
   const categoryRefs = useRef({});
 
-  console.log("Index component rendering with search query:", searchQuery);
+  console.log("Starting to fetch data with session:", !!session);
 
   const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      console.log("Fetching categories");
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('position');
-      
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
+      console.log("Fetching categories - starting request");
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('position');
+        
+        if (error) {
+          console.error("Error fetching categories:", error);
+          throw error;
+        }
+        console.log("Categories fetched successfully:", data?.length);
+        return data;
+      } catch (err) {
+        console.error("Categories fetch failed:", err);
+        throw err;
       }
-      console.log("Categories fetched:", data);
-      return data;
     },
   });
 
   const { data: products = [], isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      console.log("Fetching products");
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('active', true)
-        .order('position');
-      
-      if (error) {
-        console.error("Error fetching products:", error);
-        throw error;
+      console.log("Fetching products - starting request");
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('active', true)
+          .order('position');
+        
+        if (error) {
+          console.error("Error fetching products:", error);
+          throw error;
+        }
+        console.log("Products fetched successfully:", data?.length);
+        return data;
+      } catch (err) {
+        console.error("Products fetch failed:", err);
+        throw err;
       }
-      console.log("Products fetched:", data);
-      return data;
     },
   });
 
+  // Log any errors immediately
+  React.useEffect(() => {
+    if (categoriesError) {
+      console.error("Categories error detected:", categoriesError);
+      toast.error("Failed to load categories");
+    }
+    if (productsError) {
+      console.error("Products error detected:", productsError);
+      toast.error("Failed to load products");
+    }
+  }, [categoriesError, productsError]);
+
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out successfully");
-    navigate("/login");
+    try {
+      await supabase.auth.signOut();
+      toast.success("Signed out successfully");
+      navigate("/login");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Failed to sign out");
+    }
   };
 
   const handleCategoryClick = (category: string) => {
