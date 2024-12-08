@@ -23,63 +23,82 @@ import {
 import { ProductList } from '@/components/admin/products/ProductList';
 
 // Placeholder components for each section
-const Dashboard = () => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Total Orders</CardTitle>
-          <CardDescription>Coming soon</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">--</div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Products</CardTitle>
-          <CardDescription>Coming soon</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">--</div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Total Revenue</CardTitle>
-          <CardDescription>Coming soon</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">--</div>
-        </CardContent>
-      </Card>
+const Dashboard = () => {
+  console.log('Rendering Dashboard component');
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Orders</CardTitle>
+            <CardDescription>Coming soon</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">--</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Products</CardTitle>
+            <CardDescription>Coming soon</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">--</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Revenue</CardTitle>
+            <CardDescription>Coming soon</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">--</div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-const Products = () => (
-  <div className="space-y-6">
-    <ProductList />
-  </div>
-);
+const Products = () => {
+  console.log('Rendering Products component');
+  return (
+    <div className="space-y-6">
+      <ProductList />
+    </div>
+  );
+};
 
-const Orders = () => (
-  <div>Orders management coming soon</div>
-);
+const Orders = () => {
+  console.log('Rendering Orders component');
+  return (
+    <div>Orders management coming soon</div>
+  );
+};
 
-const UsersManagement = () => (
-  <div>User management coming soon</div>
-);
+const UsersManagement = () => {
+  console.log('Rendering UsersManagement component');
+  return (
+    <div>User management coming soon</div>
+  );
+};
 
-const Analytics = () => (
-  <div>Analytics dashboard coming soon</div>
-);
+const Analytics = () => {
+  console.log('Rendering Analytics component');
+  return (
+    <div>Analytics dashboard coming soon</div>
+  );
+};
 
-const SettingsPanel = () => (
-  <div>Settings panel coming soon</div>
-);
+const SettingsPanel = () => {
+  console.log('Rendering SettingsPanel component');
+  return (
+    <div>Settings panel coming soon</div>
+  );
+};
 
 const Admin = () => {
+  console.log('Rendering Admin component');
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
 
@@ -96,6 +115,8 @@ const Admin = () => {
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart },
     { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
   ];
+
+  console.log('Admin component - isAdmin:', isAdmin);
 
   return (
     <div className="min-h-screen bg-gray-50">
