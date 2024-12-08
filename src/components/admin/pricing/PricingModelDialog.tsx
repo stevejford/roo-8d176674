@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { PricingModelConfig } from './PricingModelConfig';
 
 interface PricingModelDialogProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface PricingModelDialogProps {
 export const PricingModelDialog = ({ open, onOpenChange, model, onClose }: PricingModelDialogProps) => {
   const [name, setName] = React.useState(model?.name || '');
   const [type, setType] = React.useState(model?.type || 'simple');
+  const [config, setConfig] = React.useState(model?.config || {});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -25,9 +27,11 @@ export const PricingModelDialog = ({ open, onOpenChange, model, onClose }: Prici
     if (model) {
       setName(model.name);
       setType(model.type);
+      setConfig(model.config || {});
     } else {
       setName('');
       setType('simple');
+      setConfig({});
     }
   }, [model]);
 
@@ -45,7 +49,7 @@ export const PricingModelDialog = ({ open, onOpenChange, model, onClose }: Prici
       const modelData = {
         name,
         type,
-        config: {},
+        config,
       };
 
       if (model?.id) {
@@ -83,7 +87,7 @@ export const PricingModelDialog = ({ open, onOpenChange, model, onClose }: Prici
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{model ? 'Edit Pricing Model' : 'Add Pricing Model'}</DialogTitle>
         </DialogHeader>
@@ -99,7 +103,13 @@ export const PricingModelDialog = ({ open, onOpenChange, model, onClose }: Prici
           
           <div className="grid gap-2">
             <Label htmlFor="type">Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select 
+              value={type} 
+              onValueChange={(value) => {
+                setType(value);
+                setConfig({}); // Reset config when type changes
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a type" />
               </SelectTrigger>
@@ -112,6 +122,12 @@ export const PricingModelDialog = ({ open, onOpenChange, model, onClose }: Prici
               </SelectContent>
             </Select>
           </div>
+
+          <PricingModelConfig
+            type={type}
+            config={config}
+            onChange={setConfig}
+          />
         </div>
         
         <div className="flex justify-end gap-2">
