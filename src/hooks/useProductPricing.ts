@@ -25,12 +25,30 @@ export const useProductPricing = (products: any[] | null) => {
       try {
         console.log('Constructing Supabase query for product IDs:', productIds);
         
+        // First, let's verify the product IDs exist in the products table
+        const { data: productsCheck, error: productsError } = await supabase
+          .from('products')
+          .select('id')
+          .in('id', productIds);
+
+        console.log('Products check result:', productsCheck);
+        console.log('Products check error:', productsError);
+
+        if (productsError) {
+          console.error('Error checking products:', productsError);
+          throw productsError;
+        }
+
+        // Now query the product_pricing table
         const { data, error, status, statusText } = await supabase
           .from('product_pricing')
-          .select('*, pricing_strategies (*)')
+          .select(`
+            *,
+            pricing_strategies (*)
+          `)
           .in('product_id', productIds);
 
-        console.log('Supabase query complete');
+        console.log('Product pricing query complete');
         console.log('Response status:', status, statusText);
         console.log('Response error:', error);
         console.log('Response data:', data);
