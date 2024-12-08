@@ -79,7 +79,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
         const strategy = productPricing.pricing_strategies;
         const config = productPricing.config as PricingConfig;
 
-        switch (strategy.type) {
+        switch (strategy?.type) {
           case 'simple':
             return config.price || product.price || 0;
           case 'size_based':
