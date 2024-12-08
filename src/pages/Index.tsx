@@ -21,6 +21,7 @@ const Index = () => {
     title: string;
     description: string;
     image: string;
+    price: number;
   } | null>(null);
   const isMobile = useIsMobile();
 
@@ -81,7 +82,7 @@ const Index = () => {
     }
   };
 
-  const handleProductSelect = (product: { title: string; description: string; image: string }) => {
+  const handleProductSelect = (product: { title: string; description: string; image: string; price: number }) => {
     setSelectedProduct(product);
   };
 
