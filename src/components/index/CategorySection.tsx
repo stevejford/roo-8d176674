@@ -31,28 +31,18 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const { data: productPricingMap } = useProductPricing(products);
 
     const calculatePrice = (product: Product) => {
-      console.log('Calculating price for product:', product.title);
-      console.log('Product pricing map:', productPricingMap);
-      console.log('Product ID:', product.id);
-      
       // First check for product-specific pricing override
       const productPricing = productPricingMap?.[product.id];
-      console.log('Product specific pricing:', productPricing);
       
       if (productPricing?.is_override) {
-        console.log('Using product pricing override');
         const strategy = productPricing.pricing_strategies;
         const config = productPricing.config as PricingConfig;
-        console.log('Strategy:', strategy);
-        console.log('Config:', config);
 
         switch (strategy?.type) {
           case 'simple':
             return config.price || product.price || 0;
           case 'size_based':
-            const sizePrice = config.sizes?.[0]?.price;
-            console.log('Size based price:', sizePrice);
-            return sizePrice || product.price || 0;
+            return config.sizes?.[0]?.price || product.price || 0;
           case 'portion_based':
             return config.portions?.[0]?.price || product.price || 0;
           case 'selection_based':
@@ -60,24 +50,19 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
           case 'volume_based':
             return config.volumes?.[0]?.price || product.price || 0;
           default:
-            console.log('No matching strategy type, using default price:', product.price);
             return product.price || 0;
         }
       }
 
-      // For popular items, use their default price if no override exists
+      // For popular items without override, use their default price
       if (isPopularCategory) {
-        console.log('Using default price for popular item');
         return product.price || 0;
       }
 
       // Use category pricing if available
       if (categoryPricing?.pricing_strategies) {
-        console.log('Using category pricing');
         const strategy = categoryPricing.pricing_strategies;
         const config = categoryPricing.config as PricingConfig;
-        console.log('Category strategy:', strategy);
-        console.log('Category config:', config);
 
         switch (strategy.type) {
           case 'simple':
@@ -96,7 +81,6 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       }
 
       // Fallback to product's default price
-      console.log('Using product default price:', product.price);
       return product.price || 0;
     };
 
@@ -122,7 +106,6 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
         }`}>
           {displayProducts.map((item) => {
             const price = calculatePrice(item);
-            console.log('Final price for', item.title, ':', price);
             return isSpecialsCategory ? (
               <SpecialCard
                 key={item.id}
