@@ -19,7 +19,6 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
 
-    // Add more detailed debug logs
     console.log('CategorySection Render:', {
       category,
       isPopularCategory,
@@ -27,14 +26,12 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       productsData: products
     });
 
-    // Filter products for Popular category
     const displayProducts = isPopularCategory 
       ? products.filter(product => product.is_popular)
       : products;
 
     console.log('Final display products:', displayProducts);
 
-    // Don't render the section if it's the Popular category and there are no popular products
     if (isPopularCategory && displayProducts.length === 0) {
       console.log('Skipping Popular category render - no popular products');
       return null;
@@ -50,31 +47,28 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
             ? isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             : isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         }`}>
-          {displayProducts.map((item) => (
+          {displayProducts.map((product) => (
             isSpecialsCategory ? (
               <SpecialCard
-                key={item.id}
-                title={item.title}
-                price={item.price || 24.00}
-                description={item.description || ''}
-                image={item.image_url || '/placeholder.svg'}
+                key={product.id}
+                title={product.title}
+                price={product.price || 24.00}
+                description={product.description || ''}
+                image={product.image_url || '/placeholder.svg'}
                 onClick={() => onProductSelect({
-                  title: item.title,
-                  description: item.description || '',
-                  image: item.image_url || '/placeholder.svg'
+                  title: product.title,
+                  description: product.description || '',
+                  image: product.image_url || '/placeholder.svg'
                 })}
               />
             ) : (
               <MenuCard 
-                key={item.id}
-                title={item.title}
-                price={item.price || 24.00}
-                description={item.description || ''}
-                image={item.image_url || '/placeholder.svg'}
+                key={product.id}
+                product={product}
                 onClick={() => onProductSelect({
-                  title: item.title,
-                  description: item.description || '',
-                  image: item.image_url || '/placeholder.svg'
+                  title: product.title,
+                  description: product.description || '',
+                  image: product.image_url || '/placeholder.svg'
                 })}
               />
             )

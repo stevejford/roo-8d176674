@@ -7,6 +7,29 @@ interface ProductPriceProps {
   categoryId: string | null;
 }
 
+interface PricingConfig {
+  price?: number;
+  sizes?: Array<{
+    name: string;
+    price: number;
+  }>;
+  portions?: Array<{
+    name: string;
+    price: number;
+  }>;
+}
+
+interface PricingStrategy {
+  name: string;
+  type: 'simple' | 'size_based' | 'portion_based';
+  config: PricingConfig;
+}
+
+interface PricingData {
+  config: PricingConfig;
+  pricing_strategies: PricingStrategy;
+}
+
 export const ProductPrice = ({ productId, categoryId }: ProductPriceProps) => {
   // Fetch product pricing (override)
   const { data: productPricing } = useQuery({
@@ -26,7 +49,7 @@ export const ProductPrice = ({ productId, categoryId }: ProductPriceProps) => {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      return data as PricingData;
     },
   });
 
@@ -50,7 +73,7 @@ export const ProductPrice = ({ productId, categoryId }: ProductPriceProps) => {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      return data as PricingData;
     },
     enabled: !!categoryId,
   });
@@ -74,10 +97,10 @@ export const ProductPrice = ({ productId, categoryId }: ProductPriceProps) => {
       case 'size_based':
         return (
           <div className="space-y-1">
-            {config.sizes?.map((size: any, index: number) => (
+            {config.sizes?.map((size, index) => (
               <div key={index} className="flex justify-between text-sm">
                 <span>{size.name}</span>
-                <span className="font-semibold">${size.price?.toFixed(2)}</span>
+                <span className="font-semibold">${size.price.toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -85,10 +108,10 @@ export const ProductPrice = ({ productId, categoryId }: ProductPriceProps) => {
       case 'portion_based':
         return (
           <div className="space-y-1">
-            {config.portions?.map((portion: any, index: number) => (
+            {config.portions?.map((portion, index) => (
               <div key={index} className="flex justify-between text-sm">
                 <span>{portion.name}</span>
-                <span className="font-semibold">${portion.price?.toFixed(2)}</span>
+                <span className="font-semibold">${portion.price.toFixed(2)}</span>
               </div>
             ))}
           </div>
