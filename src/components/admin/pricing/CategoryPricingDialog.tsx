@@ -39,7 +39,8 @@ export const CategoryPricingDialog = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: existingPricing } = useQuery({
+  // Fetch existing pricing data
+  const { data: existingPricing } = useQuery<CategoryPricingRow | null>({
     queryKey: ['category-pricing', category?.id],
     queryFn: async () => {
       if (!category?.id) return null;
@@ -51,20 +52,36 @@ export const CategoryPricingDialog = ({
           pricing_strategies (*)
         `)
         .eq('category_id', category.id)
-        .single();
+        .limit(1);
       
-      if (error && error.code !== 'PGRST116') throw error;
-      return data as CategoryPricingRow | null;
+      if (error) throw error;
+      return data?.[0] as CategoryPricingRow || null;
     },
-    enabled: !!category?.id,
+    enabled: !!category?.id
   });
+
+  // Fetch pricing strategies
+  const { data: strategies } = useQuery({
+    queryKey: ['pricing-strategies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('pricing_strategies')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const selectedStrategy = strategies?.find(s => s.id === selectedStrategyId);
 
   React.useEffect(() => {
     if (existingPricing) {
       setSelectedStrategyId(existingPricing.strategy_id);
       setConfig(existingPricing.config as unknown as PricingConfig);
       if (existingPricing.ingredients) {
-        setIngredients(existingPricing.ingredients as IngredientsState[]);
+        setIngredients((existingPricing.ingredients as unknown as IngredientsState[]) || []);
       }
     } else {
       setSelectedStrategyId('');
@@ -83,6 +100,15 @@ export const CategoryPricingDialog = ({
   };
 
   const handleSave = async () => {
+    if (!selectedStrategyId) {
+      toast({
+        title: "Error",
+        description: "Please select a pricing strategy",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const pricingData = {
         strategy_id: selectedStrategyId,
@@ -90,7 +116,7 @@ export const CategoryPricingDialog = ({
         ingredients: ingredients as unknown as Json,
       };
 
-      if (existingPricing) {
+      if (existingPricing?.id) {
         const { error } = await supabase
           .from('category_pricing')
           .update(pricingData)
@@ -101,8 +127,8 @@ export const CategoryPricingDialog = ({
         const { error } = await supabase
           .from('category_pricing')
           .insert([{
-            category_id: category.id,
             ...pricingData,
+            category_id: category.id,
           }]);
 
         if (error) throw error;
@@ -112,7 +138,7 @@ export const CategoryPricingDialog = ({
       
       toast({
         title: "Success",
-        description: "Category pricing updated successfully",
+        description: "Category pricing has been saved",
       });
       
       onClose();
@@ -128,23 +154,12 @@ export const CategoryPricingDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Category Pricing - {category?.title}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <DebugSection
-            category={category}
-            existingPricing={existingPricing}
-            config={config}
-          />
 
-          <IngredientsSection
-            ingredients={ingredients}
-            onIngredientToggle={handleIngredientToggle}
-            onEditClick={() => setIsIngredientsOpen(true)}
-          />
-
+        <div className="grid gap-6">
           <PricingSection
             selectedStrategyId={selectedStrategyId}
             onStrategyChange={setSelectedStrategyId}
@@ -152,12 +167,21 @@ export const CategoryPricingDialog = ({
             config={config}
             onConfigChange={setConfig}
           />
+
+          <IngredientsSection
+            onEditIngredients={() => setIsIngredientsOpen(true)}
+          />
+
+          <DebugSection
+            category={category}
+            existingPricing={existingPricing}
+            config={config}
+          />
         </div>
-        
+
         <DialogActions
           onClose={onClose}
           onSave={handleSave}
-          disabled={!selectedStrategyId}
         />
 
         <IngredientsEditor
