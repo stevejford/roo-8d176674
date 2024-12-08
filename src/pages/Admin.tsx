@@ -100,7 +100,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar isAdmin={isAdmin} onCategoryClick={() => {}} />
+      <Navbar isAdmin={isAdmin} onCategoryClick={() => {}} onSignOut={handleSignOut} />
       
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Sidebar */}
