@@ -10,9 +10,10 @@ import { useProducts } from '@/hooks/useProducts';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAdmin, session } = useAuth();
+  const { isAdmin } = useAuth();
   const { categories } = useCategories();
   const { products } = useProducts();
+
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const [selectedProduct, setSelectedProduct] = useState<{
@@ -20,6 +21,7 @@ const Index = () => {
     description: string;
     image: string;
     price: number;
+    category_id?: string;
   } | null>(null);
 
   const handleProductSelect = (product: {
@@ -27,6 +29,7 @@ const Index = () => {
     description: string;
     image: string;
     price: number;
+    category_id?: string;
   }) => {
     setSelectedProduct(product);
   };
@@ -40,15 +43,15 @@ const Index = () => {
 
   // Group products by category
   const productsByCategory = React.useMemo(() => {
-    if (!products) return {};
-    return products.reduce((acc: { [key: string]: any[] }, product) => {
-      const categoryId = product.category_id;
-      if (!acc[categoryId]) {
-        acc[categoryId] = [];
+    return (products || []).reduce((acc, product) => {
+      if (product.category_id) {
+        if (!acc[product.category_id]) {
+          acc[product.category_id] = [];
+        }
+        acc[product.category_id].push(product);
       }
-      acc[categoryId].push(product);
       return acc;
-    }, {});
+    }, {} as Record<string, typeof products>);
   }, [products]);
 
   return (
@@ -74,15 +77,8 @@ const Index = () => {
 
       <AppFooter 
         isAdmin={isAdmin}
-        isLoggedIn={!!session}
-        onSignOut={async () => {
-          try {
-            await supabase.auth.signOut();
-            navigate('/login');
-          } catch (error) {
-            console.error('Error signing out:', error);
-          }
-        }}
+        isLoggedIn={false}
+        onSignOut={() => {}}
       />
     </div>
   );
