@@ -19,18 +19,30 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
 
-    // Add debug logs
-    console.log('Category:', category);
-    console.log('Is Popular Category:', isPopularCategory);
-    console.log('Products before filter:', products);
-    console.log('Products with is_popular:', products.filter(product => product.is_popular));
+    // Add more detailed debug logs
+    console.log('CategorySection Render:', {
+      category,
+      isPopularCategory,
+      totalProducts: products.length,
+      productsData: products,
+      popularProducts: products.filter(product => product.is_popular)
+    });
 
     // Filter products for Popular category
     const displayProducts = isPopularCategory 
-      ? products.filter(product => product.is_popular)
+      ? products.filter(product => {
+          console.log('Checking product for popular:', product.title, 'is_popular:', product.is_popular);
+          return product.is_popular === true;
+        })
       : products;
 
-    console.log('Display Products after filter:', displayProducts);
+    console.log('Final display products:', displayProducts);
+
+    // Don't render the section if it's the Popular category and there are no popular products
+    if (isPopularCategory && displayProducts.length === 0) {
+      console.log('Skipping Popular category render - no popular products');
+      return null;
+    }
 
     return (
       <div ref={ref} className="scroll-mt-24">
