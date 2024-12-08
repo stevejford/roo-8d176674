@@ -41,10 +41,11 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
             *,
             pricing_strategies (*)
           `)
-          .eq('category_id', products[0].category_id);
+          .eq('category_id', products[0].category_id)
+          .single();
         
-        if (error) throw error;
-        return data?.[0] || null;
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
       },
       enabled: !!products[0]?.category_id && !isPopularCategory,
     });
@@ -73,9 +74,13 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     });
 
     const calculatePrice = (product: Product) => {
-      // Check for product-specific pricing override
+      console.log('Calculating price for product:', product.title);
+      console.log('Product pricing override:', productPricingMap?.[product.id]);
+      
+      // First check for product-specific pricing override
       const productPricing = productPricingMap?.[product.id];
       if (productPricing?.is_override) {
+        console.log('Using product pricing override');
         const strategy = productPricing.pricing_strategies;
         const config = productPricing.config as PricingConfig;
 
@@ -97,11 +102,13 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
 
       // For popular items, use their default price if no override exists
       if (isPopularCategory) {
+        console.log('Using default price for popular item');
         return product.price || 0;
       }
 
       // Use category pricing if available
       if (categoryPricing?.pricing_strategies) {
+        console.log('Using category pricing');
         const strategy = categoryPricing.pricing_strategies;
         const config = categoryPricing.config as PricingConfig;
 
@@ -122,6 +129,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       }
 
       // Fallback to product's default price
+      console.log('Using product default price');
       return product.price || 0;
     };
 
