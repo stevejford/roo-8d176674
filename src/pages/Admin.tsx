@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { ProductList } from '@/components/admin/products/ProductList';
 import { PricingStrategyList } from '@/components/admin/pricing/PricingStrategyList';
+import { CategoryPricingList } from '@/components/admin/pricing/CategoryPricingList';
 
 const Dashboard = () => {
   console.log('Rendering Dashboard component');
@@ -100,8 +101,9 @@ const SettingsPanel = () => {
 const PricingManagement = () => {
   console.log('Rendering PricingManagement component');
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PricingStrategyList />
+      <CategoryPricingList />
     </div>
   );
 };
