@@ -9,7 +9,6 @@ import { AppFooter } from "@/components/index/AppFooter";
 import { CategoryNav } from "@/components/index/CategoryNav";
 import { MainContent } from "@/components/index/MainContent";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Loader2 } from "lucide-react";
 import { useMenuData } from "@/hooks/useMenuData";
 
 const Index = () => {
@@ -53,17 +52,6 @@ const Index = () => {
   const handleCloseSidebar = () => {
     setSelectedProduct(null);
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-gray-600">Loading menu...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (hasError) {
     return (
