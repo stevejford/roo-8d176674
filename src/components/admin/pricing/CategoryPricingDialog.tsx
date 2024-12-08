@@ -9,6 +9,7 @@ import { Database } from '@/integrations/supabase/types';
 import { DebugSection } from './sections/DebugSection';
 import { IngredientsSection } from './sections/IngredientsSection';
 import { PricingSection } from './sections/PricingSection';
+import { PricingConfig } from '@/types/pricing/interfaces';
 
 type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
   pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
@@ -28,7 +29,7 @@ export const CategoryPricingDialog = ({
   onClose 
 }: CategoryPricingDialogProps) => {
   const [selectedStrategyId, setSelectedStrategyId] = React.useState<string>('');
-  const [config, setConfig] = React.useState({});
+  const [config, setConfig] = React.useState<PricingConfig>({});
   const [isIngredientsOpen, setIsIngredientsOpen] = React.useState(false);
   const [ingredients, setIngredients] = React.useState([
     { name: "Cheese", checked: true },
@@ -63,7 +64,7 @@ export const CategoryPricingDialog = ({
   React.useEffect(() => {
     if (existingPricing) {
       setSelectedStrategyId(existingPricing.strategy_id);
-      setConfig(existingPricing.config);
+      setConfig(existingPricing.config as PricingConfig);
       if (existingPricing.ingredients) {
         setIngredients(existingPricing.ingredients as Array<{ name: string; checked: boolean }>);
       }

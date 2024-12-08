@@ -1,5 +1,5 @@
 import { Json } from "@/integrations/supabase/types";
-import type { CategoryPricing } from "@/types/pricing/interfaces";
+import type { CategoryPricing, PricingConfig } from "@/types/pricing/interfaces";
 import { Database } from '@/integrations/supabase/types';
 
 export type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
@@ -8,6 +8,6 @@ export type CategoryPricingRow = Database['public']['Tables']['category_pricing'
 
 export interface DebugSectionProps {
   category: any;
-  existingPricing: CategoryPricing | null;
-  config: Json;
+  existingPricing: CategoryPricingRow | null;
+  config: PricingConfig;
 }
