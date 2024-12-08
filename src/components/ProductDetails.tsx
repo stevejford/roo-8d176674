@@ -12,6 +12,7 @@ interface ProductDetailsProps {
   description: string;
   image: string;
   price: number;
+  category_id?: string;
   onClose: () => void;
 }
 
@@ -19,7 +20,8 @@ export const ProductDetails = ({
   title, 
   description, 
   image, 
-  price, 
+  price,
+  category_id,
   onClose 
 }: ProductDetailsProps) => {
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -41,10 +43,37 @@ export const ProductDetails = ({
     ));
   };
 
+  // First get category pricing
+  const { data: categoryPricing } = useQuery({
+    queryKey: ['category-pricing', category_id],
+    queryFn: async () => {
+      if (!category_id) return null;
+      
+      const { data, error } = await supabase
+        .from('category_pricing')
+        .select(`
+          *,
+          pricing_strategies (
+            id,
+            name,
+            type,
+            config
+          )
+        `)
+        .eq('category_id', category_id)
+        .single();
+
+      if (error) throw error;
+      console.log("Category pricing data:", data);
+      return data;
+    },
+    enabled: !!category_id
+  });
+
+  // Then get product pricing override if it exists
   const { data: productPricing } = useQuery({
     queryKey: ['product-pricing', title],
     queryFn: async () => {
-      // First get the product ID
       const { data: products, error: productError } = await supabase
         .from('products')
         .select('id')
@@ -54,7 +83,6 @@ export const ProductDetails = ({
       if (productError) throw productError;
       if (!products?.length) return null;
 
-      // Then get the pricing data
       const { data: pricing, error: pricingError } = await supabase
         .from('product_pricing')
         .select(`
@@ -70,10 +98,23 @@ export const ProductDetails = ({
         .limit(1);
 
       if (pricingError) throw pricingError;
+      console.log("Product pricing data:", pricing?.[0]);
       return pricing?.[0] || null;
     },
     enabled: !!title
   });
+
+  // Determine which pricing strategy to use
+  const pricingStrategy = productPricing?.is_override 
+    ? productPricing.pricing_strategies
+    : categoryPricing?.pricing_strategies;
+
+  const pricingConfig = productPricing?.is_override
+    ? productPricing.config
+    : categoryPricing?.config;
+
+  console.log("Using pricing strategy:", pricingStrategy);
+  console.log("Using pricing config:", pricingConfig);
 
   return (
     <>
@@ -106,10 +147,10 @@ export const ProductDetails = ({
 
             <div className="space-y-4">
               <h3 className="font-semibold text-lg text-[#2D3648]">Options</h3>
-              {productPricing?.pricing_strategies && (
+              {pricingStrategy && pricingConfig && (
                 <PricingOptions
-                  strategy={productPricing.pricing_strategies}
-                  config={productPricing.config as PricingConfig}
+                  strategy={pricingStrategy}
+                  config={pricingConfig as PricingConfig}
                   selectedSize={selectedSize}
                   onSizeSelect={setSelectedSize}
                   defaultPrice={price}
