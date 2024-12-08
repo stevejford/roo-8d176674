@@ -5,6 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCategoryPricing } from "@/hooks/useCategoryPricing";
 import { useProductPricing } from "@/hooks/useProductPricing";
+import type { PricingConfig } from "@/types/pricing";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
