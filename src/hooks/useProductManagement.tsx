@@ -11,7 +11,7 @@ export const useProductManagement = () => {
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = React.useState(false);
 
   const { products, isLoading, updateProductOrder, deleteProduct } = useProducts();
-  const { categories, deleteCategory } = useCategories();
+  const { categories, deleteCategory, setCategories } = useCategories();
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -70,5 +70,6 @@ export const useProductManagement = () => {
     setIsCategoryDialogOpen,
     handleCloseProductDialog,
     handleCloseCategoryDialog,
+    setCategories,
   };
 };

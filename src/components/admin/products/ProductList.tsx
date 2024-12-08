@@ -6,7 +6,7 @@ import { CategorizedProducts } from './CategorizedProducts';
 import { ProductListHeader } from './ProductListHeader';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { supabase } from '@/integrations/supabase/client';
-import type { Product } from './types';
+import type { Product, Category } from './types';
 import { toast } from "sonner";
 
 export const ProductList = () => {
@@ -29,10 +29,11 @@ export const ProductList = () => {
     setIsCategoryDialogOpen,
     handleCloseProductDialog,
     handleCloseCategoryDialog,
+    setCategories // Add this from useProductManagement
   } = useProductManagement();
 
   const handleCategoryDragEnd = async (result: any) => {
-    if (!result.destination) return;
+    if (!result.destination || !categories) return;
 
     const { source, destination } = result;
     const categoryId = result.draggableId;
@@ -45,7 +46,7 @@ export const ProductList = () => {
 
     // Get all categories except Popular
     const reorderableCategories = categories
-      ?.filter(cat => cat.title.toLowerCase() !== 'popular')
+      .filter(cat => cat.title.toLowerCase() !== 'popular')
       .sort((a, b) => (a.position || 0) - (b.position || 0));
 
     console.log('Reorderable categories before update:', reorderableCategories);
@@ -53,7 +54,33 @@ export const ProductList = () => {
     if (!reorderableCategories) return;
 
     try {
-      // First, update the dragged category's position
+      // Create a new array with updated positions
+      const updatedCategories = [...categories];
+      const movedCategory = updatedCategories.find(c => c.id === categoryId);
+      
+      if (!movedCategory) return;
+
+      // Update positions in the local state first
+      movedCategory.position = destination.index;
+      
+      // Update other categories' positions
+      updatedCategories
+        .filter(category => 
+          category.id !== categoryId && 
+          category.title.toLowerCase() !== 'popular'
+        )
+        .forEach((category, index) => {
+          let newPosition = index;
+          if (index >= destination.index) {
+            newPosition = index + 1;
+          }
+          category.position = newPosition;
+        });
+
+      // Update local state immediately
+      setCategories(updatedCategories);
+
+      // Then update in the database
       const { error: draggedError } = await supabase
         .from('categories')
         .update({ position: destination.index })
@@ -64,23 +91,17 @@ export const ProductList = () => {
         throw draggedError;
       }
 
-      // Then update other categories' positions
-      const updates = reorderableCategories
-        .filter(category => category.id !== categoryId) // Exclude the dragged category
-        .map((category, index) => {
-          let newPosition = index;
-
-          if (index >= destination.index) {
-            newPosition = index + 1;
-          }
-
-          console.log(`Updating category ${category.title} to position ${newPosition}`);
-
-          return supabase
+      const updates = updatedCategories
+        .filter(category => 
+          category.id !== categoryId && 
+          category.title.toLowerCase() !== 'popular'
+        )
+        .map(category => 
+          supabase
             .from('categories')
-            .update({ position: newPosition })
-            .eq('id', category.id);
-        });
+            .update({ position: category.position })
+            .eq('id', category.id)
+        );
 
       const results = await Promise.all(updates);
       
