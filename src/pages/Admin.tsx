@@ -21,8 +21,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ProductList } from '@/components/admin/products/ProductList';
+import { PricingStrategyList } from '@/components/admin/pricing/PricingStrategyList';
 
-// Placeholder components for each section
 const Dashboard = () => {
   console.log('Rendering Dashboard component');
   return (
@@ -97,6 +97,15 @@ const SettingsPanel = () => {
   );
 };
 
+const PricingManagement = () => {
+  console.log('Rendering PricingManagement component');
+  return (
+    <div className="space-y-6">
+      <PricingStrategyList />
+    </div>
+  );
+};
+
 const Admin = () => {
   console.log('Rendering Admin component');
   const navigate = useNavigate();
@@ -112,6 +121,7 @@ const Admin = () => {
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
+    { name: 'Pricing', href: '/admin/pricing', icon: BarChart },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart },
     { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
   ];
@@ -159,6 +169,7 @@ const Admin = () => {
             <Route path="products/*" element={<Products />} />
             <Route path="orders/*" element={<Orders />} />
             <Route path="users/*" element={<UsersManagement />} />
+            <Route path="pricing/*" element={<PricingManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
             <Route path="settings/*" element={<SettingsPanel />} />
           </Routes>
