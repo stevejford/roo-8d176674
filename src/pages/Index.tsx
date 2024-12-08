@@ -20,64 +20,44 @@ const Index = () => {
   const isMobile = useIsMobile();
   const categoryRefs = useRef({});
 
-  console.log("Starting to fetch data with session:", !!session);
-
   const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      console.log("Fetching categories - starting request");
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .order('position');
-        
-        if (error) {
-          console.error("Error fetching categories:", error);
-          throw error;
-        }
-        console.log("Categories fetched successfully:", data?.length);
-        return data;
-      } catch (err) {
-        console.error("Categories fetch failed:", err);
-        throw err;
-      }
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('position');
+      
+      if (error) throw error;
+      return data;
     },
+    enabled: true // Categories can be fetched regardless of auth state
   });
 
   const { data: products = [], isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      console.log("Fetching products - starting request");
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('active', true)
-          .order('position');
-        
-        if (error) {
-          console.error("Error fetching products:", error);
-          throw error;
-        }
-        console.log("Products fetched successfully:", data?.length);
-        return data;
-      } catch (err) {
-        console.error("Products fetch failed:", err);
-        throw err;
-      }
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('active', true)
+        .order('position');
+      
+      if (error) throw error;
+      return data;
     },
+    enabled: true // Products can be fetched regardless of auth state
   });
 
-  // Log any errors immediately
+  // Handle errors with toast notifications
   React.useEffect(() => {
     if (categoriesError) {
-      console.error("Categories error detected:", categoriesError);
-      toast.error("Failed to load categories");
+      console.error("Categories error:", categoriesError);
+      toast.error("Failed to load menu categories");
     }
     if (productsError) {
-      console.error("Products error detected:", productsError);
-      toast.error("Failed to load products");
+      console.error("Products error:", productsError);
+      toast.error("Failed to load menu items");
     }
   }, [categoriesError, productsError]);
 
