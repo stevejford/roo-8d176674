@@ -2,6 +2,7 @@ import React from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { CategoryHeader } from './CategoryHeader';
 import { ProductCard } from './ProductCard';
+import { CategoryPricingDialog } from '../pricing/CategoryPricingDialog';
 import type { Product, Category } from './types';
 
 interface CategorizedProductsProps {
@@ -25,6 +26,7 @@ export const CategorizedProducts = ({
   onAddProduct,
   dragHandleProps
 }: CategorizedProductsProps) => {
+  const [isPricingOpen, setIsPricingOpen] = React.useState(false);
   const isPopularCategory = category.title.toLowerCase() === 'popular';
   
   return (
@@ -34,6 +36,7 @@ export const CategorizedProducts = ({
         onEdit={() => onEditCategory(category)}
         onDelete={() => onDeleteCategory(category.id)}
         onAddProduct={() => onAddProduct(category.id)}
+        onConfigurePricing={() => setIsPricingOpen(true)}
         dragHandleProps={dragHandleProps}
       />
       
@@ -71,6 +74,13 @@ export const CategorizedProducts = ({
           </div>
         )}
       </Droppable>
+
+      <CategoryPricingDialog
+        open={isPricingOpen}
+        onOpenChange={setIsPricingOpen}
+        category={category}
+        onClose={() => setIsPricingOpen(false)}
+      />
     </div>
   );
 };

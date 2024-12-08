@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Plus, GripVertical } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, DollarSign } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface CategoryHeaderProps {
@@ -8,6 +8,7 @@ interface CategoryHeaderProps {
   onEdit: () => void;
   onDelete: () => void;
   onAddProduct: () => void;
+  onConfigurePricing: () => void;
   dragHandleProps?: any;
 }
 
@@ -16,6 +17,7 @@ export const CategoryHeader = ({
   onEdit, 
   onDelete,
   onAddProduct,
+  onConfigurePricing,
   dragHandleProps
 }: CategoryHeaderProps) => {
   const { toast } = useToast();
@@ -63,6 +65,13 @@ export const CategoryHeader = ({
           onClick={onAddProduct}
         >
           <Plus className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onConfigurePricing}
+        >
+          <DollarSign className="h-4 w-4" />
         </Button>
         <Button
           variant="outline"
