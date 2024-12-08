@@ -28,11 +28,7 @@ export const useProductPricing = (products: any[] | null) => {
         const { data, error, status, statusText } = await supabase
           .from('product_pricing')
           .select('*, pricing_strategies (*)')
-          .in('product_id', productIds)
-          .headers({
-            'Accept': 'application/json',
-            'Prefer': 'return=representation'
-          });
+          .in('product_id', productIds);
 
         console.log('Supabase query complete');
         console.log('Response status:', status, statusText);
