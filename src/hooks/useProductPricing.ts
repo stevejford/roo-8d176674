@@ -13,41 +13,64 @@ export const useProductPricing = (products: any[] | null) => {
     queryKey: ['product-pricing', productIds],
     queryFn: async () => {
       if (!productIds.length) {
+        console.log('No product IDs provided');
         return {};
       }
 
       try {
-        console.log('Fetching product pricing for products:', productIds);
-        const { data, error } = await supabase
-          .from('product_pricing')
-          .select('*, pricing_strategies (*)')
-          .in('product_id', productIds);
+        console.log('Attempting to fetch pricing for products:', productIds);
+        
+        // First check if the products exist
+        const { data: productsExist, error: productsError } = await supabase
+          .from('products')
+          .select('id')
+          .in('id', productIds);
 
-        if (error) {
-          console.error('Product pricing error:', error);
-          return {}; // Return empty object on error
-        }
-
-        // If no data found, return empty object
-        if (!data || data.length === 0) {
-          console.log('No product pricing found for products:', productIds);
+        if (productsError) {
+          console.error('Error checking products:', productsError);
           return {};
         }
 
-        // Transform the data into a map
-        const pricingMap = data.reduce((acc: { [key: string]: ProductPricingRow }, pricing) => {
-          acc[pricing.product_id] = pricing;
+        if (!productsExist?.length) {
+          console.log('No products found with the provided IDs');
+          return {};
+        }
+
+        // Then fetch pricing data
+        const { data: pricingData, error: pricingError } = await supabase
+          .from('product_pricing')
+          .select(`
+            *,
+            pricing_strategies (
+              id,
+              name,
+              type,
+              config
+            )
+          `)
+          .in('product_id', productIds);
+
+        if (pricingError) {
+          console.error('Error fetching product pricing:', pricingError);
+          return {};
+        }
+
+        // Transform the data into a map, even if empty
+        const pricingMap = (pricingData || []).reduce((acc: { [key: string]: ProductPricingRow }, pricing) => {
+          if (pricing.product_id) {
+            acc[pricing.product_id] = pricing;
+          }
           return acc;
         }, {});
 
-        console.log('Found pricing data:', pricingMap);
+        console.log('Pricing data map created:', pricingMap);
         return pricingMap;
       } catch (error) {
-        console.error('Unexpected error in product pricing:', error);
-        return {}; // Return empty object on error
+        console.error('Unexpected error in useProductPricing:', error);
+        return {};
       }
     },
-    enabled: productIds.length > 0,
     staleTime: 30000, // Cache for 30 seconds
+    retry: false, // Don't retry on failure
   });
 };
