@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { AppFooter } from '@/components/AppFooter';
+import { AppFooter } from '@/components/index/AppFooter';
 import { MainContent } from '@/components/index/MainContent';
 import { OrderSidebar } from '@/components/OrderSidebar';
 import { useCategories } from '@/hooks/useCategories';
@@ -10,7 +10,7 @@ import { useProducts } from '@/hooks/useProducts';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, session } = useAuth();
   const { categories } = useCategories();
   const { productsByCategory } = useProducts();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -42,7 +42,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onCategoryClick={scrollToCategory} />
+      <Navbar 
+        isAdmin={isAdmin} 
+        onCategoryClick={scrollToCategory}
+      />
       
       <div className="pt-16">
         <MainContent
@@ -58,7 +61,11 @@ const Index = () => {
         onClose={() => setSelectedProduct(null)}
       />
 
-      <AppFooter />
+      <AppFooter 
+        isAdmin={isAdmin}
+        isLoggedIn={!!session}
+        onSignOut={() => {}} // This will be handled by the AppFooter component internally
+      />
     </div>
   );
 };
