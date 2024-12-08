@@ -2,11 +2,8 @@ import React, { useState } from "react";
 import { X, Minus, Plus } from "lucide-react";
 import { IngredientsEditor } from "./IngredientsEditor";
 import { ExtrasEditor } from "./ExtrasEditor";
-
-interface Size {
-  name: string;
-  price: number;
-}
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProductDetailsProps {
   title: string;
@@ -17,14 +14,7 @@ interface ProductDetailsProps {
 }
 
 export const ProductDetails = ({ title, description, image, price, onClose }: ProductDetailsProps) => {
-  const [quantities, setQuantities] = useState<Record<string, number>>({
-    King: 0,
-    Family: 0,
-    Large: 0,
-    Medium: 0,
-    Small: 0
-  });
-
+  const [selectedSize, setSelectedSize] = useState<string>("");
   const [showIngredientsEditor, setShowIngredientsEditor] = useState(false);
   const [showExtrasEditor, setShowExtrasEditor] = useState(false);
   const [ingredients, setIngredients] = useState([
@@ -35,32 +25,127 @@ export const ProductDetails = ({ title, description, image, price, onClose }: Pr
     { name: "Pepperoni ( Spicy)", checked: true }
   ]);
 
-  // Ensure price is a number and has a default value
-  const basePrice = typeof price === 'number' ? price : 0;
+  // Fetch product pricing information
+  const { data: productPricing } = useQuery({
+    queryKey: ['product-pricing', title],
+    queryFn: async () => {
+      const { data: products } = await supabase
+        .from('products')
+        .select('id')
+        .eq('title', title)
+        .single();
 
-  const sizes: Size[] = [
-    { name: "King", price: basePrice * 2.25 },
-    { name: "Family", price: basePrice * 1.9 },
-    { name: "Large", price: basePrice * 1.6 },
-    { name: "Medium", price: basePrice * 1.25 },
-    { name: "Small", price: basePrice }
-  ];
+      if (!products?.id) return null;
 
-  const handleQuantityChange = (size: string, increment: boolean) => {
-    setQuantities(prev => ({
-      ...prev,
-      [size]: Math.max(0, prev[size] + (increment ? 1 : -1))
-    }));
-  };
+      const { data: pricing } = await supabase
+        .from('product_pricing')
+        .select(`
+          *,
+          pricing_strategies (
+            id,
+            name,
+            type,
+            config
+          )
+        `)
+        .eq('product_id', products.id)
+        .single();
 
-  const handleIngredientToggle = (ingredientName: string) => {
-    setIngredients(prev => 
-      prev.map(ing => 
-        ing.name === ingredientName 
-          ? { ...ing, checked: !ing.checked }
-          : ing
-      )
-    );
+      return pricing;
+    },
+    enabled: !!title
+  });
+
+  const renderPricingOptions = () => {
+    if (!productPricing?.pricing_strategies) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-[#2D3648]">Regular</span>
+            <div className="flex items-center gap-6">
+              <span className="text-[#2D3648] min-w-[60px]">${price.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const strategy = productPricing.pricing_strategies;
+    const config = productPricing.config;
+
+    switch (strategy.type) {
+      case 'simple':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[#2D3648]">Regular</span>
+              <div className="flex items-center gap-6">
+                <span className="text-[#2D3648] min-w-[60px]">${config.price?.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'size_based':
+        return (
+          <div className="space-y-4">
+            {config.sizes?.map((size: { name: string; price: number }) => (
+              <div key={size.name} className="flex items-center justify-between">
+                <span className="text-[#2D3648]">{size.name}</span>
+                <div className="flex items-center gap-6">
+                  <span className="text-[#2D3648] min-w-[60px]">${size.price.toFixed(2)}</span>
+                  <button
+                    onClick={() => setSelectedSize(size.name)}
+                    className={`px-4 py-2 rounded-full ${
+                      selectedSize === size.name 
+                        ? 'bg-[#10B981] text-white' 
+                        : 'bg-gray-100'
+                    }`}
+                  >
+                    Select
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'selection_based':
+        return (
+          <div className="space-y-4">
+            {config.options?.map((option: { name: string; price: number }) => (
+              <div key={option.name} className="flex items-center justify-between">
+                <span className="text-[#2D3648]">{option.name}</span>
+                <div className="flex items-center gap-6">
+                  <span className="text-[#2D3648] min-w-[60px]">${option.price.toFixed(2)}</span>
+                  <button
+                    onClick={() => setSelectedSize(option.name)}
+                    className={`px-4 py-2 rounded-full ${
+                      selectedSize === option.name 
+                        ? 'bg-[#10B981] text-white' 
+                        : 'bg-gray-100'
+                    }`}
+                  >
+                    Select
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      default:
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[#2D3648]">Regular</span>
+              <div className="flex items-center gap-6">
+                <span className="text-[#2D3648] min-w-[60px]">${price.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        );
+    }
   };
 
   return (
@@ -93,30 +178,8 @@ export const ProductDetails = ({ title, description, image, price, onClose }: Pr
             <p className="text-gray-600 mb-6">{description}</p>
 
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg text-[#2D3648]">Quantity</h3>
-              {sizes.map((size) => (
-                <div key={size.name} className="flex items-center justify-between">
-                  <span className="text-[#2D3648]">{size.name}</span>
-                  <div className="flex items-center gap-6">
-                    <span className="text-[#2D3648] min-w-[60px]">${size.price.toFixed(2)}</span>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => handleQuantityChange(size.name, false)}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                      >
-                        <Minus className="h-5 w-5 text-gray-400" />
-                      </button>
-                      <span className="w-4 text-center">{quantities[size.name]}</span>
-                      <button
-                        onClick={() => handleQuantityChange(size.name, true)}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                      >
-                        <Plus className="h-5 w-5 text-[#E86452]" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <h3 className="font-semibold text-lg text-[#2D3648]">Options</h3>
+              {renderPricingOptions()}
             </div>
           </div>
         </div>
