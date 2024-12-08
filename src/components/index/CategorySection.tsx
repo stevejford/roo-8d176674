@@ -29,11 +29,11 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
 
-    // Fetch category pricing
+    // Fetch category pricing only if not in Popular category
     const { data: categoryPricing } = useQuery({
-      queryKey: ['category-pricing', products[0]?.category_id],
+      queryKey: ['category-pricing', !isPopularCategory ? products[0]?.category_id : null],
       queryFn: async () => {
-        if (!products[0]?.category_id) return null;
+        if (!products[0]?.category_id || isPopularCategory) return null;
         
         const { data, error } = await supabase
           .from('category_pricing')
@@ -46,7 +46,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
         if (error) throw error;
         return data?.[0] || null;
       },
-      enabled: !!products[0]?.category_id,
+      enabled: !!products[0]?.category_id && !isPopularCategory,
     });
 
     // Fetch product pricing overrides
@@ -93,6 +93,11 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
           default:
             return product.price || 0;
         }
+      }
+
+      // For popular items, use their default price if no override exists
+      if (isPopularCategory) {
+        return product.price || 0;
       }
 
       // Use category pricing if available
