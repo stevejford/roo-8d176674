@@ -18,11 +18,14 @@ export const useCategories = () => {
       
       if (error) throw error;
       return data;
-    },
-    onSuccess: (data) => {
-      setCategories(data);
-    },
+    }
   });
+
+  React.useEffect(() => {
+    if (data) {
+      setCategories(data);
+    }
+  }, [data]);
 
   const deleteCategory = async (id: string) => {
     const { error } = await supabase
