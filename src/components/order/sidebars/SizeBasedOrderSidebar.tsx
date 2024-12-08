@@ -39,8 +39,8 @@ export const SizeBasedOrderSidebar = ({ product, pricing, onClose }: SizeBasedOr
   };
 
   return (
-    <div className="h-full flex flex-col overflow-auto">
-      <div className="flex-1">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
         <div className="relative">
           <img
             src={product.image}
@@ -81,7 +81,6 @@ export const SizeBasedOrderSidebar = ({ product, pricing, onClose }: SizeBasedOr
             </div>
           </div>
 
-          <OrderHeader onClose={onClose} />
           <DeliveryModeSelector mode={mode} setMode={setMode} />
           <OrderLocation mode={mode} />
           <TimeSelector 
