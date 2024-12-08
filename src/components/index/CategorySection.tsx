@@ -19,57 +19,69 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
 
+    // Add more detailed debug logs
+    console.log('CategorySection Render:', {
+      category,
+      isPopularCategory,
+      totalProducts: products.length,
+      productsData: products,
+      popularProducts: products.filter(product => product.is_popular)
+    });
+
+    // Filter products for Popular category
     const displayProducts = isPopularCategory 
-      ? products.filter(product => product.is_popular)
+      ? products.filter(product => {
+          console.log('Checking product for popular:', product.title, 'is_popular:', product.is_popular);
+          return product.is_popular === true;
+        })
       : products;
 
+    console.log('Final display products:', displayProducts);
+
+    // Don't render the section if it's the Popular category and there are no popular products
     if (isPopularCategory && displayProducts.length === 0) {
+      console.log('Skipping Popular category render - no popular products');
       return null;
     }
-
-    const gridClassName = `grid gap-6 ${
-      isSpecialsCategory 
-        ? isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-        : isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-    }`;
 
     return (
       <div ref={ref} className="scroll-mt-24">
         <h3 className="text-2xl font-bold text-primary-title mb-6">
           {category}
         </h3>
-        <div 
-          className={gridClassName}
-          style={{ 
-            contain: 'content',
-            contentVisibility: 'auto'
-          }}
-        >
-          {displayProducts.map((product) => (
-            <div key={product.id} style={{ contain: 'layout' }}>
-              {isSpecialsCategory ? (
-                <SpecialCard
-                  title={product.title}
-                  price={product.price || 24.00}
-                  description={product.description || ''}
-                  image={product.image_url || '/placeholder.svg'}
-                  onClick={() => onProductSelect({
-                    title: product.title,
-                    description: product.description || '',
-                    image: product.image_url || '/placeholder.svg'
-                  })}
-                />
-              ) : (
-                <MenuCard 
-                  product={product}
-                  onClick={() => onProductSelect({
-                    title: product.title,
-                    description: product.description || '',
-                    image: product.image_url || '/placeholder.svg'
-                  })}
-                />
-              )}
-            </div>
+        <div className={`grid gap-6 ${
+          isSpecialsCategory 
+            ? isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            : isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        }`}>
+          {displayProducts.map((item) => (
+            isSpecialsCategory ? (
+              <SpecialCard
+                key={item.id}
+                title={item.title}
+                price={item.price || 24.00}
+                description={item.description || ''}
+                image={item.image_url || '/placeholder.svg'}
+                onClick={() => onProductSelect({
+                  title: item.title,
+                  description: item.description || '',
+                  image: item.image_url || '/placeholder.svg'
+                })}
+              />
+            ) : (
+              <MenuCard 
+                key={item.id}
+                title={item.title}
+                price={item.price || 24.00}
+                description={item.description || ''}
+                image={item.image_url || '/placeholder.svg'}
+                onClick={() => onProductSelect({
+                  title: item.title,
+                  description: item.description || '',
+                  image: item.image_url || '/placeholder.svg'
+                })}
+              />
+            )
           ))}
         </div>
       </div>

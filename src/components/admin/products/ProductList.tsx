@@ -1,12 +1,13 @@
 import React from 'react';
-import { DragDropContext } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { ProductDialog } from './ProductDialog';
 import { CategoryDialog } from './CategoryDialog';
-import { CategoryList } from './CategoryList';
+import { CategorizedProducts } from './CategorizedProducts';
+import { UncategorizedProducts } from './UncategorizedProducts';
 import { ProductListHeader } from './ProductListHeader';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "sonner";
+import type { Product } from './types';
 
 export const ProductList = () => {
   const {
@@ -28,49 +29,23 @@ export const ProductList = () => {
     setIsCategoryDialogOpen,
     handleCloseProductDialog,
     handleCloseCategoryDialog,
-    setCategories
   } = useProductManagement();
 
   const handleCategoryDragEnd = async (result: any) => {
-    if (!result.destination || !categories) return;
+    if (!result.destination) return;
 
     const { source, destination } = result;
     const categoryId = result.draggableId;
 
     try {
-      // Create a new array with updated positions
-      const updatedCategories = [...categories].filter(cat => 
-        cat.title.toLowerCase() !== 'popular'
-      );
-      
-      // Update positions
-      const [movedCategory] = updatedCategories.splice(source.index, 1);
-      updatedCategories.splice(destination.index, 0, movedCategory);
-      
-      // Update all positions
-      const categoriesWithNewPositions = updatedCategories.map((category, index) => ({
-        ...category,
-        position: index
-      }));
-
-      // Update local state immediately
-      setCategories([
-        ...categories.filter(cat => cat.title.toLowerCase() === 'popular'),
-        ...categoriesWithNewPositions
-      ]);
-
-      // Update database
       const { error } = await supabase
         .from('categories')
         .update({ position: destination.index })
         .eq('id', categoryId);
 
       if (error) throw error;
-
-      toast.success("Category order updated successfully");
     } catch (error) {
-      console.error('Error updating category positions:', error);
-      toast.error("Failed to update category order");
+      console.error('Error updating category position:', error);
     }
   };
 
@@ -82,18 +57,22 @@ export const ProductList = () => {
   const popularProducts = products?.filter(product => product.is_popular) || [];
 
   // Group remaining products by category
-  const categorizedProducts = products?.reduce((acc: { [key: string]: any[] }, product) => {
-    if (product.category_id) {
-      if (!acc[product.category_id]) {
-        acc[product.category_id] = [];
-      }
-      acc[product.category_id].push(product);
+  const categorizedProducts = products?.reduce((acc: { [key: string]: Product[] }, product: Product) => {
+    const categoryId = product.category_id || 'uncategorized';
+    if (!acc[categoryId]) {
+      acc[categoryId] = [];
     }
+    acc[categoryId].push(product);
     return acc;
   }, {});
 
   // Find the Popular category
   const popularCategory = categories?.find(cat => cat.title.toLowerCase() === 'popular');
+
+  // Sort categories by position
+  const sortedCategories = [...(categories || [])].sort((a, b) => 
+    (a.position || 0) - (b.position || 0)
+  );
 
   return (
     <div className="space-y-4">
@@ -106,17 +85,63 @@ export const ProductList = () => {
       />
 
       <DragDropContext onDragEnd={handleCategoryDragEnd}>
-        <CategoryList
-          categories={categories || []}
-          popularCategory={popularCategory}
-          popularProducts={popularProducts}
-          categorizedProducts={categorizedProducts || {}}
-          onEdit={handleEditProduct}
-          onDelete={deleteProduct}
-          onEditCategory={setSelectedCategory}
-          onDeleteCategory={deleteCategory}
-          onAddProduct={handleAddProduct}
-        />
+        <Droppable droppableId="categories" type="CATEGORY">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {/* Always show Popular category first if it exists */}
+              {popularCategory && (
+                <CategorizedProducts
+                  key={popularCategory.id}
+                  category={popularCategory}
+                  products={popularProducts}
+                  onEdit={handleEditProduct}
+                  onDelete={deleteProduct}
+                  onEditCategory={setSelectedCategory}
+                  onDeleteCategory={deleteCategory}
+                  onAddProduct={handleAddProduct}
+                />
+              )}
+
+              {/* Show other categories */}
+              {sortedCategories
+                .filter(cat => cat.title.toLowerCase() !== 'popular')
+                .map((category, index) => (
+                  <Draggable 
+                    key={category.id} 
+                    draggableId={category.id} 
+                    index={index}
+                  >
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                      >
+                        <CategorizedProducts
+                          category={category}
+                          products={categorizedProducts[category.id] || []}
+                          onEdit={handleEditProduct}
+                          onDelete={deleteProduct}
+                          onEditCategory={setSelectedCategory}
+                          onDeleteCategory={deleteCategory}
+                          onAddProduct={handleAddProduct}
+                          dragHandleProps={provided.dragHandleProps}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <UncategorizedProducts
+            products={categorizedProducts['uncategorized'] || []}
+            onEdit={handleEditProduct}
+            onDelete={deleteProduct}
+          />
+        </DragDropContext>
       </DragDropContext>
 
       <ProductDialog

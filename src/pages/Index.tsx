@@ -4,42 +4,78 @@ import { Navbar } from "@/components/Navbar";
 import { OrderSidebar } from "@/components/OrderSidebar";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { AppFooter } from "@/components/index/AppFooter";
 import { CategoryNav } from "@/components/index/CategoryNav";
 import { MainContent } from "@/components/index/MainContent";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useMenuData } from "@/hooks/useMenuData";
+
+type Product = Database['public']['Tables']['products']['Row'];
 
 const Index = () => {
   const navigate = useNavigate();
   const { session, isAdmin } = useAuth();
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<{
+    title: string;
+    description: string;
+    image: string;
+  } | null>(null);
   const isMobile = useIsMobile();
-  const categoryRefs = useRef({});
 
-  const { categories = [], products = [], hasError, refetch } = useMenuData();
+  const menuScrollRef = useRef<HTMLDivElement>(null);
+  const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('position');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('active', true)
+        .order('position');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success("Signed out successfully");
-      navigate("/login");
-    } catch (error) {
-      console.error("Sign out error:", error);
-      toast.error("Failed to sign out");
-    }
+    await supabase.auth.signOut();
+    toast.success("Signed out successfully");
+    navigate("/login");
   };
 
   const handleCategoryClick = (category: string) => {
-    const element = categoryRefs.current[category];
-    if (element) {
-      const headerOffset = 100;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    categoryRefs.current[category]?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  const scrollMenu = (direction: 'left' | 'right') => {
+    if (menuScrollRef.current) {
+      const scrollAmount = 300;
+      const newScrollLeft = direction === 'left' 
+        ? menuScrollRef.current.scrollLeft - scrollAmount
+        : menuScrollRef.current.scrollLeft + scrollAmount;
       
-      window.scrollTo({
-        top: offsetPosition,
+      menuScrollRef.current.scrollTo({
+        left: newScrollLeft,
         behavior: 'smooth'
       });
     }
@@ -53,30 +89,12 @@ const Index = () => {
     setSelectedProduct(null);
   };
 
-  const handleRefresh = async () => {
-    try {
-      await refetch();
-      toast.success("Menu refreshed successfully");
-    } catch (error) {
-      toast.error("Failed to refresh menu");
-    }
-  };
-
-  if (hasError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center max-w-md mx-auto px-4">
-          <p className="text-red-600 font-medium mb-2">Unable to load the menu</p>
-          <p className="text-gray-600 text-sm">
-            Please try refreshing the page. If the problem persists, contact support.
-          </p>
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return null;
   }
 
   // Group products by category
-  const productsByCategory = products.reduce((acc, product) => {
+  const productsByCategory = products.reduce((acc: { [key: string]: Product[] }, product) => {
     const categoryId = product.category_id || 'uncategorized';
     if (!acc[categoryId]) {
       acc[categoryId] = [];
@@ -94,13 +112,14 @@ const Index = () => {
         onSignOut={handleSignOut} 
         isAdmin={isAdmin} 
         onCategoryClick={handleCategoryClick}
-        onRefresh={handleRefresh}
       />
       <div className="flex flex-1">
         <main className={`${mainContentClass} pb-16`}>
           <CategoryNav
-            categories={categories.map(cat => cat.title)}
+            categories={categories}
             onCategoryClick={handleCategoryClick}
+            onScroll={scrollMenu}
+            scrollRef={menuScrollRef}
           />
           <MainContent
             categories={categories}

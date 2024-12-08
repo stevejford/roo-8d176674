@@ -33,126 +33,6 @@ export type Database = {
         }
         Relationships: []
       }
-      category_pricing: {
-        Row: {
-          category_id: string
-          config: Json
-          created_at: string | null
-          id: string
-          strategy_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          category_id: string
-          config?: Json
-          created_at?: string | null
-          id?: string
-          strategy_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          category_id?: string
-          config?: Json
-          created_at?: string | null
-          id?: string
-          strategy_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "category_pricing_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: true
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "category_pricing_strategy_id_fkey"
-            columns: ["strategy_id"]
-            isOneToOne: false
-            referencedRelation: "pricing_strategies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pricing_strategies: {
-        Row: {
-          config: Json
-          created_at: string | null
-          id: string
-          name: string
-          preview_config: Json | null
-          preview_enabled: boolean | null
-          type: Database["public"]["Enums"]["pricing_strategy_type"]
-          updated_at: string | null
-        }
-        Insert: {
-          config?: Json
-          created_at?: string | null
-          id?: string
-          name: string
-          preview_config?: Json | null
-          preview_enabled?: boolean | null
-          type: Database["public"]["Enums"]["pricing_strategy_type"]
-          updated_at?: string | null
-        }
-        Update: {
-          config?: Json
-          created_at?: string | null
-          id?: string
-          name?: string
-          preview_config?: Json | null
-          preview_enabled?: boolean | null
-          type?: Database["public"]["Enums"]["pricing_strategy_type"]
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      product_pricing: {
-        Row: {
-          config: Json
-          created_at: string | null
-          id: string
-          is_override: boolean | null
-          product_id: string
-          strategy_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          config?: Json
-          created_at?: string | null
-          id?: string
-          is_override?: boolean | null
-          product_id: string
-          strategy_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          config?: Json
-          created_at?: string | null
-          id?: string
-          is_override?: boolean | null
-          product_id?: string
-          strategy_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_pricing_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: true
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_pricing_strategy_id_fkey"
-            columns: ["strategy_id"]
-            isOneToOne: false
-            referencedRelation: "pricing_strategies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       products: {
         Row: {
           active: boolean | null
@@ -232,12 +112,6 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      pricing_strategy_type:
-        | "simple"
-        | "size_based"
-        | "portion_based"
-        | "selection_based"
-        | "volume_based"
       user_role:
         | "admin"
         | "user"

@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 type AuthContextType = {
   session: Session | null;
@@ -21,24 +20,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
 
-  const checkAdminStatus = async (currentSession: Session | null) => {
-    if (!currentSession?.user?.id) {
-      console.log("No valid session for admin check");
+  const checkAdminStatus = async (session: Session | null) => {
+    if (!session || isCheckingAdmin) {
+      console.log("No session or already checking admin status");
       setIsAdmin(false);
       setIsLoading(false);
       return;
     }
 
     try {
-      console.log("Checking admin status for user:", currentSession.user.id);
+      setIsCheckingAdmin(true);
+      console.log("Checking admin status for user:", session.user.id);
       
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', currentSession.user.id)
-        .single();
+        .eq('id', session.user.id)
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking admin status:', error);
@@ -46,62 +46,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      console.log("Profile data received:", profile);
-      const isUserAdmin = profile?.role === 'admin';
-      console.log("Is user admin?", isUserAdmin);
-      setIsAdmin(isUserAdmin);
+      if (profile) {
+        console.log("Found existing profile:", profile);
+        setIsAdmin(profile.role === 'admin');
+      }
+
+      // Profile will be created by the database trigger, no need to create it here
+      console.log("Profile status:", profile ? "exists" : "will be created by trigger");
+      setIsAdmin(profile?.role === 'admin');
 
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
     } finally {
       setIsLoading(false);
+      setIsCheckingAdmin(false);
     }
   };
 
   useEffect(() => {
     // Initial session check
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      console.log("Initial session check:", initialSession?.user?.id);
-      setSession(initialSession);
-      checkAdminStatus(initialSession);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session?.user.id);
+      setSession(session);
+      checkAdminStatus(session);
     });
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event, "User ID:", currentSession?.user?.id);
-      
-      if (event === 'SIGNED_OUT') {
-        console.log("User signed out, redirecting to login");
-        setSession(null);
-        setIsAdmin(false);
-        setIsLoading(false);
-        navigate('/login');
-        return;
-      }
-
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        console.log("User signed in or token refreshed");
-        setSession(currentSession);
-        await checkAdminStatus(currentSession);
-      }
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", session?.user.id);
+      setSession(session);
+      checkAdminStatus(session);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
-
-  const value = {
-    session,
-    isAdmin,
-    isLoading
-  };
-
-  console.log("AuthProvider state:", value);
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ session, isAdmin, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
