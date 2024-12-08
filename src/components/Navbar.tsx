@@ -127,7 +127,7 @@ export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => 
         onOpenChange={setOpen}
         aria-label="Search menu items"
       >
-        <div className="flex flex-col">
+        <div className="flex flex-col" role="dialog" aria-label="Search menu">
           <CommandInput 
             placeholder="Search menu items..." 
             value={searchQuery}
