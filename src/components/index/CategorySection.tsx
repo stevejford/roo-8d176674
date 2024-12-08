@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { MenuCard } from "@/components/MenuCard";
 import { SpecialCard } from "./SpecialCard";
 import type { Database } from "@/integrations/supabase/types";
@@ -18,32 +18,18 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isSpecialsCategory = category.toLowerCase() === "specials";
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
-    const resizeRef = useRef<ResizeObserver>();
-
-    useEffect(() => {
-      // Cleanup previous observer
-      return () => {
-        if (resizeRef.current) {
-          resizeRef.current.disconnect();
-        }
-      };
-    }, []);
 
     // Add more detailed debug logs
     console.log('CategorySection Render:', {
       category,
       isPopularCategory,
       totalProducts: products.length,
-      productsData: products,
-      popularProducts: products.filter(product => product.is_popular)
+      productsData: products
     });
 
     // Filter products for Popular category
     const displayProducts = isPopularCategory 
-      ? products.filter(product => {
-          console.log('Checking product for popular:', product.title, 'is_popular:', product.is_popular);
-          return product.is_popular === true;
-        })
+      ? products.filter(product => product.is_popular)
       : products;
 
     console.log('Final display products:', displayProducts);

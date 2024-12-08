@@ -69,7 +69,14 @@ const Index = () => {
     console.log("Category clicked:", category);
     const element = categoryRefs.current[category];
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const headerOffset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -123,6 +130,7 @@ const Index = () => {
     );
   });
 
+  // Group products by category
   const productsByCategory = filteredProducts.reduce((acc, product) => {
     const categoryId = product.category_id || 'uncategorized';
     if (!acc[categoryId]) {
