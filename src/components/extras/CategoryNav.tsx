@@ -3,13 +3,17 @@ import React from "react";
 interface CategoryNavProps {
   categories: string[];
   onCategoryClick: (category: string) => void;
+  onScroll?: (direction: 'left' | 'right') => void;
 }
 
 export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(
-  ({ categories, onCategoryClick }, ref) => {
+  ({ categories, onCategoryClick, onScroll }, ref) => {
     return (
-      <div className="w-full py-4">
-        <div className="flex flex-wrap gap-3 justify-center">
+      <div 
+        ref={ref}
+        className="w-full overflow-x-auto py-4"
+      >
+        <div className="flex flex-wrap gap-3 px-4 justify-center">
           {categories.map((category) => (
             <button
               key={category}
