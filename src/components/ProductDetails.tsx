@@ -61,11 +61,14 @@ export const ProductDetails = ({
           )
         `)
         .eq('category_id', category_id)
-        .single();
+        .limit(1); // Changed from .single() to .limit(1)
 
-      if (error) throw error;
-      console.log("Category pricing data:", data);
-      return data;
+      // Handle case where no pricing exists
+      if (error && error.code !== 'PGRST116') throw error;
+      if (!data?.length) return null;
+      
+      console.log("Category pricing data:", data[0]);
+      return data[0];
     },
     enabled: !!category_id
   });
