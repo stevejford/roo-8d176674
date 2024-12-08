@@ -7,6 +7,7 @@ import { ProductListHeader } from './ProductListHeader';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product } from './types';
+import { toast } from "sonner";
 
 export const ProductList = () => {
   const {
@@ -36,15 +37,41 @@ export const ProductList = () => {
     const { source, destination } = result;
     const categoryId = result.draggableId;
 
+    // Get all categories except Popular
+    const reorderableCategories = categories
+      ?.filter(cat => cat.title.toLowerCase() !== 'popular')
+      .sort((a, b) => (a.position || 0) - (b.position || 0));
+
+    // Update positions for all affected categories
+    const updates = reorderableCategories.map((category, index) => {
+      let newPosition = index;
+      
+      if (index >= destination.index && category.id !== categoryId) {
+        newPosition = index + 1;
+      }
+      
+      return supabase
+        .from('categories')
+        .update({ position: newPosition })
+        .eq('id', category.id);
+    });
+
     try {
+      // Update the dragged category's position
       const { error } = await supabase
         .from('categories')
         .update({ position: destination.index })
         .eq('id', categoryId);
 
       if (error) throw error;
+
+      // Execute all other position updates
+      await Promise.all(updates);
+      
+      toast.success("Category order updated successfully");
     } catch (error) {
-      console.error('Error updating category position:', error);
+      console.error('Error updating category positions:', error);
+      toast.error("Failed to update category order");
     }
   };
 
