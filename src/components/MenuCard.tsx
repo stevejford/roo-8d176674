@@ -6,31 +6,16 @@ interface MenuItemProps {
   price: number;
   description: string;
   image: string;
-  category_id?: string;
-  onClick?: (product: { 
-    title: string; 
-    description: string; 
-    image: string; 
-    price: number;
-    category_id?: string;
-  }) => void;
+  onClick?: (product: { title: string; description: string; image: string; price: number }) => void;
 }
 
-export const MenuCard = ({ 
-  title, 
-  price, 
-  description, 
-  image, 
-  category_id,
-  onClick 
-}: MenuItemProps) => {
-  console.log(`MenuCard ${title} price:`, price, 'category_id:', category_id);
-  
+export const MenuCard = ({ title, price, description, image, onClick }: MenuItemProps) => {
+  console.log('MenuCard price:', price); // Debug log
   return (
     <button 
       type="button" 
       className="block w-full text-left h-full"
-      onClick={() => onClick?.({ title, description, image, price, category_id })}
+      onClick={() => onClick?.({ title, description, image, price })}
     >
       <div className="relative overflow-hidden rounded-lg 2xl:rounded-2.25">
         <div className="relative z-1 w-full pb-[100%] overflow-hidden rounded-lg bg-stone-300 2xl:rounded-2.25 after:absolute after:bottom-0 after:left-0 after:z-2 after:h-1/2 after:w-full after:bg-gradient-to-b after:from-neutral-200/0 after:to-black/50">

@@ -5,7 +5,9 @@ import { OrderLocation } from "./OrderLocation";
 import { PickupTimeModal } from "./PickupTimeModal";
 import { ComplementaryItems } from "./ComplementaryItems";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { usePricingCalculator } from "./order/PricingCalculator";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { PricingConfig } from "@/types/pricing";
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -25,7 +27,145 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
   const isMobile = useIsMobile();
 
-  const { calculatedPrice } = usePricingCalculator({ product: selectedProduct });
+  // Fetch category pricing if product has a category
+  const { data: categoryPricing } = useQuery({
+    queryKey: ['category-pricing', selectedProduct?.category_id],
+    queryFn: async () => {
+      if (!selectedProduct?.category_id) return null;
+      
+      console.log("Fetching category pricing for category:", selectedProduct.category_id);
+      
+      const { data, error } = await supabase
+        .from('category_pricing')
+        .select(`
+          *,
+          pricing_strategies (
+            id,
+            name,
+            type,
+            config
+          )
+        `)
+        .eq('category_id', selectedProduct.category_id)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching category pricing:", error);
+        throw error;
+      }
+      
+      console.log("Category pricing data:", data);
+      return data;
+    },
+    enabled: !!selectedProduct?.category_id
+  });
+
+  // Fetch product pricing override if it exists
+  const { data: productPricing } = useQuery({
+    queryKey: ['product-pricing', selectedProduct?.title],
+    queryFn: async () => {
+      if (!selectedProduct?.title) return null;
+      
+      console.log("Fetching product pricing for:", selectedProduct.title);
+      
+      // First get the product ID
+      const { data: products, error: productError } = await supabase
+        .from('products')
+        .select('id')
+        .eq('title', selectedProduct.title)
+        .limit(1);
+
+      if (productError) {
+        console.error("Error fetching product:", productError);
+        throw productError;
+      }
+      
+      if (!products?.length) return null;
+
+      // Then get the pricing data
+      const { data: pricing, error: pricingError } = await supabase
+        .from('product_pricing')
+        .select(`
+          *,
+          pricing_strategies (
+            id,
+            name,
+            type,
+            config
+          )
+        `)
+        .eq('product_id', products[0].id)
+        .limit(1);
+
+      if (pricingError) {
+        console.error("Error fetching product pricing:", pricingError);
+        throw pricingError;
+      }
+      
+      console.log("Product pricing data:", pricing?.[0]);
+      return pricing?.[0] || null;
+    },
+    enabled: !!selectedProduct?.title
+  });
+
+  const calculatePrice = () => {
+    if (!selectedProduct) return 0;
+    
+    console.log("Calculating price for:", selectedProduct.title);
+    console.log("Product base price:", selectedProduct.price);
+    console.log("Product pricing override:", productPricing);
+    console.log("Category pricing:", categoryPricing);
+
+    // Check for product-specific pricing override
+    if (productPricing?.is_override) {
+      const strategy = productPricing.pricing_strategies;
+      const config = productPricing.config as PricingConfig;
+      
+      console.log("Using product pricing override with strategy:", strategy?.type);
+
+      switch (strategy?.type) {
+        case 'simple':
+          return config.price || selectedProduct.price;
+        case 'size_based':
+          return config.sizes?.[0]?.price || selectedProduct.price;
+        case 'portion_based':
+          return config.portions?.[0]?.price || selectedProduct.price;
+        case 'selection_based':
+          return config.options?.[0]?.price || selectedProduct.price;
+        case 'volume_based':
+          return config.volumes?.[0]?.price || selectedProduct.price;
+        default:
+          return selectedProduct.price;
+      }
+    }
+
+    // Use category pricing if available
+    if (categoryPricing?.pricing_strategies) {
+      const strategy = categoryPricing.pricing_strategies;
+      const config = categoryPricing.config as PricingConfig;
+      
+      console.log("Using category pricing with strategy:", strategy.type);
+
+      switch (strategy.type) {
+        case 'simple':
+          return config.price || selectedProduct.price;
+        case 'size_based':
+          return config.sizes?.[0]?.price || selectedProduct.price;
+        case 'portion_based':
+          return config.portions?.[0]?.price || selectedProduct.price;
+        case 'selection_based':
+          return config.options?.[0]?.price || selectedProduct.price;
+        case 'volume_based':
+          return config.volumes?.[0]?.price || selectedProduct.price;
+        default:
+          return selectedProduct.price;
+      }
+    }
+
+    // Fallback to product's default price
+    console.log("Using product default price:", selectedProduct.price);
+    return selectedProduct.price;
+  };
 
   const handleTimeSchedule = (date: string, time: string) => {
     setSelectedTime(`${date} - ${time}`);
@@ -33,6 +173,9 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   };
 
   if (selectedProduct) {
+    const calculatedPrice = calculatePrice();
+    console.log("Final calculated price:", calculatedPrice);
+    
     return (
       <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`}>
         <ProductDetails
