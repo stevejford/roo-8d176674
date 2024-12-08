@@ -10,6 +10,7 @@ import { DebugSection } from './sections/DebugSection';
 import { IngredientsSection } from './sections/IngredientsSection';
 import { PricingSection } from './sections/PricingSection';
 import { PricingConfig } from '@/types/pricing/interfaces';
+import { Json } from '@/integrations/supabase/types';
 
 type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
   pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
@@ -64,7 +65,7 @@ export const CategoryPricingDialog = ({
   React.useEffect(() => {
     if (existingPricing) {
       setSelectedStrategyId(existingPricing.strategy_id);
-      setConfig(existingPricing.config as PricingConfig);
+      setConfig(existingPricing.config as unknown as PricingConfig);
       if (existingPricing.ingredients) {
         setIngredients(existingPricing.ingredients as Array<{ name: string; checked: boolean }>);
       }
@@ -103,8 +104,8 @@ export const CategoryPricingDialog = ({
     try {
       const pricingData = {
         strategy_id: selectedStrategyId,
-        config,
-        ingredients,
+        config: config as unknown as Json,
+        ingredients: ingredients as unknown as Json,
       };
 
       if (existingPricing) {
