@@ -18,7 +18,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const categoryRefs = useRef({});
 
-  const { categories = [], products = [], hasError } = useMenuData();
+  const { categories = [], products = [], hasError, refetch } = useMenuData();
 
   const handleSignOut = async () => {
     try {
@@ -53,6 +53,15 @@ const Index = () => {
     setSelectedProduct(null);
   };
 
+  const handleRefresh = async () => {
+    try {
+      await refetch();
+      toast.success("Menu refreshed successfully");
+    } catch (error) {
+      toast.error("Failed to refresh menu");
+    }
+  };
+
   if (hasError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -85,11 +94,12 @@ const Index = () => {
         onSignOut={handleSignOut} 
         isAdmin={isAdmin} 
         onCategoryClick={handleCategoryClick}
+        onRefresh={handleRefresh}
       />
       <div className="flex flex-1">
         <main className={`${mainContentClass} pb-16`}>
           <CategoryNav
-            categories={categories}
+            categories={categories.map(cat => cat.title)}
             onCategoryClick={handleCategoryClick}
           />
           <MainContent
