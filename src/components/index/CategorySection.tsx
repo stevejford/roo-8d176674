@@ -27,44 +27,49 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       return null;
     }
 
+    const gridClassName = `grid gap-6 ${
+      isSpecialsCategory 
+        ? isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        : isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    }`;
+
     return (
       <div ref={ref} className="scroll-mt-24">
         <h3 className="text-2xl font-bold text-primary-title mb-6">
           {category}
         </h3>
         <div 
-          className={`grid gap-6 ${
-            isSpecialsCategory 
-              ? isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-              : isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          }`}
-          style={{ contain: 'paint' }}
+          className={gridClassName}
+          style={{ 
+            contain: 'content',
+            contentVisibility: 'auto'
+          }}
         >
           {displayProducts.map((product) => (
-            isSpecialsCategory ? (
-              <SpecialCard
-                key={product.id}
-                title={product.title}
-                price={product.price || 24.00}
-                description={product.description || ''}
-                image={product.image_url || '/placeholder.svg'}
-                onClick={() => onProductSelect({
-                  title: product.title,
-                  description: product.description || '',
-                  image: product.image_url || '/placeholder.svg'
-                })}
-              />
-            ) : (
-              <MenuCard 
-                key={product.id}
-                product={product}
-                onClick={() => onProductSelect({
-                  title: product.title,
-                  description: product.description || '',
-                  image: product.image_url || '/placeholder.svg'
-                })}
-              />
-            )
+            <div key={product.id} style={{ contain: 'layout' }}>
+              {isSpecialsCategory ? (
+                <SpecialCard
+                  title={product.title}
+                  price={product.price || 24.00}
+                  description={product.description || ''}
+                  image={product.image_url || '/placeholder.svg'}
+                  onClick={() => onProductSelect({
+                    title: product.title,
+                    description: product.description || '',
+                    image: product.image_url || '/placeholder.svg'
+                  })}
+                />
+              ) : (
+                <MenuCard 
+                  product={product}
+                  onClick={() => onProductSelect({
+                    title: product.title,
+                    description: product.description || '',
+                    image: product.image_url || '/placeholder.svg'
+                  })}
+                />
+              )}
+            </div>
           ))}
         </div>
       </div>
