@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { AppFooter } from '@/components/index/AppFooter';
+import { AppFooter } from '@/components/AppFooter';
 import { MainContent } from '@/components/index/MainContent';
 import { OrderSidebar } from '@/components/OrderSidebar';
 import { useCategories } from '@/hooks/useCategories';
@@ -12,8 +12,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { categories } = useCategories();
-  const { products } = useProducts();
-
+  const { productsByCategory } = useProducts();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const [selectedProduct, setSelectedProduct] = useState<{
@@ -41,25 +40,9 @@ const Index = () => {
     }
   };
 
-  // Group products by category
-  const productsByCategory = React.useMemo(() => {
-    return (products || []).reduce((acc, product) => {
-      if (product.category_id) {
-        if (!acc[product.category_id]) {
-          acc[product.category_id] = [];
-        }
-        acc[product.category_id].push(product);
-      }
-      return acc;
-    }, {} as Record<string, typeof products>);
-  }, [products]);
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar 
-        isAdmin={isAdmin} 
-        onCategoryClick={scrollToCategory}
-      />
+      <Navbar onCategoryClick={scrollToCategory} />
       
       <div className="pt-16">
         <MainContent
@@ -75,11 +58,7 @@ const Index = () => {
         onClose={() => setSelectedProduct(null)}
       />
 
-      <AppFooter 
-        isAdmin={isAdmin}
-        isLoggedIn={false}
-        onSignOut={() => {}}
-      />
+      <AppFooter />
     </div>
   );
 };
