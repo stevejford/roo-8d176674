@@ -17,8 +17,18 @@ export const CategoryHeader = ({
   onAddProduct 
 }: CategoryHeaderProps) => {
   const { toast } = useToast();
+  const isPopularCategory = title.toLowerCase() === 'popular';
 
   const handleDelete = async () => {
+    if (isPopularCategory) {
+      toast({
+        title: "Cannot Delete Popular Category",
+        description: "The Popular category is a default category and cannot be deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const confirmDelete = window.confirm(`Are you sure you want to delete the category "${title}"?`);
     if (!confirmDelete) return;
 
@@ -52,13 +62,15 @@ export const CategoryHeader = ({
         >
           <Pencil className="h-4 w-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleDelete}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {!isPopularCategory && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
