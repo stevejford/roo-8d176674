@@ -7,6 +7,7 @@ export interface Product {
   is_popular: boolean;
   is_complementary: boolean;
   price: number;
+  price_override: boolean;
 }
 
 export interface Category {

@@ -8,6 +8,8 @@ import { ProductImageSection } from './ProductImageSection';
 import { ProductBasicInfo } from './ProductBasicInfo';
 import { ProductCategorySelect } from './ProductCategorySelect';
 import { ProductFlags } from './ProductFlags';
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import type { Product } from './types';
 
 interface ProductDialogProps {
@@ -26,6 +28,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
   const [isPopular, setIsPopular] = React.useState(product?.is_popular || false);
   const [isComplementary, setIsComplementary] = React.useState(product?.is_complementary || false);
   const [price, setPrice] = React.useState(product?.price?.toString() || '0.00');
+  const [priceOverride, setPriceOverride] = React.useState(product?.price_override || false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -52,6 +55,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       setIsPopular(product.is_popular || false);
       setIsComplementary(product.is_complementary || false);
       setPrice(product.price?.toString() || '0.00');
+      setPriceOverride(product.price_override || false);
     } else {
       setTitle('');
       setDescription('');
@@ -60,6 +64,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       setIsPopular(false);
       setIsComplementary(false);
       setPrice('0.00');
+      setPriceOverride(false);
     }
   }, [product, categoryId]);
 
@@ -88,6 +93,7 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
       is_popular: isPopular,
       is_complementary: isComplementary,
       price: parseFloat(price) || 0.00,
+      price_override: priceOverride,
     };
 
     if (product?.id) {
@@ -147,6 +153,15 @@ export const ProductDialog = ({ open, onOpenChange, product, categoryId, onClose
             onDescriptionChange={setDescription}
             onPriceChange={handlePriceChange}
           />
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="price-override"
+              checked={priceOverride}
+              onCheckedChange={setPriceOverride}
+            />
+            <Label htmlFor="price-override">Override category pricing</Label>
+          </div>
 
           <ProductCategorySelect
             selectedCategoryId={selectedCategoryId}

@@ -165,6 +165,7 @@ export type Database = {
           is_popular: boolean | null
           position: number | null
           price: number | null
+          price_override: boolean | null
           sizes: Json | null
           title: string
           updated_at: string | null
@@ -180,6 +181,7 @@ export type Database = {
           is_popular?: boolean | null
           position?: number | null
           price?: number | null
+          price_override?: boolean | null
           sizes?: Json | null
           title: string
           updated_at?: string | null
@@ -195,6 +197,7 @@ export type Database = {
           is_popular?: boolean | null
           position?: number | null
           price?: number | null
+          price_override?: boolean | null
           sizes?: Json | null
           title?: string
           updated_at?: string | null
