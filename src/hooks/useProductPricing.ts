@@ -36,7 +36,7 @@ export const useProductPricing = (products: any[] | null) => {
           return {};
         }
 
-        // Then fetch pricing data
+        // Then fetch pricing data with all required fields
         const { data: pricingData, error: pricingError } = await supabase
           .from('product_pricing')
           .select(`
@@ -45,7 +45,11 @@ export const useProductPricing = (products: any[] | null) => {
               id,
               name,
               type,
-              config
+              config,
+              created_at,
+              updated_at,
+              preview_config,
+              preview_enabled
             )
           `)
           .in('product_id', productIds);
@@ -58,7 +62,7 @@ export const useProductPricing = (products: any[] | null) => {
         // Transform the data into a map, even if empty
         const pricingMap = (pricingData || []).reduce((acc: { [key: string]: ProductPricingRow }, pricing) => {
           if (pricing.product_id) {
-            acc[pricing.product_id] = pricing;
+            acc[pricing.product_id] = pricing as ProductPricingRow;
           }
           return acc;
         }, {});
