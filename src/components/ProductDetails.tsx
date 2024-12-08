@@ -44,15 +44,18 @@ export const ProductDetails = ({
   const { data: productPricing } = useQuery({
     queryKey: ['product-pricing', title],
     queryFn: async () => {
-      const { data: products } = await supabase
+      // First get the product ID
+      const { data: products, error: productError } = await supabase
         .from('products')
         .select('id')
         .eq('title', title)
-        .single();
+        .limit(1);
 
-      if (!products?.id) return null;
+      if (productError) throw productError;
+      if (!products?.length) return null;
 
-      const { data: pricing } = await supabase
+      // Then get the pricing data
+      const { data: pricing, error: pricingError } = await supabase
         .from('product_pricing')
         .select(`
           *,
@@ -63,10 +66,11 @@ export const ProductDetails = ({
             config
           )
         `)
-        .eq('product_id', products.id)
-        .single();
+        .eq('product_id', products[0].id)
+        .limit(1);
 
-      return pricing;
+      if (pricingError) throw pricingError;
+      return pricing?.[0] || null;
     },
     enabled: !!title
   });
