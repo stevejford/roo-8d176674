@@ -81,6 +81,8 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          preview_config: Json | null
+          preview_enabled: boolean | null
           type: Database["public"]["Enums"]["pricing_strategy_type"]
           updated_at: string | null
         }
@@ -89,6 +91,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           name: string
+          preview_config?: Json | null
+          preview_enabled?: boolean | null
           type: Database["public"]["Enums"]["pricing_strategy_type"]
           updated_at?: string | null
         }
@@ -97,6 +101,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          preview_config?: Json | null
+          preview_enabled?: boolean | null
           type?: Database["public"]["Enums"]["pricing_strategy_type"]
           updated_at?: string | null
         }
@@ -107,6 +113,7 @@ export type Database = {
           config: Json
           created_at: string | null
           id: string
+          is_override: boolean | null
           product_id: string
           strategy_id: string
           updated_at: string | null
@@ -115,6 +122,7 @@ export type Database = {
           config?: Json
           created_at?: string | null
           id?: string
+          is_override?: boolean | null
           product_id: string
           strategy_id: string
           updated_at?: string | null
@@ -123,6 +131,7 @@ export type Database = {
           config?: Json
           created_at?: string | null
           id?: string
+          is_override?: boolean | null
           product_id?: string
           strategy_id?: string
           updated_at?: string | null
