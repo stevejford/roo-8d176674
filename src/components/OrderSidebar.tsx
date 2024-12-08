@@ -5,6 +5,9 @@ import { OrderLocation } from "./OrderLocation";
 import { PickupTimeModal } from "./PickupTimeModal";
 import { ComplementaryItems } from "./ComplementaryItems";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { PricingConfig } from "@/types/pricing";
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -12,6 +15,7 @@ interface OrderSidebarProps {
     description: string;
     image: string;
     price: number;
+    category_id?: string;
   } | null;
   onClose: () => void;
 }
@@ -22,6 +26,118 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
   const isMobile = useIsMobile();
+
+  // Fetch category pricing if product has a category
+  const { data: categoryPricing } = useQuery({
+    queryKey: ['category-pricing', selectedProduct?.category_id],
+    queryFn: async () => {
+      if (!selectedProduct?.category_id) return null;
+      
+      const { data, error } = await supabase
+        .from('category_pricing')
+        .select(`
+          *,
+          pricing_strategies (
+            id,
+            name,
+            type,
+            config
+          )
+        `)
+        .eq('category_id', selectedProduct.category_id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedProduct?.category_id
+  });
+
+  // Fetch product pricing override if it exists
+  const { data: productPricing } = useQuery({
+    queryKey: ['product-pricing', selectedProduct?.title],
+    queryFn: async () => {
+      if (!selectedProduct?.title) return null;
+      
+      // First get the product ID
+      const { data: products, error: productError } = await supabase
+        .from('products')
+        .select('id')
+        .eq('title', selectedProduct.title)
+        .limit(1);
+
+      if (productError) throw productError;
+      if (!products?.length) return null;
+
+      // Then get the pricing data
+      const { data: pricing, error: pricingError } = await supabase
+        .from('product_pricing')
+        .select(`
+          *,
+          pricing_strategies (
+            id,
+            name,
+            type,
+            config
+          )
+        `)
+        .eq('product_id', products[0].id)
+        .limit(1);
+
+      if (pricingError) throw pricingError;
+      return pricing?.[0] || null;
+    },
+    enabled: !!selectedProduct?.title
+  });
+
+  const calculatePrice = () => {
+    if (!selectedProduct) return 0;
+
+    // Check for product-specific pricing override
+    if (productPricing?.is_override) {
+      const strategy = productPricing.pricing_strategies;
+      const config = productPricing.config as PricingConfig;
+
+      switch (strategy?.type) {
+        case 'simple':
+          return config.price || selectedProduct.price || 0;
+        case 'size_based':
+          return config.sizes?.[0]?.price || selectedProduct.price || 0;
+        case 'portion_based':
+          return config.portions?.[0]?.price || selectedProduct.price || 0;
+        case 'selection_based':
+          return config.options?.[0]?.price || selectedProduct.price || 0;
+        case 'volume_based':
+          return config.volumes?.[0]?.price || selectedProduct.price || 0;
+        default:
+          return selectedProduct.price || 0;
+      }
+    }
+
+    // Use category pricing if available
+    if (categoryPricing?.pricing_strategies) {
+      const strategy = categoryPricing.pricing_strategies;
+      const config = categoryPricing.config as PricingConfig;
+
+      switch (strategy.type) {
+        case 'simple':
+          return config.price || selectedProduct.price || 0;
+        case 'size_based':
+          return config.sizes?.[0]?.price || selectedProduct.price || 0;
+        case 'portion_based':
+          return config.portions?.[0]?.price || selectedProduct.price || 0;
+        case 'selection_based':
+          return config.options?.[0]?.price || selectedProduct.price || 0;
+        case 'volume_based':
+          return config.volumes?.[0]?.price || selectedProduct.price || 0;
+        default:
+          return selectedProduct.price || 0;
+      }
+    }
+
+    // Fallback to product's default price
+    return selectedProduct.price || 0;
+  };
 
   const handleTimeSchedule = (date: string, time: string) => {
     setSelectedTime(`${date} - ${time}`);
@@ -35,7 +151,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
           title={selectedProduct.title}
           description={selectedProduct.description}
           image={selectedProduct.image}
-          price={selectedProduct.price}
+          price={calculatePrice()}
           onClose={onClose}
         />
       </div>
