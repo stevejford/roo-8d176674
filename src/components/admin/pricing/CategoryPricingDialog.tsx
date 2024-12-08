@@ -7,6 +7,11 @@ import { PricingModelConfig } from './PricingModelConfig';
 import { PricingStrategySelect } from './shared/PricingStrategySelect';
 import { DialogActions } from './shared/DialogActions';
 import { IngredientsEditor } from '@/components/IngredientsEditor';
+import { Database } from '@/integrations/supabase/types';
+
+type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
+};
 
 interface CategoryPricingDialogProps {
   open: boolean;
@@ -44,7 +49,7 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      return data as CategoryPricingRow | null;
     },
     enabled: !!category?.id,
   });
