@@ -22,7 +22,6 @@ export const ProductCategorySelect = ({
           <SelectValue placeholder="Select a category" />
         </SelectTrigger>
         <SelectContent className="bg-white">
-          <SelectItem value="uncategorized">Uncategorized</SelectItem>
           {categories?.map((category: Category) => (
             <SelectItem key={category.id} value={category.id}>
               {category.title}

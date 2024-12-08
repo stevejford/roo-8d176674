@@ -3,7 +3,6 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { ProductDialog } from './ProductDialog';
 import { CategoryDialog } from './CategoryDialog';
 import { CategorizedProducts } from './CategorizedProducts';
-import { UncategorizedProducts } from './UncategorizedProducts';
 import { ProductListHeader } from './ProductListHeader';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,11 +57,12 @@ export const ProductList = () => {
 
   // Group remaining products by category
   const categorizedProducts = products?.reduce((acc: { [key: string]: Product[] }, product: Product) => {
-    const categoryId = product.category_id || 'uncategorized';
-    if (!acc[categoryId]) {
-      acc[categoryId] = [];
+    if (product.category_id) {
+      if (!acc[product.category_id]) {
+        acc[product.category_id] = [];
+      }
+      acc[product.category_id].push(product);
     }
-    acc[categoryId].push(product);
     return acc;
   }, {});
 
@@ -134,14 +134,6 @@ export const ProductList = () => {
             </div>
           )}
         </Droppable>
-
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <UncategorizedProducts
-            products={categorizedProducts['uncategorized'] || []}
-            onEdit={handleEditProduct}
-            onDelete={deleteProduct}
-          />
-        </DragDropContext>
       </DragDropContext>
 
       <ProductDialog
