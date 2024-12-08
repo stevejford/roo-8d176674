@@ -33,8 +33,6 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     queryFn: async () => {
       if (!selectedProduct?.category_id) return null;
       
-      console.log("Fetching category pricing for category:", selectedProduct.category_id);
-      
       const { data, error } = await supabase
         .from('category_pricing')
         .select(`
@@ -49,12 +47,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         .eq('category_id', selectedProduct.category_id)
         .single();
       
-      if (error) {
-        console.error("Error fetching category pricing:", error);
-        throw error;
-      }
-      
-      console.log("Category pricing data:", data);
+      if (error) throw error;
       return data;
     },
     enabled: !!selectedProduct?.category_id
@@ -66,8 +59,6 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     queryFn: async () => {
       if (!selectedProduct?.title) return null;
       
-      console.log("Fetching product pricing for:", selectedProduct.title);
-      
       // First get the product ID
       const { data: products, error: productError } = await supabase
         .from('products')
@@ -75,11 +66,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         .eq('title', selectedProduct.title)
         .limit(1);
 
-      if (productError) {
-        console.error("Error fetching product:", productError);
-        throw productError;
-      }
-      
+      if (productError) throw productError;
       if (!products?.length) return null;
 
       // Then get the pricing data
@@ -97,12 +84,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         .eq('product_id', products[0].id)
         .limit(1);
 
-      if (pricingError) {
-        console.error("Error fetching product pricing:", pricingError);
-        throw pricingError;
-      }
-      
-      console.log("Product pricing data:", pricing?.[0]);
+      if (pricingError) throw pricingError;
       return pricing?.[0] || null;
     },
     enabled: !!selectedProduct?.title
@@ -110,32 +92,25 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
 
   const calculatePrice = () => {
     if (!selectedProduct) return 0;
-    
-    console.log("Calculating price for:", selectedProduct.title);
-    console.log("Product base price:", selectedProduct.price);
-    console.log("Product pricing override:", productPricing);
-    console.log("Category pricing:", categoryPricing);
 
     // Check for product-specific pricing override
     if (productPricing?.is_override) {
       const strategy = productPricing.pricing_strategies;
       const config = productPricing.config as PricingConfig;
-      
-      console.log("Using product pricing override with strategy:", strategy?.type);
 
       switch (strategy?.type) {
         case 'simple':
-          return config.price || selectedProduct.price;
+          return config.price || selectedProduct.price || 0;
         case 'size_based':
-          return config.sizes?.[0]?.price || selectedProduct.price;
+          return config.sizes?.[0]?.price || selectedProduct.price || 0;
         case 'portion_based':
-          return config.portions?.[0]?.price || selectedProduct.price;
+          return config.portions?.[0]?.price || selectedProduct.price || 0;
         case 'selection_based':
-          return config.options?.[0]?.price || selectedProduct.price;
+          return config.options?.[0]?.price || selectedProduct.price || 0;
         case 'volume_based':
-          return config.volumes?.[0]?.price || selectedProduct.price;
+          return config.volumes?.[0]?.price || selectedProduct.price || 0;
         default:
-          return selectedProduct.price;
+          return selectedProduct.price || 0;
       }
     }
 
@@ -143,28 +118,25 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     if (categoryPricing?.pricing_strategies) {
       const strategy = categoryPricing.pricing_strategies;
       const config = categoryPricing.config as PricingConfig;
-      
-      console.log("Using category pricing with strategy:", strategy.type);
 
       switch (strategy.type) {
         case 'simple':
-          return config.price || selectedProduct.price;
+          return config.price || selectedProduct.price || 0;
         case 'size_based':
-          return config.sizes?.[0]?.price || selectedProduct.price;
+          return config.sizes?.[0]?.price || selectedProduct.price || 0;
         case 'portion_based':
-          return config.portions?.[0]?.price || selectedProduct.price;
+          return config.portions?.[0]?.price || selectedProduct.price || 0;
         case 'selection_based':
-          return config.options?.[0]?.price || selectedProduct.price;
+          return config.options?.[0]?.price || selectedProduct.price || 0;
         case 'volume_based':
-          return config.volumes?.[0]?.price || selectedProduct.price;
+          return config.volumes?.[0]?.price || selectedProduct.price || 0;
         default:
-          return selectedProduct.price;
+          return selectedProduct.price || 0;
       }
     }
 
     // Fallback to product's default price
-    console.log("Using product default price:", selectedProduct.price);
-    return selectedProduct.price;
+    return selectedProduct.price || 0;
   };
 
   const handleTimeSchedule = (date: string, time: string) => {
@@ -173,16 +145,13 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   };
 
   if (selectedProduct) {
-    const calculatedPrice = calculatePrice();
-    console.log("Final calculated price:", calculatedPrice);
-    
     return (
       <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`}>
         <ProductDetails
           title={selectedProduct.title}
           description={selectedProduct.description}
           image={selectedProduct.image}
-          price={calculatedPrice}
+          price={calculatePrice()}
           onClose={onClose}
         />
       </div>
