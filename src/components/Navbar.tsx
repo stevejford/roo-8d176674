@@ -125,45 +125,41 @@ export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => 
       <CommandDialog 
         open={open} 
         onOpenChange={setOpen}
-        aria-label="Search menu items"
       >
-        <div className="flex flex-col" role="dialog" aria-label="Search menu">
-          <CommandInput 
-            placeholder="Search menu items..." 
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-            aria-label="Search input"
-          />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="Menu Items">
-              {filteredProducts.map((product) => (
-                <CommandItem
-                  key={product.id}
-                  value={product.title}
-                  onSelect={handleSearch}
-                  className="flex items-center gap-2 p-2"
-                >
-                  {product.image_url && (
-                    <img
-                      src={product.image_url}
-                      alt={product.title}
-                      className="w-8 h-8 object-cover rounded"
-                    />
+        <CommandInput 
+          placeholder="Search menu items..." 
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+        />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Menu Items">
+            {filteredProducts.map((product) => (
+              <CommandItem
+                key={product.id}
+                value={product.title}
+                onSelect={handleSearch}
+                className="flex items-center gap-2 p-2"
+              >
+                {product.image_url && (
+                  <img
+                    src={product.image_url}
+                    alt={product.title}
+                    className="w-8 h-8 object-cover rounded"
+                  />
+                )}
+                <div className="flex flex-col">
+                  <span className="font-medium">{product.title}</span>
+                  {product.price && (
+                    <span className="text-sm text-gray-500">
+                      ${product.price.toFixed(2)}
+                    </span>
                   )}
-                  <div className="flex flex-col">
-                    <span className="font-medium">{product.title}</span>
-                    {product.price && (
-                      <span className="text-sm text-gray-500">
-                        ${product.price.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </div>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
       </CommandDialog>
     </nav>
   );
