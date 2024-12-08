@@ -37,20 +37,14 @@ export const ProductPrice = ({ productId, categoryId }: ProductPriceProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('product_pricing')
-        .select(`
-          *,
-          pricing_strategies (
-            name,
-            type,
-            config
-          )
-        `)
+        .select('*, pricing_strategies(name, type, config)')
         .eq('product_id', productId)
-        .single();
+        .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
       return data as PricingData;
     },
+    retry: false
   });
 
   // Fetch category pricing (fallback)
@@ -61,21 +55,15 @@ export const ProductPrice = ({ productId, categoryId }: ProductPriceProps) => {
       
       const { data, error } = await supabase
         .from('category_pricing')
-        .select(`
-          *,
-          pricing_strategies (
-            name,
-            type,
-            config
-          )
-        `)
+        .select('*, pricing_strategies(name, type, config)')
         .eq('category_id', categoryId)
-        .single();
+        .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
       return data as PricingData;
     },
     enabled: !!categoryId,
+    retry: false
   });
 
   const renderPrice = () => {
