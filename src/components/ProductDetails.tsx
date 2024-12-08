@@ -35,12 +35,15 @@ export const ProductDetails = ({ title, description, image, price, onClose }: Pr
     { name: "Pepperoni ( Spicy)", checked: true }
   ]);
 
+  // Ensure price is a number and has a default value
+  const basePrice = typeof price === 'number' ? price : 0;
+
   const sizes: Size[] = [
-    { name: "King", price: price * 2.25 },
-    { name: "Family", price: price * 1.9 },
-    { name: "Large", price: price * 1.6 },
-    { name: "Medium", price: price * 1.25 },
-    { name: "Small", price }
+    { name: "King", price: basePrice * 2.25 },
+    { name: "Family", price: basePrice * 1.9 },
+    { name: "Large", price: basePrice * 1.6 },
+    { name: "Medium", price: basePrice * 1.25 },
+    { name: "Small", price: basePrice }
   ];
 
   const handleQuantityChange = (size: string, increment: boolean) => {

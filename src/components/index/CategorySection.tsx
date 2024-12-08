@@ -8,18 +8,10 @@ import { useProductPricing } from "@/hooks/useProductPricing";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
-interface PricingConfig {
-  price?: number;
-  sizes?: Array<{ price: number }>;
-  portions?: Array<{ price: number }>;
-  options?: Array<{ price: number }>;
-  volumes?: Array<{ price: number }>;
-}
-
 interface CategorySectionProps {
   category: string;
   products: Product[];
-  onProductSelect: (product: { title: string; description: string; image: string }) => void;
+  onProductSelect: (product: { title: string; description: string; image: string; price: number }) => void;
   ref?: React.RefObject<HTMLDivElement>;
 }
 
@@ -116,35 +108,39 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
             ? isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             : isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         }`}>
-          {displayProducts.map((item) => (
-            isSpecialsCategory ? (
+          {displayProducts.map((item) => {
+            const price = calculatePrice(item);
+            console.log('Final price for', item.title, ':', price); // Debug log
+            return isSpecialsCategory ? (
               <SpecialCard
                 key={item.id}
                 title={item.title}
-                price={calculatePrice(item)}
+                price={price}
                 description={item.description || ''}
                 image={item.image_url || '/placeholder.svg'}
                 onClick={() => onProductSelect({
                   title: item.title,
                   description: item.description || '',
-                  image: item.image_url || '/placeholder.svg'
+                  image: item.image_url || '/placeholder.svg',
+                  price
                 })}
               />
             ) : (
               <MenuCard 
                 key={item.id}
                 title={item.title}
-                price={calculatePrice(item)}
+                price={price}
                 description={item.description || ''}
                 image={item.image_url || '/placeholder.svg'}
                 onClick={() => onProductSelect({
                   title: item.title,
                   description: item.description || '',
-                  image: item.image_url || '/placeholder.svg'
+                  image: item.image_url || '/placeholder.svg',
+                  price
                 })}
               />
-            )
-          ))}
+            );
+          })}
         </div>
       </div>
     );
