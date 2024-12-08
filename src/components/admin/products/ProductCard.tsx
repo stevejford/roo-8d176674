@@ -10,9 +10,16 @@ interface ProductCardProps {
   dragHandleProps: any;
   onEdit: (product: Product) => void;
   onDelete?: (id: string) => void;
+  showDragHandle?: boolean;
 }
 
-export const ProductCard = ({ product, dragHandleProps, onEdit, onDelete }: ProductCardProps) => {
+export const ProductCard = ({ 
+  product, 
+  dragHandleProps, 
+  onEdit, 
+  onDelete,
+  showDragHandle = true 
+}: ProductCardProps) => {
   const { toast } = useToast();
 
   const handleDelete = async () => {
@@ -36,9 +43,11 @@ export const ProductCard = ({ product, dragHandleProps, onEdit, onDelete }: Prod
   return (
     <Card className="bg-white">
       <CardContent className="flex items-center p-4">
-        <div {...dragHandleProps} className="cursor-grab mr-4">
-          <GripVertical className="text-gray-400" />
-        </div>
+        {showDragHandle && (
+          <div {...dragHandleProps} className="cursor-grab mr-4">
+            <GripVertical className="text-gray-400" />
+          </div>
+        )}
         
         {product.image_url && (
           <img

@@ -56,6 +56,7 @@ export const CategorizedProducts = ({
                       dragHandleProps={provided.dragHandleProps}
                       onEdit={onEdit}
                       onDelete={isPopularCategory ? undefined : onDelete}
+                      showDragHandle={true}
                     />
                   </div>
                 )}
