@@ -11,7 +11,7 @@ import {
   Settings as SettingsIcon, 
   ShoppingCart,
   BarChart,
-  Plus 
+  DollarSign,
 } from "lucide-react";
 import {
   Card,
@@ -21,8 +21,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ProductList } from '@/components/admin/products/ProductList';
+import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
 
-// Placeholder components for each section
 const Dashboard = () => (
   <div className="space-y-6">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -91,6 +91,7 @@ const Admin = () => {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
+    { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart },
@@ -99,7 +100,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onSignOut={handleSignOut} isAdmin={isAdmin} onCategoryClick={() => {}} />
+      <Navbar isAdmin={isAdmin} onCategoryClick={() => {}} />
       
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Sidebar */}
@@ -136,6 +137,7 @@ const Admin = () => {
           <Routes>
             <Route index element={<Dashboard />} />
             <Route path="products/*" element={<Products />} />
+            <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />
             <Route path="users/*" element={<UsersManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
