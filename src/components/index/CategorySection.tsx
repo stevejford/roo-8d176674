@@ -8,6 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
+interface PricingConfig {
+  price?: number;
+  sizes?: Array<{ price: number }>;
+  portions?: Array<{ price: number }>;
+  options?: Array<{ price: number }>;
+  volumes?: Array<{ price: number }>;
+}
+
 interface CategorySectionProps {
   category: string;
   products: Product[];
@@ -33,11 +41,10 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
             *,
             pricing_strategies (*)
           `)
-          .eq('category_id', products[0].category_id)
-          .single();
+          .eq('category_id', products[0].category_id);
         
-        if (error && error.code !== 'PGRST116') throw error;
-        return data;
+        if (error) throw error;
+        return data?.[0] || null;
       },
       enabled: !!products[0]?.category_id,
     });
@@ -70,7 +77,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       const productPricing = productPricingMap?.[product.id];
       if (productPricing?.is_override) {
         const strategy = productPricing.pricing_strategies;
-        const config = productPricing.config;
+        const config = productPricing.config as PricingConfig;
 
         switch (strategy.type) {
           case 'simple':
@@ -91,7 +98,7 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       // Use category pricing if available
       if (categoryPricing?.pricing_strategies) {
         const strategy = categoryPricing.pricing_strategies;
-        const config = categoryPricing.config;
+        const config = categoryPricing.config as PricingConfig;
 
         switch (strategy.type) {
           case 'simple':
