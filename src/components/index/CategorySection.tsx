@@ -3,8 +3,8 @@ import { MenuCard } from "@/components/MenuCard";
 import { SpecialCard } from "./SpecialCard";
 import type { Database } from "@/integrations/supabase/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useCategoryPricing } from "@/hooks/useCategoryPricing";
+import { useProductPricing } from "@/hooks/useProductPricing";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -30,52 +30,15 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isMobile = useIsMobile();
 
     // Fetch category pricing only if not in Popular category
-    const { data: categoryPricing } = useQuery({
-      queryKey: ['category-pricing', !isPopularCategory ? products[0]?.category_id : null],
-      queryFn: async () => {
-        if (!products[0]?.category_id || isPopularCategory) return null;
-        
-        const { data, error } = await supabase
-          .from('category_pricing')
-          .select(`
-            *,
-            pricing_strategies (*)
-          `)
-          .eq('category_id', products[0].category_id)
-          .single();
-        
-        if (error && error.code !== 'PGRST116') throw error;
-        return data;
-      },
-      enabled: !!products[0]?.category_id && !isPopularCategory,
-    });
+    const { data: categoryPricing } = useCategoryPricing(
+      !isPopularCategory ? products[0]?.category_id : null
+    );
 
     // Fetch product pricing overrides
-    const { data: productPricingMap } = useQuery({
-      queryKey: ['product-pricing', products.map(p => p.id)],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from('product_pricing')
-          .select(`
-            *,
-            pricing_strategies (*)
-          `)
-          .in('product_id', products.map(p => p.id));
-        
-        if (error) throw error;
-        
-        // Convert to map for easier lookup
-        return data.reduce((acc, pricing) => {
-          acc[pricing.product_id] = pricing;
-          return acc;
-        }, {} as Record<string, any>);
-      },
-      enabled: products.length > 0,
-    });
+    const { data: productPricingMap } = useProductPricing(products);
 
     const calculatePrice = (product: Product) => {
       console.log('Calculating price for product:', product.title);
-      console.log('Product pricing override:', productPricingMap?.[product.id]);
       
       // First check for product-specific pricing override
       const productPricing = productPricingMap?.[product.id];
@@ -133,28 +96,13 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
       return product.price || 0;
     };
 
-    // Add more detailed debug logs
-    console.log('CategorySection Render:', {
-      category,
-      isPopularCategory,
-      totalProducts: products.length,
-      productsData: products,
-      popularProducts: products.filter(product => product.is_popular)
-    });
-
     // Filter products for Popular category
     const displayProducts = isPopularCategory 
-      ? products.filter(product => {
-          console.log('Checking product for popular:', product.title, 'is_popular:', product.is_popular);
-          return product.is_popular === true;
-        })
+      ? products.filter(product => product.is_popular)
       : products;
-
-    console.log('Final display products:', displayProducts);
 
     // Don't render the section if it's the Popular category and there are no popular products
     if (isPopularCategory && displayProducts.length === 0) {
-      console.log('Skipping Popular category render - no popular products');
       return null;
     }
 
