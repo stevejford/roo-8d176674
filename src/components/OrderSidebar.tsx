@@ -11,6 +11,7 @@ import { OrderHeader } from "./order/OrderHeader";
 import { DeliveryModeSelector } from "./order/DeliveryModeSelector";
 import { TimeSelector } from "./order/TimeSelector";
 import { VoucherSection } from "./order/VoucherSection";
+import { SizeBasedOrderSidebar } from "./order/sidebars/SizeBasedOrderSidebar";
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -30,8 +31,6 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   const [selectedTime, setSelectedTime] = useState("Today - 20 Minutes");
   const isMobile = useIsMobile();
 
-  console.log("OrderSidebar - Selected Product:", selectedProduct); // Debug log
-
   // Fetch category pricing if product has a category
   const { data: categoryPricing } = useQuery({
     queryKey: ['category-pricing', selectedProduct?.category_id],
@@ -45,10 +44,10 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
           pricing_strategies (*)
         `)
         .eq('category_id', selectedProduct.category_id)
-        .single();
+        .limit(1);
       
       if (error) throw error;
-      return data;
+      return data?.[0] || null;
     },
     enabled: !!selectedProduct?.category_id
   });
@@ -83,110 +82,39 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     enabled: !!selectedProduct?.title
   });
 
-  const calculatePrice = () => {
-    if (!selectedProduct) return 0;
-    console.log("Calculating price for product:", selectedProduct.title);
+  if (!selectedProduct) {
+    return null;
+  }
 
-    // Check for product-specific pricing override
-    if (productPricing?.is_override) {
-      const strategy = productPricing.pricing_strategies;
-      const config = productPricing.config as PricingConfig;
-      console.log("Using product pricing override:", config);
+  const pricingStrategy = productPricing?.is_override 
+    ? productPricing.pricing_strategies
+    : categoryPricing?.pricing_strategies;
 
-      switch (strategy?.type) {
-        case 'simple':
-          return config.price || selectedProduct.price || 0;
-        case 'size_based':
-          return config.sizes?.[0]?.price || selectedProduct.price || 0;
-        case 'portion_based':
-          return config.portions?.[0]?.price || selectedProduct.price || 0;
-        case 'selection_based':
-          return config.options?.[0]?.price || selectedProduct.price || 0;
-        case 'volume_based':
-          return config.volumes?.[0]?.price || selectedProduct.price || 0;
-        default:
-          return selectedProduct.price || 0;
-      }
-    }
+  const pricingConfig = productPricing?.is_override
+    ? productPricing.config
+    : categoryPricing?.config;
 
-    // Use category pricing if available
-    if (categoryPricing?.pricing_strategies) {
-      const strategy = categoryPricing.pricing_strategies;
-      const config = categoryPricing.config as PricingConfig;
-      console.log("Using category pricing:", config);
-
-      switch (strategy.type) {
-        case 'simple':
-          return config.price || selectedProduct.price || 0;
-        case 'size_based':
-          return config.sizes?.[0]?.price || selectedProduct.price || 0;
-        case 'portion_based':
-          return config.portions?.[0]?.price || selectedProduct.price || 0;
-        case 'selection_based':
-          return config.options?.[0]?.price || selectedProduct.price || 0;
-        case 'volume_based':
-          return config.volumes?.[0]?.price || selectedProduct.price || 0;
-        default:
-          return selectedProduct.price || 0;
-      }
-    }
-
-    // Fallback to product's default price
-    console.log("Using default price:", selectedProduct.price);
-    return selectedProduct.price || 0;
-  };
-
-  const handleTimeSchedule = (date: string, time: string) => {
-    setSelectedTime(`${date} - ${time}`);
-    setShowTimeModal(false);
-  };
-
-  if (selectedProduct) {
-    console.log("Rendering ProductDetails with price:", calculatePrice()); // Debug log
+  // Render size-based sidebar if applicable
+  if (pricingStrategy?.type === 'size_based' && pricingConfig?.sizes) {
     return (
-      <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`}>
-        <ProductDetails
-          title={selectedProduct.title}
-          description={selectedProduct.description}
-          image={selectedProduct.image}
-          price={calculatePrice()}
-          onClose={onClose}
-        />
-      </div>
+      <SizeBasedOrderSidebar
+        product={selectedProduct}
+        pricing={pricingConfig}
+        onClose={onClose}
+      />
     );
   }
 
+  // Default to ProductDetails for other pricing types
   return (
-    <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen flex flex-col`}>
-      <div className="flex-1 overflow-auto">
-        <div className="p-6 space-y-6">
-          <OrderHeader onClose={onClose} />
-          <DeliveryModeSelector mode={mode} setMode={setMode} />
-          <OrderLocation mode={mode} />
-          <TimeSelector 
-            mode={mode} 
-            selectedTime={selectedTime} 
-            onTimeChange={() => setShowTimeModal(true)} 
-          />
-          <VoucherSection 
-            showVoucherInput={showVoucherInput}
-            setShowVoucherInput={setShowVoucherInput}
-          />
-          <ComplementaryItems />
-        </div>
-      </div>
-
-      <div className="p-4 border-t border-gray-200 mt-auto">
-        <button className="w-full py-3 px-4 bg-[#E86452] text-white rounded-md flex items-center justify-center space-x-2">
-          <span>Store Closed</span>
-          <span>→</span>
-        </button>
-      </div>
-
-      <PickupTimeModal 
-        isOpen={showTimeModal}
-        onClose={() => setShowTimeModal(false)}
-        onSchedule={handleTimeSchedule}
+    <div className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen overflow-hidden`}>
+      <ProductDetails
+        title={selectedProduct.title}
+        description={selectedProduct.description}
+        image={selectedProduct.image}
+        price={selectedProduct.price}
+        category_id={selectedProduct.category_id}
+        onClose={onClose}
       />
     </div>
   );
