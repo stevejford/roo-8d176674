@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 
 export const useMenuData = () => {
-  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -18,7 +18,7 @@ export const useMenuData = () => {
     enabled: true
   });
 
-  const { data: products = [], isLoading: productsLoading, error: productsError } = useQuery({
+  const { data: products = [], isLoading: productsLoading, error: productsError, refetch: refetchProducts } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -44,10 +44,15 @@ export const useMenuData = () => {
     }
   }, [categoriesError, productsError]);
 
+  const refetch = async () => {
+    await Promise.all([refetchCategories(), refetchProducts()]);
+  };
+
   return {
     categories,
     products,
     isLoading: categoriesLoading || productsLoading,
-    hasError: !!categoriesError || !!productsError
+    hasError: !!categoriesError || !!productsError,
+    refetch
   };
 };

@@ -1,14 +1,16 @@
 import React from "react";
-import { HopOff, LogOut } from "lucide-react";
+import { HopOff, LogOut, RefreshCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "./ui/button";
 
 interface NavbarProps {
   onSignOut: () => void;
   isAdmin: boolean;
   onCategoryClick: (category: string) => void;
+  onRefresh?: () => void;
 }
 
-export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
+export const Navbar = ({ onSignOut, isAdmin, onRefresh }: NavbarProps) => {
   const isMobile = useIsMobile();
   
   return (
@@ -21,7 +23,19 @@ export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
           </div>
           <div className="flex items-center gap-4 ml-auto">
             {isAdmin && (
-              <span className="text-sm font-medium text-primary">Admin</span>
+              <>
+                <span className="text-sm font-medium text-primary">Admin</span>
+                {onRefresh && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onRefresh}
+                    className="text-gray-600 hover:text-primary transition-colors"
+                  >
+                    <RefreshCw className="h-5 w-5" />
+                  </Button>
+                )}
+              </>
             )}
             <button
               onClick={onSignOut}
