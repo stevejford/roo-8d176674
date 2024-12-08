@@ -61,10 +61,17 @@ const Index = () => {
   };
 
   const handleCategoryClick = (category: string) => {
-    categoryRefs.current[category]?.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
-    });
+    const element = categoryRefs.current[category];
+    if (element) {
+      const navHeight = 144; // Height of navbar + category nav (64px + 80px)
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
   };
 
   const scrollMenu = (direction: 'left' | 'right') => {
