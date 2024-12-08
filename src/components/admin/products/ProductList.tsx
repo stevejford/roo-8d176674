@@ -6,6 +6,7 @@ import { CategorizedProducts } from './CategorizedProducts';
 import { UncategorizedProducts } from './UncategorizedProducts';
 import { ProductListHeader } from './ProductListHeader';
 import { useProductManagement } from '@/hooks/useProductManagement';
+import type { Product } from './types';
 
 export const ProductList = () => {
   const {
@@ -37,7 +38,7 @@ export const ProductList = () => {
   const popularProducts = products?.filter(product => product.is_popular) || [];
 
   // Group remaining products by category
-  const categorizedProducts = products?.reduce((acc: any, product: Product) => {
+  const categorizedProducts = products?.reduce((acc: { [key: string]: Product[] }, product: Product) => {
     const categoryId = product.category_id || 'uncategorized';
     if (!acc[categoryId]) {
       acc[categoryId] = [];
