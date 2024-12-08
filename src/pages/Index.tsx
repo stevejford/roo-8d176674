@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { OrderSidebar } from "@/components/OrderSidebar";
@@ -26,6 +26,20 @@ const Index = () => {
 
   const menuScrollRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Add error handling for ResizeObserver
+  useEffect(() => {
+    const handleError = (error: ErrorEvent) => {
+      if (error.message === 'ResizeObserver loop completed with undelivered notifications.' ||
+          error.message === 'ResizeObserver loop limit exceeded') {
+        error.stopImmediatePropagation();
+        return false;
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -63,29 +77,35 @@ const Index = () => {
   const handleCategoryClick = (category: string) => {
     const element = categoryRefs.current[category];
     if (element) {
-      const navHeight = 144; // Height of navbar + category nav (64px + 80px)
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - navHeight;
+      // Add a small delay to ensure smooth scrolling
+      requestAnimationFrame(() => {
+        const navHeight = 144;
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - navHeight;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       });
     }
   };
 
   const scrollMenu = (direction: 'left' | 'right') => {
-    if (menuScrollRef.current) {
-      const scrollAmount = 300;
-      const newScrollLeft = direction === 'left' 
-        ? menuScrollRef.current.scrollLeft - scrollAmount
-        : menuScrollRef.current.scrollLeft + scrollAmount;
-      
-      menuScrollRef.current.scrollTo({
+    if (!menuScrollRef.current) return;
+    
+    const scrollAmount = 300;
+    const currentScroll = menuScrollRef.current.scrollLeft;
+    const newScrollLeft = direction === 'left' 
+      ? currentScroll - scrollAmount
+      : currentScroll + scrollAmount;
+    
+    requestAnimationFrame(() => {
+      menuScrollRef.current?.scrollTo({
         left: newScrollLeft,
         behavior: 'smooth'
       });
-    }
+    });
   };
 
   const handleProductSelect = (product: { title: string; description: string; image: string }) => {
@@ -100,7 +120,6 @@ const Index = () => {
     return null;
   }
 
-  // Group products by category
   const productsByCategory = products.reduce((acc: { [key: string]: Product[] }, product) => {
     const categoryId = product.category_id || 'uncategorized';
     if (!acc[categoryId]) {
