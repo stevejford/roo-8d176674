@@ -3,11 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from '@/components/ui/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PricingModelConfig } from './PricingModelConfig';
-import { PricingStrategySelect } from './shared/PricingStrategySelect';
 import { DialogActions } from './shared/DialogActions';
 import { IngredientsEditor } from '@/components/IngredientsEditor';
 import { Database } from '@/integrations/supabase/types';
+import { DebugSection } from './sections/DebugSection';
+import { IngredientsSection } from './sections/IngredientsSection';
+import { PricingSection } from './sections/PricingSection';
 
 type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
   pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
@@ -20,7 +21,12 @@ interface CategoryPricingDialogProps {
   onClose: () => void;
 }
 
-export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }: CategoryPricingDialogProps) => {
+export const CategoryPricingDialog = ({ 
+  open, 
+  onOpenChange, 
+  category, 
+  onClose 
+}: CategoryPricingDialogProps) => {
   const [selectedStrategyId, setSelectedStrategyId] = React.useState<string>('');
   const [config, setConfig] = React.useState({});
   const [isIngredientsOpen, setIsIngredientsOpen] = React.useState(false);
@@ -143,68 +149,38 @@ export const CategoryPricingDialog = ({ open, onOpenChange, category, onClose }:
           <DialogTitle>Category Pricing - {category?.title}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="bg-gray-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium mb-2">Debug Information</h3>
-            <div className="space-y-2">
-              <div>
-                <h4 className="text-xs font-medium text-gray-500">Category ID:</h4>
-                <pre className="text-xs bg-white p-2 rounded">{category?.id}</pre>
-              </div>
-              <div>
-                <h4 className="text-xs font-medium text-gray-500">Current Pricing Data:</h4>
-                <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-40">
-                  {JSON.stringify(existingPricing, null, 2)}
-                </pre>
-              </div>
-              <div>
-                <h4 className="text-xs font-medium text-gray-500">Current Config:</h4>
-                <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-40">
-                  {JSON.stringify(config, null, 2)}
-                </pre>
-              </div>
-            </div>
-          </div>
+          <DebugSection
+            category={category}
+            existingPricing={existingPricing}
+            config={config}
+          />
 
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded-md border border-gray-200">
-              <h3 className="text-lg font-semibold text-[#2D3648] mb-4">Ingredients</h3>
-              <div className="space-y-2">
-                {ingredients.map((ingredient) => (
-                  <div 
-                    key={ingredient.name}
-                    className="flex items-center justify-between py-2"
-                  >
-                    <span className="text-[#2D3648]">{ingredient.name}</span>
-                    <input
-                      type="checkbox"
-                      checked={ingredient.checked}
-                      onChange={() => handleIngredientToggle(ingredient.name)}
-                      className="h-5 w-5 border-2 border-[#E86452] rounded text-[#E86452] focus:ring-[#E86452]"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+          <IngredientsSection
+            ingredients={ingredients}
+            onIngredientToggle={handleIngredientToggle}
+            onEditClick={() => setIsIngredientsOpen(true)}
+          />
 
-            <PricingStrategySelect
-              selectedStrategyId={selectedStrategyId}
-              onStrategyChange={setSelectedStrategyId}
-            />
-
-            {selectedStrategy && (
-              <PricingModelConfig
-                type={selectedStrategy.type}
-                config={config}
-                onChange={setConfig}
-              />
-            )}
-          </div>
+          <PricingSection
+            selectedStrategyId={selectedStrategyId}
+            onStrategyChange={setSelectedStrategyId}
+            selectedStrategy={selectedStrategy}
+            config={config}
+            onConfigChange={setConfig}
+          />
         </div>
         
         <DialogActions
           onClose={onClose}
           onSave={handleSave}
           disabled={!selectedStrategyId}
+        />
+
+        <IngredientsEditor
+          isOpen={isIngredientsOpen}
+          onClose={() => setIsIngredientsOpen(false)}
+          ingredients={ingredients}
+          onIngredientToggle={handleIngredientToggle}
         />
       </DialogContent>
     </Dialog>
