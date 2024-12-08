@@ -19,10 +19,18 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
 
+    // Add debug logs
+    console.log('Category:', category);
+    console.log('Is Popular Category:', isPopularCategory);
+    console.log('Products before filter:', products);
+    console.log('Products with is_popular:', products.filter(product => product.is_popular));
+
     // Filter products for Popular category
     const displayProducts = isPopularCategory 
       ? products.filter(product => product.is_popular)
       : products;
+
+    console.log('Display Products after filter:', displayProducts);
 
     return (
       <div ref={ref} className="scroll-mt-24">
