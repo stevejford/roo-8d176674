@@ -1,45 +1,22 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { OrderSidebar } from "@/components/OrderSidebar";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { AppFooter } from "@/components/index/AppFooter";
 import { CategoryNav } from "@/components/index/CategoryNav";
 import { MainContent } from "@/components/index/MainContent";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type Product = Database['public']['Tables']['products']['Row'];
-
 const Index = () => {
   const navigate = useNavigate();
   const { session, isAdmin } = useAuth();
-  const [selectedProduct, setSelectedProduct] = useState<{
-    title: string;
-    description: string;
-    image: string;
-  } | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const isMobile = useIsMobile();
-
-  const menuScrollRef = useRef<HTMLDivElement>(null);
-  const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  // Add error handling for ResizeObserver
-  useEffect(() => {
-    const handleError = (error: ErrorEvent) => {
-      if (error.message === 'ResizeObserver loop completed with undelivered notifications.' ||
-          error.message === 'ResizeObserver loop limit exceeded') {
-        error.stopImmediatePropagation();
-        return false;
-      }
-    };
-
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
+  const categoryRefs = useRef({});
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -77,35 +54,15 @@ const Index = () => {
   const handleCategoryClick = (category: string) => {
     const element = categoryRefs.current[category];
     if (element) {
-      // Add a small delay to ensure smooth scrolling
-      requestAnimationFrame(() => {
-        const navHeight = 144;
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - navHeight;
+      const navHeight = 144;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navHeight;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      });
-    }
-  };
-
-  const scrollMenu = (direction: 'left' | 'right') => {
-    if (!menuScrollRef.current) return;
-    
-    const scrollAmount = 300;
-    const currentScroll = menuScrollRef.current.scrollLeft;
-    const newScrollLeft = direction === 'left' 
-      ? currentScroll - scrollAmount
-      : currentScroll + scrollAmount;
-    
-    requestAnimationFrame(() => {
-      menuScrollRef.current?.scrollTo({
-        left: newScrollLeft,
+      window.scrollTo({
+        top: offsetPosition,
         behavior: 'smooth'
       });
-    });
+    }
   };
 
   const handleProductSelect = (product: { title: string; description: string; image: string }) => {
@@ -120,7 +77,7 @@ const Index = () => {
     return null;
   }
 
-  const productsByCategory = products.reduce((acc: { [key: string]: Product[] }, product) => {
+  const productsByCategory = products.reduce((acc, product) => {
     const categoryId = product.category_id || 'uncategorized';
     if (!acc[categoryId]) {
       acc[categoryId] = [];
@@ -144,8 +101,6 @@ const Index = () => {
           <CategoryNav
             categories={categories}
             onCategoryClick={handleCategoryClick}
-            onScroll={scrollMenu}
-            scrollRef={menuScrollRef}
           />
           <MainContent
             categories={categories}
