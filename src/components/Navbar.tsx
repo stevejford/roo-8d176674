@@ -19,9 +19,6 @@ export const Navbar = ({ isAdmin }: NavbarProps) => {
             <h1 className={`font-bold ${isMobile ? 'text-lg' : 'text-xl'}`}>Roo Restaurant</h1>
           </div>
           <div className="flex items-center gap-4 ml-auto">
-            {isAdmin && (
-              <span className="text-sm font-medium text-primary">Admin</span>
-            )}
           </div>
         </div>
       </div>
