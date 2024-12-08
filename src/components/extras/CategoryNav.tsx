@@ -1,69 +1,28 @@
-import React, { useEffect, useCallback, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import React from "react";
 
 interface CategoryNavProps {
   categories: string[];
   onCategoryClick: (category: string) => void;
-  onScroll: (direction: 'left' | 'right') => void;
 }
 
 export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(
-  ({ categories, onCategoryClick, onScroll }, ref) => {
-    const isScrolling = useRef(false);
-
-    useEffect(() => {
-      const handleError = (error: ErrorEvent) => {
-        if (error.message === 'ResizeObserver loop completed with undelivered notifications.' ||
-            error.message === 'ResizeObserver loop limit exceeded') {
-          error.stopImmediatePropagation();
-          return false;
-        }
-      };
-
-      window.addEventListener('error', handleError);
-      return () => window.removeEventListener('error', handleError);
-    }, []);
-
-    const handleScroll = useCallback((direction: 'left' | 'right') => {
-      if (!isScrolling.current) {
-        isScrolling.current = true;
-        onScroll(direction);
-        setTimeout(() => {
-          isScrolling.current = false;
-        }, 200);
-      }
-    }, [onScroll]);
-
+  ({ categories, onCategoryClick }, ref) => {
     return (
-      <div className="relative mb-4">
-        <button 
-          onClick={() => handleScroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        
-        <div 
-          ref={ref}
-          className="overflow-x-auto scrollbar-hide py-2 px-8 flex space-x-6 scroll-smooth"
-        >
+      <div 
+        ref={ref}
+        className="w-full overflow-x-auto py-4"
+      >
+        <div className="flex flex-wrap gap-3 px-4 justify-center">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => onCategoryClick(category)}
-              className="text-[#2D3648] whitespace-nowrap text-sm font-medium hover:text-primary transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
             >
               {category}
             </button>
           ))}
         </div>
-
-        <button 
-          onClick={() => handleScroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full hover:bg-gray-50"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
       </div>
     );
   }

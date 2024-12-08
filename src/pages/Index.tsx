@@ -18,29 +18,42 @@ const Index = () => {
   const isMobile = useIsMobile();
   const categoryRefs = useRef({});
 
-  const { data: categories = [] } = useQuery({
+  // Add console logs for debugging
+  console.log("Index component rendering");
+
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
+      console.log("Fetching categories");
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('position');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+      console.log("Categories fetched:", data);
       return data;
     },
   });
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
+      console.log("Fetching products");
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('active', true)
         .order('position');
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+      }
+      console.log("Products fetched:", data);
       return data;
     },
   });
@@ -52,20 +65,15 @@ const Index = () => {
   };
 
   const handleCategoryClick = (category: string) => {
+    console.log("Category clicked:", category);
     const element = categoryRefs.current[category];
     if (element) {
-      const navHeight = 144;
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - navHeight;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
   const handleProductSelect = (product: { title: string; description: string; image: string }) => {
+    console.log("Product selected:", product);
     setSelectedProduct(product);
   };
 
@@ -73,7 +81,7 @@ const Index = () => {
     setSelectedProduct(null);
   };
 
-  if (isLoading) {
+  if (categoriesLoading || productsLoading) {
     return null;
   }
 
