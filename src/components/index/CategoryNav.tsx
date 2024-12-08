@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CategoryNavProps {
@@ -9,14 +9,6 @@ interface CategoryNavProps {
 }
 
 export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }: CategoryNavProps) => {
-  useEffect(() => {
-    // Cleanup function to disconnect ResizeObserver
-    return () => {
-      const resizeObserver = new ResizeObserver(() => {});
-      resizeObserver.disconnect();
-    };
-  }, []);
-
   return (
     <div className="sticky top-16 bg-gray-50 z-40">
       <div className="relative py-4 max-w-[1400px] mx-auto px-4">
@@ -31,15 +23,12 @@ export const CategoryNav = ({ categories, onCategoryClick, onScroll, scrollRef }
         <div 
           ref={scrollRef}
           className="overflow-x-auto scrollbar-hide py-2 px-8 flex justify-center space-x-6 scroll-smooth"
-          role="navigation"
-          aria-label="Category navigation"
         >
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => onCategoryClick(category.title)}
               className="text-gray-900 whitespace-nowrap font-medium hover:text-primary transition-colors"
-              aria-label={`Go to ${category.title} category`}
             >
               {category.title}
             </button>
