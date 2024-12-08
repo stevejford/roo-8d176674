@@ -21,26 +21,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
   const navigate = useNavigate();
 
-  const checkAdminStatus = async (session: Session | null) => {
-    if (!session || isCheckingAdmin) {
-      console.log("No session or already checking admin status");
+  const checkAdminStatus = async (currentSession: Session | null) => {
+    if (!currentSession?.user?.id) {
+      console.log("No valid session for admin check");
       setIsAdmin(false);
       setIsLoading(false);
       return;
     }
 
     try {
-      setIsCheckingAdmin(true);
-      console.log("Checking admin status for user:", session.user.id);
+      console.log("Checking admin status for user:", currentSession.user.id);
       
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', session.user.id)
-        .maybeSingle();
+        .eq('id', currentSession.user.id)
+        .single();
 
       if (error) {
         console.error('Error checking admin status:', error);
@@ -58,11 +56,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAdmin(false);
     } finally {
       setIsLoading(false);
-      setIsCheckingAdmin(false);
     }
   };
 
   useEffect(() => {
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      console.log("Initial session check:", initialSession?.user?.id);
+      setSession(initialSession);
+      checkAdminStatus(initialSession);
+    });
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, "User ID:", currentSession?.user?.id);
@@ -71,6 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("User signed out, redirecting to login");
         setSession(null);
         setIsAdmin(false);
+        setIsLoading(false);
         navigate('/login');
         return;
       }
@@ -82,28 +87,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      console.log("Initial session check:", initialSession?.user?.id);
-      setSession(initialSession);
-      checkAdminStatus(initialSession);
-    });
-
     return () => {
       subscription.unsubscribe();
     };
   }, [navigate]);
 
-  const contextValue = {
+  const value = {
     session,
     isAdmin,
     isLoading
   };
 
-  console.log("AuthProvider state:", contextValue);
+  console.log("AuthProvider state:", value);
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
