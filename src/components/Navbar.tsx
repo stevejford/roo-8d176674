@@ -86,13 +86,11 @@ export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => 
                     className="w-full pr-12 h-9 text-sm rounded-full border-gray-200 placeholder:text-gray-500"
                     onClick={() => setOpen(true)}
                     readOnly
-                    aria-label="Search menu"
                   />
                   <div className="absolute right-1.5 top-1/2 transform -translate-y-1/2">
                     <button 
                       className="p-1.5 bg-white rounded-full hover:bg-gray-50 transition-colors shadow-sm"
                       onClick={() => setOpen(true)}
-                      aria-label="Open search"
                     >
                       <Search className="h-3.5 w-3.5 text-primary" />
                     </button>
@@ -105,7 +103,6 @@ export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => 
                 <button 
                   onClick={() => window.location.href = '/admin'} 
                   className="text-gray-600 hover:text-primary"
-                  aria-label="Go to admin panel"
                 >
                   <HopOff className="h-5 w-5" />
                 </button>
@@ -113,7 +110,6 @@ export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => 
               <button 
                 onClick={onSignOut} 
                 className="text-gray-600 hover:text-primary"
-                aria-label="Sign out"
               >
                 <LogOut className="h-5 w-5" />
               </button>
@@ -122,46 +118,45 @@ export const Navbar = ({ onSignOut, isAdmin, onCategoryClick }: NavbarProps) => 
         </div>
       </div>
 
-      <CommandDialog 
-        open={open} 
-        onOpenChange={setOpen}
-      >
-        <CommandInput 
-          placeholder="Search menu items..." 
-          value={searchQuery}
-          onValueChange={setSearchQuery}
-          aria-label="Search menu items"
-        />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Menu Items">
-            {filteredProducts.map((product) => (
-              <CommandItem
-                key={product.id}
-                value={product.title}
-                onSelect={handleSearch}
-                className="flex items-center gap-2 p-2"
-              >
-                {product.image_url && (
-                  <img
-                    src={product.image_url}
-                    alt={product.title}
-                    className="w-8 h-8 object-cover rounded"
-                  />
-                )}
-                <div className="flex flex-col">
-                  <span className="font-medium">{product.title}</span>
-                  {product.price && (
-                    <span className="text-sm text-gray-500">
-                      ${product.price.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
+      {open && (
+        <CommandDialog open={open} onOpenChange={setOpen}>
+          <CommandInput 
+            placeholder="Search menu items..." 
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+          />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading="Menu Items">
+              {filteredProducts.map((product) => (
+                <CommandItem
+                  key={product.id}
+                  value={product.title}
+                  onSelect={handleSearch}
+                >
+                  <div className="flex items-center gap-2">
+                    {product.image_url && (
+                      <img
+                        src={product.image_url}
+                        alt={product.title}
+                        className="w-8 h-8 object-cover rounded"
+                      />
+                    )}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{product.title}</span>
+                      {product.price && (
+                        <span className="text-sm text-gray-500">
+                          ${product.price.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </CommandDialog>
+      )}
     </nav>
   );
 };
