@@ -23,41 +23,36 @@ export const useProductPricing = (products: any[] | null) => {
       }
 
       try {
-        console.log('Making Supabase request with query:', `
-          SELECT *,
-          pricing_strategies.*
-          FROM product_pricing
-          WHERE product_id IN (${productIds.join(', ')})
-        `);
-
+        // Instead of using .in(), let's fetch all product pricing and filter in JS
+        // This avoids potential issues with the IN clause and response format
         const { data, error, status, statusText } = await supabase
           .from('product_pricing')
           .select(`
             *,
             pricing_strategies (*)
-          `)
-          .in('product_id', productIds);
+          `);
 
         console.log('Supabase response status:', status, statusText);
-        console.log('Supabase response data:', data);
+        console.log('Raw response data:', data);
 
         if (error) {
           console.error('Error fetching product pricing:', {
             error,
             status,
             statusText,
-            query: 'product_pricing?select=*,pricing_strategies(*)',
-            productIds
+            query: 'product_pricing?select=*,pricing_strategies(*)'
           });
           throw error;
         }
 
-        // Transform the data into a map of product_id -> pricing data
-        const pricingMap = (data || []).reduce((acc: { [key: string]: ProductPricingRow }, pricing) => {
-          console.log('Processing pricing data for product:', pricing.product_id);
-          acc[pricing.product_id] = pricing;
-          return acc;
-        }, {});
+        // Filter the data for our product IDs and transform into a map
+        const pricingMap = (data || [])
+          .filter(pricing => productIds.includes(pricing.product_id))
+          .reduce((acc: { [key: string]: ProductPricingRow }, pricing) => {
+            console.log('Processing pricing data for product:', pricing.product_id);
+            acc[pricing.product_id] = pricing;
+            return acc;
+          }, {});
 
         console.log('Final transformed pricing map:', pricingMap);
         return pricingMap;
