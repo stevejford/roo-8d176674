@@ -24,6 +24,19 @@ interface OrderSidebarProps {
   onClose: () => void;
 }
 
+interface CategoryPricing {
+  id: string;
+  category_id: string;
+  strategy_id: string;
+  config: PricingConfig;
+  pricing_strategies: {
+    id: string;
+    name: string;
+    type: string;
+    config: PricingConfig;
+  };
+}
+
 export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) => {
   const [mode, setMode] = useState<'pickup' | 'delivery'>('pickup');
   const [showVoucherInput, setShowVoucherInput] = useState(false);
@@ -32,7 +45,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   const isMobile = useIsMobile();
 
   // Fetch category pricing if product has a category
-  const { data: categoryPricing } = useQuery({
+  const { data: categoryPricing } = useQuery<CategoryPricing | null>({
     queryKey: ['category-pricing', selectedProduct?.category_id],
     queryFn: async () => {
       if (!selectedProduct?.category_id) return null;
@@ -53,7 +66,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   });
 
   // Fetch product pricing override if it exists
-  const { data: productPricing } = useQuery({
+  const { data: productPricing } = useQuery<CategoryPricing | null>({
     queryKey: ['product-pricing', selectedProduct?.title],
     queryFn: async () => {
       if (!selectedProduct?.title) return null;
@@ -99,7 +112,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     return (
       <SizeBasedOrderSidebar
         product={selectedProduct}
-        pricing={pricingConfig}
+        pricing={pricingConfig as Required<PricingConfig>}
         onClose={onClose}
       />
     );
