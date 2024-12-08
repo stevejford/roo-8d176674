@@ -15,11 +15,11 @@ const Index = () => {
   const navigate = useNavigate();
   const { session, isAdmin } = useAuth();
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
   const categoryRefs = useRef({});
 
-  // Add console logs for debugging
-  console.log("Index component rendering");
+  console.log("Index component rendering with search query:", searchQuery);
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
@@ -81,11 +81,26 @@ const Index = () => {
     setSelectedProduct(null);
   };
 
+  const handleSearch = (query: string) => {
+    console.log("Search query:", query);
+    setSearchQuery(query);
+  };
+
   if (categoriesLoading || productsLoading) {
     return null;
   }
 
-  const productsByCategory = products.reduce((acc, product) => {
+  // Filter products based on search query
+  const filteredProducts = products.filter(product => {
+    if (!searchQuery) return true;
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      product.title.toLowerCase().includes(searchLower) ||
+      (product.description && product.description.toLowerCase().includes(searchLower))
+    );
+  });
+
+  const productsByCategory = filteredProducts.reduce((acc, product) => {
     const categoryId = product.category_id || 'uncategorized';
     if (!acc[categoryId]) {
       acc[categoryId] = [];
@@ -103,6 +118,7 @@ const Index = () => {
         onSignOut={handleSignOut} 
         isAdmin={isAdmin} 
         onCategoryClick={handleCategoryClick}
+        onSearch={handleSearch}
       />
       <div className="flex flex-1">
         <main className={`${mainContentClass} pb-16`}>

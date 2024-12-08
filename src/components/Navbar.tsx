@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Search, HopOff, LogOut } from "lucide-react";
 import { Input } from "./ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -7,10 +7,20 @@ interface NavbarProps {
   onSignOut: () => void;
   isAdmin: boolean;
   onCategoryClick: (category: string) => void;
+  onSearch?: (query: string) => void;
 }
 
-export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
+export const Navbar = ({ onSignOut, isAdmin, onSearch }: NavbarProps) => {
   const isMobile = useIsMobile();
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (onSearch) {
+      onSearch(query);
+    }
+  };
   
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -26,6 +36,8 @@ export const Navbar = ({ onSignOut, isAdmin }: NavbarProps) => {
                 <Input
                   type="text"
                   placeholder="Search Menu"
+                  value={searchQuery}
+                  onChange={handleSearch}
                   className="w-full pr-12 h-9 text-sm rounded-full border-gray-200 placeholder:text-gray-500"
                 />
                 <div className="absolute right-1.5 top-1/2 transform -translate-y-1/2">
