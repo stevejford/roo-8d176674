@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { CalendarIcon } from "lucide-react";
-import { format, parse, isBefore, startOfDay, endOfDay } from "date-fns";
+import { format, parse, isBefore, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -108,8 +108,8 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <div className="flex flex-col sm:flex-row">
+      <PopoverContent className="w-auto p-0 bg-white" align="start">
+        <div className="flex">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -118,26 +118,28 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
             initialFocus
           />
           {selectedDate && availableTimes.length > 0 && (
-            <ScrollArea className="h-[300px] w-[150px] border-l">
-              <div className="p-2 space-y-2">
-                {availableTimes.map((time) => {
-                  const formattedTime = format(
-                    parse(time, 'HH:mm', new Date()),
-                    'h:mm aa'
-                  );
-                  return (
-                    <Button
-                      key={time}
-                      variant="ghost"
-                      className="w-full justify-start font-normal"
-                      onClick={() => handleTimeSelect(time)}
-                    >
-                      {formattedTime}
-                    </Button>
-                  );
-                })}
-              </div>
-            </ScrollArea>
+            <div className="border-l border-gray-200">
+              <ScrollArea className="h-[300px] w-[150px]">
+                <div className="grid grid-cols-1 gap-1 p-2">
+                  {availableTimes.map((time) => {
+                    const formattedTime = format(
+                      parse(time, 'HH:mm', new Date()),
+                      'h:mm aa'
+                    );
+                    return (
+                      <Button
+                        key={time}
+                        variant="ghost"
+                        className="w-full justify-start font-normal"
+                        onClick={() => handleTimeSelect(time)}
+                      >
+                        {formattedTime}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
           )}
         </div>
       </PopoverContent>
