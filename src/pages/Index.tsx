@@ -29,8 +29,9 @@ const Index = () => {
     category_id?: string;
   } | null>(null);
 
-  // Initialize showLocationSheet based on screen width
-  const [showLocationSheet, setShowLocationSheet] = useState(window.innerWidth >= 1280);
+  // Initialize showLocationSheet based on screen width - default to true for desktop
+  const isDesktopWidth = windowWidth >= 1280;
+  const [showLocationSheet, setShowLocationSheet] = useState(isDesktopWidth);
   const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
   const [cartCount, setCartCount] = useState(2);
 
@@ -39,15 +40,20 @@ const Index = () => {
       const newWidth = window.innerWidth;
       setWindowWidth(newWidth);
       
-      // Show sidebar by default on desktop, hide on mobile/tablet
-      setShowLocationSheet(newWidth >= 1280);
+      // On desktop (>= 1280px), show sidebar by default unless a product is selected
+      if (newWidth >= 1280 && !selectedProduct) {
+        setShowLocationSheet(true);
+      } else if (newWidth < 1280) {
+        // On mobile/tablet, hide the sidebar
+        setShowLocationSheet(false);
+      }
     };
 
     window.addEventListener('resize', handleResize);
     handleResize(); // Initial check
 
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [selectedProduct]);
 
   // Transform products into category-based structure
   const productsByCategory = React.useMemo(() => {
