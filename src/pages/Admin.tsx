@@ -3,6 +3,23 @@ import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
+import { ProductList } from '@/components/admin/products/ProductList';
+import { OrderList } from '@/components/admin/orders/OrderList';
+import { UserManagement } from '@/components/admin/users/UserManagement';
+import { KitchenDashboard } from '@/components/admin/orders/KitchenDashboard';
+import { WaiterDashboard } from '@/components/admin/orders/WaiterDashboard';
+import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
+import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
+import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
+import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
+import {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { 
   LayoutDashboard, 
   Package, 
