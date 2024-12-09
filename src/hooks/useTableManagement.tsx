@@ -129,37 +129,35 @@ export const useTableManagement = () => {
   };
 
   const updateTablePositions = async (tableIds: string[]) => {
-    // First, get the current table data
-    const { data: currentTables, error: fetchError } = await supabase
-      .from('tables')
-      .select('*')
-      .in('id', tableIds);
+    // Create updates array with new positions while preserving existing data
+    const updates = await Promise.all(tableIds.map(async (id, index) => {
+      // Get current table data
+      const { data: currentTable, error: fetchError } = await supabase
+        .from('tables')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (fetchError) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch current table data",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    // Create updates array preserving all existing table data, only updating positions
-    const updates = tableIds.map((id, index) => {
-      const currentTable = currentTables?.find(t => t.id === id);
-      if (!currentTable) {
-        console.error(`Table with id ${id} not found`);
+      if (fetchError) {
+        console.error('Error fetching table data:', fetchError);
         return null;
       }
+
+      // Only update the position, preserve all other fields
       return {
         ...currentTable,
         position: index + 1
       };
-    }).filter(Boolean);
+    }));
+
+    // Filter out any null values from failed fetches
+    const validUpdates = updates.filter(Boolean);
 
     const { error } = await supabase
       .from('tables')
-      .upsert(updates);
+      .upsert(validUpdates, {
+        onConflict: 'id'
+      });
 
     if (error) {
       toast({
