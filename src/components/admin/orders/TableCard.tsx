@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DialogTrigger } from "@/components/ui/dialog";
@@ -9,11 +9,14 @@ interface TableCardProps {
     table_number: string;
     status: 'available' | 'occupied' | 'reserved';
     customer_name?: string;
+    order_id?: string;
+    order_status?: string;
   };
   onSelect: () => void;
+  onViewOrder?: (orderId: string) => void;
 }
 
-export const TableCard = ({ table, onSelect }: TableCardProps) => {
+export const TableCard = ({ table, onSelect, onViewOrder }: TableCardProps) => {
   const getTableStatusColor = (status: string) => {
     switch (status) {
       case 'occupied':
@@ -39,8 +42,22 @@ export const TableCard = ({ table, onSelect }: TableCardProps) => {
               <Users className="mx-auto h-6 w-6" />
               <div className="text-sm">{table.customer_name}</div>
               <Badge variant="secondary" className="bg-white/20">
-                Occupied
+                {table.order_status || 'Occupied'}
               </Badge>
+              {table.order_id && onViewOrder && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="mt-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewOrder(table.order_id!);
+                  }}
+                >
+                  <ClipboardList className="w-4 h-4 mr-1" />
+                  View Order
+                </Button>
+              )}
             </>
           ) : (
             <>

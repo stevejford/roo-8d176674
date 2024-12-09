@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList } from "lucide-react";
 import { WaiterOrderCard } from './WaiterOrderCard';
@@ -20,6 +20,38 @@ export const OrderManagement = ({
   onUpdateStatus,
   statusColors 
 }: OrderManagementProps) => {
+  const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const timeouts = new Map();
+
+    orders?.forEach(order => {
+      if (newOrderIds.has(order.id)) {
+        const timeout = setTimeout(() => {
+          setNewOrderIds(prev => {
+            const updated = new Set(prev);
+            updated.delete(order.id);
+            return updated;
+          });
+        }, 3000);
+        timeouts.set(order.id, timeout);
+      }
+    });
+
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [orders, newOrderIds]);
+
+  useEffect(() => {
+    if (orders?.length) {
+      const lastOrder = orders[0];
+      if (lastOrder && Date.now() - new Date(lastOrder.created_at).getTime() < 5000) {
+        setNewOrderIds(prev => new Set(prev).add(lastOrder.id));
+      }
+    }
+  }, [orders]);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -48,6 +80,7 @@ export const OrderManagement = ({
           order={order}
           onUpdateStatus={onUpdateStatus}
           statusColors={statusColors}
+          isNew={newOrderIds.has(order.id)}
         />
       ))}
     </div>
