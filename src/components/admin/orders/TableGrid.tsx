@@ -16,7 +16,7 @@ export const TableGrid = () => {
   const [newTableNumber, setNewTableNumber] = React.useState('');
   const navigate = useNavigate();
   
-  const { tables, addTable, updateTable, refetch, updateTablePositions } = useTableManagement();
+  const { tables, addTable, updateTable, updateTablePositions, refetch } = useTableManagement();
 
   const handleViewOrder = (orderId: string) => {
     navigate(`/admin/waiter/order/${orderId}`);
@@ -37,25 +37,21 @@ export const TableGrid = () => {
     }
   };
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination || !tables) return;
+  const handleDragEnd = async (result: any) => {
+    if (!result.destination) return;
 
-    const items = Object.values(tables);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const tableArray = Object.values(tables);
+    const [reorderedItem] = tableArray.splice(result.source.index, 1);
+    tableArray.splice(result.destination.index, 0, reorderedItem);
 
-    // Create updates array with new positions while preserving table numbers
-    const updates = items.map((table: any, index: number) => ({
-      id: table.id,
-      table_number: table.table_number, // Preserve table number
-      position: index + 1,
-      status: table.status, // Preserve status
-    }));
-
-    updateTablePositions(updates);
+    // Update positions in the database
+    const tableIds = tableArray.map(table => table.id);
+    await updateTablePositions(tableIds);
   };
 
   if (!tables) return null;
+
+  const tableArray = Object.values(tables);
 
   return (
     <div className="space-y-6">
@@ -70,15 +66,15 @@ export const TableGrid = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="tables" direction="horizontal">
           {(provided) => (
-            <div
-              {...provided.droppableProps}
+            <div 
               ref={provided.innerRef}
+              {...provided.droppableProps}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
             >
-              {Object.values(tables).map((table, index) => (
+              {tableArray.map((table, index) => (
                 <Draggable 
-                  key={table.id} 
-                  draggableId={table.id} 
+                  key={table.table_number} 
+                  draggableId={table.table_number} 
                   index={index}
                 >
                   {(provided) => (
