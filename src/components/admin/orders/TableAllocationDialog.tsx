@@ -92,36 +92,46 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
 
     try {
       // First, check if the item already exists in the order
-      const { data: existingItems } = await supabase
+      const { data: existingItems, error: queryError } = await supabase
         .from('order_items')
         .select('*')
         .eq('order_id', table.order_id)
-        .eq('product_id', product.id)
-        .single();
+        .eq('product_id', product.id);
 
-      if (existingItems) {
+      if (queryError) throw queryError;
+
+      let updatedItem;
+      
+      if (existingItems && existingItems.length > 0) {
         // Update quantity if item exists
-        const { error: updateError } = await supabase
+        const existingItem = existingItems[0];
+        const { data, error: updateError } = await supabase
           .from('order_items')
           .update({ 
-            quantity: existingItems.quantity + 1,
+            quantity: existingItem.quantity + 1,
             price: product.price
           })
-          .eq('id', existingItems.id);
+          .eq('id', existingItem.id)
+          .select()
+          .single();
 
         if (updateError) throw updateError;
+        updatedItem = data;
       } else {
         // Insert new item if it doesn't exist
-        const { error: insertError } = await supabase
+        const { data, error: insertError } = await supabase
           .from('order_items')
           .insert({
             order_id: table.order_id,
             product_id: product.id,
             quantity: 1,
             price: product.price,
-          });
+          })
+          .select()
+          .single();
 
         if (insertError) throw insertError;
+        updatedItem = data;
       }
 
       toast({
