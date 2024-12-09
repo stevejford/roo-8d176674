@@ -21,18 +21,43 @@ export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCa
   const { data: productPricingMap } = useProductPricing([product]);
   
   const productPricing = productPricingMap?.[product.id];
-  const price = product.price_override ? product.price : (
-    productPricing?.is_override ? 
-      (productPricing.config as PricingConfig)?.price || product.price : 
-      (categoryPricing?.config as PricingConfig)?.price || product.price
-  );
+  
+  // Calculate the correct price based on pricing hierarchy
+  const calculatePrice = () => {
+    console.log('Calculating price for product:', product.title);
+    console.log('Product base price:', product.price);
+    console.log('Product pricing override:', productPricing);
+    console.log('Category pricing:', categoryPricing);
+
+    // First check for product-specific pricing override
+    if (productPricing?.is_override) {
+      const config = productPricing.config as PricingConfig;
+      return config.price || product.price || 0;
+    }
+
+    // Then check for category pricing
+    if (categoryPricing?.pricing_strategies) {
+      const config = categoryPricing.config as PricingConfig;
+      return config.price || product.price || 0;
+    }
+
+    // Fallback to product's default price
+    return product.price || 0;
+  };
+
+  const price = calculatePrice();
+  console.log('Final calculated price:', price);
 
   const handleQuantityChange = (increment: boolean) => {
     const newQuantity = increment ? quantity + 1 : Math.max(0, quantity - 1);
     setQuantity(newQuantity);
     
     if (increment && newQuantity === 1) {
-      onSelect(product);
+      console.log('Selecting product with price:', price);
+      onSelect({
+        ...product,
+        price: price // Ensure we pass the calculated price
+      });
     }
   };
 

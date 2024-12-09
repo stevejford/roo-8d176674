@@ -24,21 +24,26 @@ export const WaiterOrderCard = ({
   const { toast } = useToast();
 
   const calculateTotal = () => {
+    console.log('Calculating total for order items:', order.order_items);
     return order.order_items?.reduce((acc: number, item: any) => {
       const itemPrice = Number(item.price) || 0;
-      return acc + (itemPrice * item.quantity);
+      const quantity = Number(item.quantity) || 0;
+      const itemTotal = itemPrice * quantity;
+      console.log(`Item: ${item.product?.title}, Price: ${itemPrice}, Quantity: ${quantity}, Total: ${itemTotal}`);
+      return acc + itemTotal;
     }, 0) || 0;
   };
 
   const handlePayment = async (method: 'cash' | 'card') => {
     setIsProcessingPayment(true);
     try {
+      const total = calculateTotal();
       const { error } = await supabase
         .from('orders')
         .update({
           payment_status: 'completed',
           payment_method: method,
-          paid_amount: calculateTotal(),
+          paid_amount: total,
           status: 'completed'
         })
         .eq('id', order.id);
@@ -47,7 +52,7 @@ export const WaiterOrderCard = ({
 
       toast({
         title: "Payment Processed",
-        description: `Payment of $${calculateTotal().toFixed(2)} processed successfully via ${method}`,
+        description: `Payment of $${total.toFixed(2)} processed successfully via ${method}`,
       });
       onUpdateStatus(order.id, 'completed');
     } catch (error) {
@@ -65,7 +70,10 @@ export const WaiterOrderCard = ({
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ status: 'preparing' })
+        .update({ 
+          status: 'preparing',
+          order_taken_at: new Date().toISOString()
+        })
         .eq('id', order.id);
 
       if (error) throw error;
@@ -85,6 +93,7 @@ export const WaiterOrderCard = ({
   };
 
   const handleAddItem = async (product: any) => {
+    console.log('Adding product to order:', product);
     try {
       const { data: existingItems } = await supabase
         .from('order_items')
@@ -98,7 +107,7 @@ export const WaiterOrderCard = ({
           .from('order_items')
           .update({ 
             quantity: existingItem.quantity + 1,
-            price: product.price
+            price: product.price // Ensure we use the passed price
           })
           .eq('id', existingItem.id);
       } else {
@@ -108,7 +117,7 @@ export const WaiterOrderCard = ({
             order_id: order.id,
             product_id: product.id,
             quantity: 1,
-            price: product.price,
+            price: product.price, // Ensure we use the passed price
           });
       }
 
