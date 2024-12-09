@@ -1,6 +1,10 @@
-import { Users, Edit, Trash } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Plus, Users, ClipboardList } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { TableStatusBadge } from './table/TableStatusBadge';
 import { TableManagementButtons } from './table/TableManagementButtons';
+import { TableEditForm } from './table/TableEditForm';
 
 interface TableCardProps {
   table: {
@@ -12,88 +16,96 @@ interface TableCardProps {
     order_status?: string;
   };
   onClick: () => void;
+  onSelect?: () => void;
+  onViewOrder?: (orderId: string) => void;
   onDelete?: () => void;
 }
 
-export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
-  const getStatusColor = () => {
-    switch (table.status) {
-      case 'occupied':
-        return 'bg-emerald-600';
-      case 'reserved':
-        return 'bg-yellow-600';
-      default:
-        return 'bg-white border border-input';
-    }
-  };
+export const TableCard = ({ table, onClick, onViewOrder, onDelete }: TableCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <div className="relative p-2">
-      <div
-        role="button"
-        tabIndex={0}
-        className={`relative h-[12rem] w-full rounded-md transition-all duration-300 hover:shadow-lg ${getStatusColor()}`}
-        onClick={onClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            onClick();
-          }
-        }}
-      >
-        <div className="flex flex-col h-full p-4">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex flex-col items-start">
-              <h3 className={`text-xl font-bold mb-1 ${table.status === 'available' ? 'text-gray-900' : 'text-white'}`}>
-                Table {table.table_number}
-              </h3>
-              <Badge 
-                variant={table.status === 'available' ? 'secondary' : 'outline'}
-                className="bg-white/20"
-              >
-                {table.status === 'occupied' && table.order_status ? table.order_status : table.status}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="flex-1 flex flex-col items-center justify-center">
-            {table.status === 'occupied' && table.customer_name ? (
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-white opacity-90" />
-                <span className="text-lg font-medium text-white opacity-90">
-                  {table.customer_name}
-                </span>
-              </div>
-            ) : (
-              <span className={`text-base ${table.status === 'available' ? 'text-gray-600' : 'text-white/90'}`}>
-                {table.status === 'available' ? 'Tap to add order' : 'No customer name'}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute top-4 right-4 flex gap-2">
-        <button
-          className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white"
-          onClick={(e) => {
-            e.stopPropagation();
-            // Handle edit
-          }}
-        >
-          <Edit className="w-4 h-4" />
-        </button>
-        {onDelete && (
-          <button
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
+      <Dialog>
+        <DialogTrigger asChild>
+          <div
+            role="button"
+            tabIndex={0}
+            className={`relative h-[12rem] w-full transition-all duration-300 hover:shadow-lg ${
+              table.status === 'available' 
+                ? 'border rounded-md border-input bg-background hover:bg-accent hover:text-accent-foreground' 
+                : `text-white bg-${table.status === 'occupied' ? 'green' : 'yellow'}-600 hover:bg-${table.status === 'occupied' ? 'green' : 'yellow'}-700`
+            }`}
+            onClick={onClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                onClick();
+              }
             }}
           >
-            <Trash className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+            <div className="flex flex-col h-full p-4">
+              {/* Header section */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex flex-col items-start">
+                  {isEditing ? (
+                    <TableEditForm
+                      tableId={table.id}
+                      initialTableNumber={table.table_number}
+                      onSuccess={() => setIsEditing(false)}
+                    />
+                  ) : (
+                    <h3 className="text-xl font-bold mb-1">Table {table.table_number}</h3>
+                  )}
+                  <TableStatusBadge status={table.status} orderStatus={table.order_status} />
+                </div>
+              </div>
+
+              {/* Content section */}
+              <div className="flex-1 flex flex-col items-center justify-center">
+                {table.status === 'occupied' ? (
+                  <>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="h-5 w-5 opacity-90" />
+                      {table.customer_name && (
+                        <span className="text-lg font-medium opacity-90">
+                          {table.customer_name}
+                        </span>
+                      )}
+                    </div>
+                    {table.order_id && onViewOrder && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="mt-2 bg-white/20 hover:bg-white/30 text-white font-medium px-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onViewOrder(table.order_id!);
+                        }}
+                      >
+                        <ClipboardList className="w-4 h-4 mr-2" />
+                        View Order
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-8 w-8 mb-2" />
+                    <span className="text-base">Tap to add order</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogTrigger>
+      </Dialog>
+      
+      {/* Table management buttons */}
+      {!isEditing && (
+        <TableManagementButtons
+          onEdit={() => setIsEditing(true)}
+          onDelete={() => onDelete?.()}
+        />
+      )}
     </div>
   );
 };
