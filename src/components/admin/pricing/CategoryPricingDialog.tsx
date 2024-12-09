@@ -154,29 +154,31 @@ export const CategoryPricingDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Category Pricing - {category?.title}</DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-6">
-          <PricingSection
-            selectedStrategyId={selectedStrategyId}
-            onStrategyChange={setSelectedStrategyId}
-            selectedStrategy={selectedStrategy}
-            config={config}
-            onConfigChange={setConfig}
-          />
+        <div className="flex-1 overflow-y-auto pr-2">
+          <div className="grid gap-6">
+            <PricingSection
+              selectedStrategyId={selectedStrategyId}
+              onStrategyChange={setSelectedStrategyId}
+              selectedStrategy={selectedStrategy}
+              config={config}
+              onConfigChange={setConfig}
+            />
 
-          <IngredientsSection
-            onEditIngredients={() => setIsIngredientsOpen(true)}
-          />
+            <IngredientsSection
+              onEditIngredients={() => setIsIngredientsOpen(true)}
+            />
 
-          <DebugSection
-            category={category}
-            existingPricing={existingPricing}
-            config={config}
-          />
+            <DebugSection
+              category={category}
+              existingPricing={existingPricing}
+              config={config}
+            />
+          </div>
         </div>
 
         <DialogActions

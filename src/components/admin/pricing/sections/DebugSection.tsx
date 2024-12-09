@@ -12,13 +12,13 @@ export const DebugSection = ({ category, existingPricing, config }: DebugSection
         </div>
         <div>
           <h4 className="text-xs font-medium text-gray-500">Current Pricing Data:</h4>
-          <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-40">
+          <pre className="text-xs bg-white p-2 rounded overflow-y-auto max-h-[200px]">
             {JSON.stringify(existingPricing, null, 2)}
           </pre>
         </div>
         <div>
           <h4 className="text-xs font-medium text-gray-500">Current Config:</h4>
-          <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-40">
+          <pre className="text-xs bg-white p-2 rounded overflow-y-auto max-h-[200px]">
             {JSON.stringify(config, null, 2)}
           </pre>
         </div>
