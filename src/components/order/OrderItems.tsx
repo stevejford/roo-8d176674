@@ -22,7 +22,7 @@ export const OrderItems = () => {
         description: `${result.code} - ${result.discount_type === 'percentage' 
           ? `${result.discount_value}% off`
           : `$${result.discount_value} off`} has been applied to your order.`,
-        variant: "success",
+        variant: "default",
       });
     } else if (error) {
       toast({
