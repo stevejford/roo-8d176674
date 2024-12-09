@@ -44,8 +44,10 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
       }
     };
 
-    loadAvailableDays();
-  }, []);
+    if (isOpen) {
+      loadAvailableDays();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const loadAvailableTimes = async () => {
@@ -53,14 +55,22 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
         try {
           const times = await getAvailableTimeSlots(selectedDate);
           setAvailableTimes(times);
-          setSelectedTime(times[0] || "");
+          if (times.length > 0) {
+            setSelectedTime(times[0]);
+          } else {
+            setSelectedTime("");
+          }
         } catch (error) {
           console.error('Error loading available times:', error);
+          setAvailableTimes([]);
+          setSelectedTime("");
         }
       }
     };
 
-    loadAvailableTimes();
+    if (selectedDate) {
+      loadAvailableTimes();
+    }
   }, [selectedDate]);
 
   const handleSchedule = () => {
@@ -73,7 +83,7 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
   };
 
   if (isLoading) {
-    return null; // Or show a loading spinner
+    return null;
   }
 
   return (
