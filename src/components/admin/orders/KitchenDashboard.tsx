@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import { Clock, CheckCircle, XCircle } from "lucide-react";
+import { Database } from '@/integrations/supabase/types';
+
+type OrderStatus = Database['public']['Enums']['order_status'];
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -51,7 +54,7 @@ export const KitchenDashboard = () => {
     },
   });
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus })
