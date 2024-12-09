@@ -8,7 +8,7 @@ interface MenuBrowserDialogProps {
 
 export const MenuBrowserDialog = ({ onSelectItem }: MenuBrowserDialogProps) => {
   return (
-    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+    <DialogContent className="max-w-[90vw] max-h-[90vh] w-[1200px] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Add Items to Order</DialogTitle>
       </DialogHeader>

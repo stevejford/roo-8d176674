@@ -1,5 +1,5 @@
-import React from 'react';
-import { Plus } from "lucide-react";
+import React, { useState } from 'react';
+import { Plus, Minus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCategoryPricing } from '@/hooks/useCategoryPricing';
@@ -16,6 +16,7 @@ interface MenuProductCardProps {
 }
 
 export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCardProps) => {
+  const [quantity, setQuantity] = useState(0);
   const { data: categoryPricing } = useCategoryPricing(categoryId);
   const { data: productPricingMap } = useProductPricing([product]);
   
@@ -26,17 +27,23 @@ export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCa
       (categoryPricing?.config as PricingConfig)?.price || product.price
   );
 
+  const handleQuantityChange = (increment: boolean) => {
+    const newQuantity = increment ? quantity + 1 : Math.max(0, quantity - 1);
+    setQuantity(newQuantity);
+    
+    if (increment && newQuantity === 1) {
+      onSelect(product);
+    }
+  };
+
   return (
-    <Card 
-      className="p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer"
-      onClick={() => onSelect(product)}
-    >
+    <Card className="p-4 flex justify-between items-center hover:bg-gray-50">
       <div className="flex items-center space-x-4">
         {product.image_url && (
           <img 
             src={product.image_url} 
             alt={product.title}
-            className="w-12 h-12 rounded-md object-cover"
+            className="w-16 h-16 rounded-md object-cover"
           />
         )}
         <div>
@@ -44,9 +51,27 @@ export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCa
           <p className="text-sm text-gray-500">${price?.toFixed(2)}</p>
         </div>
       </div>
-      <Button variant="ghost" size="icon">
-        <Plus className="h-4 w-4" />
-      </Button>
+      
+      <div className="flex items-center gap-3">
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={() => handleQuantityChange(false)}
+          disabled={quantity === 0}
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
+        
+        <span className="w-8 text-center font-medium">{quantity}</span>
+        
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={() => handleQuantityChange(true)}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
     </Card>
   );
 };
