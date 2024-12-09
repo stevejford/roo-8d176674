@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/card";
 import { ProductList } from '@/components/admin/products/ProductList';
 import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
+import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
+import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
 
 const Dashboard = () => (
   <div className="space-y-6">
@@ -76,7 +78,17 @@ const Analytics = () => (
 );
 
 const SettingsPanel = () => (
-  <div>Settings panel coming soon</div>
+  <div className="space-y-8">
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Store Settings</h2>
+      <StoreSettingsForm />
+    </div>
+    
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Store Hours</h2>
+      <StoreHoursForm />
+    </div>
+  </div>
 );
 
 const Admin = () => {
