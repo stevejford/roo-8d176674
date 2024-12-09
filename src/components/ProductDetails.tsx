@@ -49,28 +49,37 @@ export const ProductDetails = ({
   };
 
   // Fetch category pricing
-  const { data: categoryPricing } = useQuery<CategoryPricing | null>({
+  const { data: categoryPricing } = useQuery({
     queryKey: ['category-pricing', category_id],
     queryFn: async () => {
       if (!category_id) return null;
       
-      const { data, error } = await supabase
-        .from('category_pricing')
-        .select(`
-          *,
-          pricing_strategies (*)
-        `)
-        .eq('category_id', category_id)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('category_pricing')
+          .select(`
+            *,
+            pricing_strategies (*)
+          `)
+          .eq('category_id', category_id)
+          .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data as CategoryPricing;
+        if (error) {
+          if (error.code === 'PGRST116') return null;
+          throw error;
+        }
+
+        return data as CategoryPricing;
+      } catch (error) {
+        console.error('Error fetching category pricing:', error);
+        return null;
+      }
     },
     enabled: !!category_id
   });
 
   // Fetch product pricing override
-  const { data: productPricing } = useQuery<ProductPricing | null>({
+  const { data: productPricing } = useQuery({
     queryKey: ['product-pricing', title],
     queryFn: async () => {
       try {
@@ -78,10 +87,14 @@ export const ProductDetails = ({
           .from('products')
           .select('id')
           .eq('title', title)
-          .limit(1);
+          .single();
 
-        if (productError) throw productError;
-        if (!products?.length) return null;
+        if (productError) {
+          if (productError.code === 'PGRST116') return null;
+          throw productError;
+        }
+
+        if (!products) return null;
 
         const { data: pricing, error: pricingError } = await supabase
           .from('product_pricing')
@@ -89,10 +102,14 @@ export const ProductDetails = ({
             *,
             pricing_strategies (*)
           `)
-          .eq('product_id', products[0].id)
-          .maybeSingle();
+          .eq('product_id', products.id)
+          .single();
 
-        if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
+        if (pricingError) {
+          if (pricingError.code === 'PGRST116') return null;
+          throw pricingError;
+        }
+
         return pricing as ProductPricing;
       } catch (error) {
         console.error('Error fetching product pricing:', error);
@@ -108,8 +125,8 @@ export const ProductDetails = ({
     : categoryPricing?.pricing_strategies;
 
   const pricingConfig = productPricing?.is_override
-    ? productPricing.config
-    : categoryPricing?.config;
+    ? productPricing.config as PricingConfig
+    : categoryPricing?.config as PricingConfig;
 
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size);
