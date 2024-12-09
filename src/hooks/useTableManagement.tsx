@@ -17,6 +17,15 @@ export const useTableManagement = () => {
   const { data: tables, refetch } = useQuery({
     queryKey: ['tables'],
     queryFn: async () => {
+      // First, get all tables
+      const { data: tablesData, error: tablesError } = await supabase
+        .from('tables')
+        .select('*')
+        .order('table_number');
+
+      if (tablesError) throw tablesError;
+
+      // Then, get active orders to determine table status
       const { data: orders } = await supabase
         .from('orders')
         .select('*')
@@ -26,14 +35,11 @@ export const useTableManagement = () => {
 
       const tableMap: Record<string, Table> = {};
       
-      // First, get all existing tables from orders
-      const existingTables = Array.from(new Set(orders?.map(o => o.table_number) || []));
-      
       // Create table entries for all tables
-      existingTables.forEach(tableNumber => {
-        const activeOrder = orders?.find(o => o.table_number === tableNumber);
-        tableMap[tableNumber] = {
-          table_number: tableNumber,
+      tablesData?.forEach(table => {
+        const activeOrder = orders?.find(o => o.table_number === table.table_number);
+        tableMap[table.table_number] = {
+          table_number: table.table_number,
           status: activeOrder ? 'occupied' : 'available',
           customer_name: activeOrder?.customer_name,
           order_id: activeOrder?.id,
@@ -55,30 +61,14 @@ export const useTableManagement = () => {
       return false;
     }
 
-    // Check if table already exists
-    if (tables && tables[tableNumber]) {
-      toast({
-        title: "Error",
-        description: "This table number already exists",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    // Create a dummy order to initialize the table (will be immediately completed)
     const { error } = await supabase
-      .from('orders')
-      .insert({
-        table_number: tableNumber,
-        status: 'completed',
-        customer_name: 'Table Setup',
-        total_amount: 0
-      });
+      .from('tables')
+      .insert({ table_number: tableNumber });
 
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to add table",
+        description: error.message,
         variant: "destructive",
       });
       return false;

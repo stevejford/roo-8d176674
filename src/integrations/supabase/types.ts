@@ -436,6 +436,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tables: {
+        Row: {
+          created_at: string | null
+          id: string
+          status: string | null
+          table_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          table_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          table_number?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_actions: {
         Row: {
           action_details: Json | null
