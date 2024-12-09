@@ -26,22 +26,28 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
   const { data: existingPricing, isError } = useQuery({
     queryKey: ['product-pricing', product?.id],
     queryFn: async () => {
-      if (!product?.id) return null;
+      if (!product?.id) {
+        console.log('No product ID provided');
+        return null;
+      }
       
       try {
+        console.log('Fetching pricing for product:', product.id);
         const { data, error } = await supabase
           .from('product_pricing')
           .select('*')
           .eq('product_id', product.id)
-          .maybeSingle(); // Using maybeSingle() instead of single()
+          .maybeSingle();
         
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('Error fetching product pricing:', error);
           throw error;
         }
+        
+        console.log('Fetched pricing data:', data);
         return data;
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('Unexpected error in pricing query:', error);
         return null;
       }
     },
@@ -50,10 +56,12 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
 
   React.useEffect(() => {
     if (existingPricing) {
+      console.log('Setting existing pricing:', existingPricing);
       setSelectedStrategyId(existingPricing.strategy_id);
       setConfig(existingPricing.config);
       setIsOverride(existingPricing.is_override ?? true);
     } else {
+      console.log('No existing pricing found, resetting to defaults');
       setSelectedStrategyId('');
       setConfig({});
       setIsOverride(true);
@@ -77,25 +85,38 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
 
   const handleSave = async () => {
     try {
-      if (existingPricing) {
+      if (isOverride && !selectedStrategyId) {
+        toast({
+          title: "Error",
+          description: "Please select a pricing strategy",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const pricingData = {
+        strategy_id: selectedStrategyId,
+        config,
+        is_override: isOverride,
+      };
+
+      console.log('Saving pricing data:', pricingData);
+
+      if (existingPricing?.id) {
+        console.log('Updating existing pricing');
         const { error } = await supabase
           .from('product_pricing')
-          .update({
-            strategy_id: selectedStrategyId,
-            config,
-            is_override: isOverride,
-          })
+          .update(pricingData)
           .eq('id', existingPricing.id);
 
         if (error) throw error;
       } else {
+        console.log('Creating new pricing');
         const { error } = await supabase
           .from('product_pricing')
           .insert([{
+            ...pricingData,
             product_id: product.id,
-            strategy_id: selectedStrategyId,
-            config,
-            is_override: isOverride,
           }]);
 
         if (error) throw error;
