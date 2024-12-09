@@ -7,6 +7,9 @@ import { WaiterOrderCard } from './WaiterOrderCard';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+import type { Database } from '@/integrations/supabase/types';
+
+type OrderStatus = Database['public']['Enums']['order_status'];
 
 export const WaiterDashboard = () => {
   const { orderId } = useParams();
@@ -54,6 +57,19 @@ export const WaiterDashboard = () => {
     setIsMenuOpen(false);
   };
 
+  const handleStatusChange = async (status: OrderStatus) => {
+    if (!orderId) return;
+
+    const { error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
   if (!order) return null;
 
   return (
@@ -77,7 +93,7 @@ export const WaiterDashboard = () => {
 
       <WaiterOrderCard 
         order={order}
-        onStatusChange={() => {}}
+        onUpdateStatus={handleStatusChange}
         isNew={false}
       />
     </div>

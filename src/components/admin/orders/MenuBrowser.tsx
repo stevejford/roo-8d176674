@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import { useCategoryPricing } from '@/hooks/useCategoryPricing';
 import { useProductPricing } from '@/hooks/useProductPricing';
 import type { Database } from '@/integrations/supabase/types';
+import type { PricingConfig } from '@/types/pricing';
 
 type Product = Database['public']['Tables']['products']['Row'];
 type Category = Database['public']['Tables']['categories']['Row'];
@@ -65,8 +66,8 @@ export const MenuBrowser = ({ onSelectItem }: MenuBrowserProps) => {
     const productPricing = productPricingMap?.[product.id];
     const price = product.price_override ? product.price : (
       productPricing?.is_override ? 
-        productPricing.config?.price || product.price : 
-        categoryPricing?.config?.price || product.price
+        (productPricing.config as PricingConfig)?.price || product.price : 
+        (categoryPricing?.config as PricingConfig)?.price || product.price
     );
 
     return (
