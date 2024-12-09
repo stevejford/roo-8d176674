@@ -1,128 +1,85 @@
 import React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from "@/components/ui/use-toast";
-import type { Database } from '@/integrations/supabase/types';
-import { TableGrid } from './TableGrid';
-import { OrderManagement } from './OrderManagement';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { useWaiterOrders } from '@/hooks/useWaiterOrders';
+import { MenuBrowser } from './MenuBrowser';
 import { WaiterOrderCard } from './WaiterOrderCard';
-import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
-
-type OrderStatus = Database['public']['Enums']['order_status'];
-
-const statusColors = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-blue-100 text-blue-800',
-  preparing: 'bg-purple-100 text-purple-800',
-  ready: 'bg-green-100 text-green-800',
-  delivered: 'bg-gray-100 text-gray-800',
-  completed: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
-};
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 export const WaiterDashboard = () => {
   const { orderId } = useParams();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const { singleOrder, orders, isLoading, isLoadingSingle } = useWaiterOrders(orderId);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
+  const { data: order } = useQuery({
+    queryKey: ['order', orderId],
+    queryFn: async () => {
+      if (!orderId) return null;
+      
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *,
+            product:products (*)
+          )
+        `)
+        .eq('id', orderId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orderId,
+  });
+
+  const handleAddItem = async (product: any) => {
+    if (!orderId) return;
+
     const { error } = await supabase
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('id', orderId);
+      .from('order_items')
+      .insert({
+        order_id: orderId,
+        product_id: product.id,
+        price: product.price,
+      });
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update order status",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: `Order status updated to ${newStatus}`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['waiter-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['single-order', orderId] });
+      console.error('Error adding item:', error);
+      return;
     }
+
+    setIsMenuOpen(false);
   };
 
-  // If viewing a single order
-  if (orderId) {
-    if (isLoadingSingle) {
-      return <KitchenOrderSkeleton />;
-    }
+  if (!order) return null;
 
-    if (!singleOrder) {
-      return (
-        <div className="space-y-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/admin/waiter')}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Tables
-          </Button>
-          <div className="text-center">
-            <p>Order not found</p>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/admin/waiter')}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Tables
-        </Button>
-        <WaiterOrderCard
-          order={singleOrder}
-          onUpdateStatus={updateOrderStatus}
-          statusColors={statusColors}
-        />
-      </div>
-    );
-  }
-
-  // Main dashboard view
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Waiter Dashboard</h2>
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Order #{order.id.slice(0, 8)}</h1>
+        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+          <SheetTrigger asChild>
+            <Button>
+              <Menu className="mr-2 h-4 w-4" />
+              Add Items
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+            <div className="h-full py-6">
+              <MenuBrowser onSelectItem={handleAddItem} />
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
-      <Tabs defaultValue="tables">
-        <TabsList>
-          <TabsTrigger value="tables">Tables</TabsTrigger>
-          <TabsTrigger value="orders">Orders</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="tables" className="mt-4">
-          <TableGrid />
-        </TabsContent>
-        
-        <TabsContent value="orders">
-          <OrderManagement
-            orders={orders}
-            isLoading={isLoading}
-            onUpdateStatus={updateOrderStatus}
-            statusColors={statusColors}
-          />
-        </TabsContent>
-      </Tabs>
+      <WaiterOrderCard 
+        order={order}
+        onStatusChange={() => {}}
+        isNew={false}
+      />
     </div>
   );
 };
