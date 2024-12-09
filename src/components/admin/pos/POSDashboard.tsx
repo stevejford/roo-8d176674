@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
-import { MenuBrowser } from '../orders/MenuBrowser';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { POSMenuBrowser } from './POSMenuBrowser';
 
 export const POSDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -66,11 +65,7 @@ export const POSDashboard = () => {
       </div>
 
       <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <MenuBrowser
-          isOpen={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
-          onSelect={handleAddItem}
-        />
+        <POSMenuBrowser onSelect={handleAddItem} />
       </Dialog>
     </div>
   );
