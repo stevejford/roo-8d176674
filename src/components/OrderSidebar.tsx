@@ -4,7 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductDetails } from "./ProductDetails";
 import { SizeBasedOrderSidebar } from "./order/sidebars/SizeBasedOrderSidebar";
-import type { CategoryPricing, ProductPricing } from "@/types/pricing/interfaces";
+import type { CategoryPricing, ProductPricing, PricingConfig } from "@/types/pricing/interfaces";
+import type { Database } from "@/integrations/supabase/types";
+
+type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
+};
+
+type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
+};
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -21,16 +30,14 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   const isMobile = useIsMobile();
   const [isClosing, setIsClosing] = useState(false);
 
-  // Handle smooth closing animation
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
       onClose();
-    }, 300); // Match this with the animation duration
+    }, 300);
   };
 
-  // Reset closing state when product changes
   useEffect(() => {
     if (selectedProduct) {
       setIsClosing(false);
@@ -38,7 +45,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   }, [selectedProduct]);
 
   // Fetch category pricing if product has a category
-  const { data: categoryPricing } = useQuery<CategoryPricing | null>({
+  const { data: categoryPricing } = useQuery<CategoryPricingRow | null>({
     queryKey: ['category-pricing', selectedProduct?.category_id],
     queryFn: async () => {
       if (!selectedProduct?.category_id) return null;
@@ -59,7 +66,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   });
 
   // Fetch product pricing override if it exists
-  const { data: productPricing } = useQuery<ProductPricing | null>({
+  const { data: productPricing } = useQuery<ProductPricingRow | null>({
     queryKey: ['product-pricing', selectedProduct?.title],
     queryFn: async () => {
       if (!selectedProduct?.title) return null;
@@ -84,7 +91,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
           .maybeSingle();
 
         if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
-        return pricing || null;
+        return pricing;
       } catch (error) {
         console.error('Error fetching product pricing:', error);
         return null;
@@ -102,8 +109,8 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     : categoryPricing?.pricing_strategies;
 
   const pricingConfig = productPricing?.is_override
-    ? productPricing.config
-    : categoryPricing?.config;
+    ? productPricing.config as PricingConfig
+    : categoryPricing?.config as PricingConfig;
 
   const baseClassName = `fixed ${
     isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'

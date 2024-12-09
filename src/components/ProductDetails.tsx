@@ -7,6 +7,16 @@ import { PastaTypeSelector } from "./product/PastaTypeSelector";
 import { ProductHeader } from "./product/ProductHeader";
 import { ProductInfo } from "./product/ProductInfo";
 import { ProductActions } from "./product/ProductActions";
+import type { Database } from "@/integrations/supabase/types";
+import type { PricingConfig } from "@/types/pricing/interfaces";
+
+type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
+};
+
+type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
+};
 
 interface ProductDetailsProps {
   title: string;
@@ -48,7 +58,7 @@ export const ProductDetails = ({
   };
 
   // Fetch category pricing
-  const { data: categoryPricing } = useQuery({
+  const { data: categoryPricing } = useQuery<CategoryPricingRow | null>({
     queryKey: ['category-pricing', category_id],
     queryFn: async () => {
       if (!category_id) return null;
@@ -74,7 +84,7 @@ export const ProductDetails = ({
   });
 
   // Fetch product pricing override
-  const { data: productPricing } = useQuery({
+  const { data: productPricing } = useQuery<ProductPricingRow | null>({
     queryKey: ['product-pricing', title],
     queryFn: async () => {
       try {
@@ -117,8 +127,8 @@ export const ProductDetails = ({
     : categoryPricing?.pricing_strategies;
 
   const pricingConfig = productPricing?.is_override
-    ? productPricing.config
-    : categoryPricing?.config;
+    ? productPricing.config as PricingConfig
+    : categoryPricing?.config as PricingConfig;
 
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size);
