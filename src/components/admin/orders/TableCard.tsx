@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus, Users, ClipboardList, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface TableCardProps {
   table: {
@@ -14,11 +15,14 @@ interface TableCardProps {
   };
   onSelect: () => void;
   onViewOrder?: (orderId: string) => void;
-  onEdit?: () => void;
+  onEdit?: (newTableNumber: string) => void;
   onDelete?: () => void;
 }
 
 export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: TableCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newTableNumber, setNewTableNumber] = useState(table.table_number);
+
   const getTableStatusColor = (status: string) => {
     switch (status) {
       case 'occupied':
@@ -30,8 +34,17 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
     }
   };
 
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onEdit) {
+      onEdit(newTableNumber);
+      setIsEditing(false);
+    }
+  };
+
   return (
-    <div className="relative">
+    <div className="relative p-2">
       <DialogTrigger asChild>
         <div
           role="button"
@@ -52,7 +65,29 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
             {/* Header section */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex flex-col items-start">
-                <h3 className="text-xl font-bold mb-1">Table {table.table_number}</h3>
+                {isEditing ? (
+                  <form onSubmit={handleEditSubmit} onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={newTableNumber}
+                        onChange={(e) => setNewTableNumber(e.target.value)}
+                        className="w-24 h-8"
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <Button 
+                        type="submit" 
+                        size="sm"
+                        variant="secondary"
+                        className="h-8"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <h3 className="text-xl font-bold mb-1">Table {table.table_number}</h3>
+                )}
                 <Badge 
                   variant="secondary"
                   className={`px-3 py-1 text-sm font-medium ${
@@ -105,14 +140,14 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
       </DialogTrigger>
       
       {/* Table management buttons */}
-      <div className="absolute -top-2 right-2 flex space-x-1">
+      <div className="absolute top-4 right-4 flex space-x-1">
         <Button
           size="icon"
           variant="ghost"
           className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
           onClick={(e) => {
             e.stopPropagation();
-            onEdit?.();
+            setIsEditing(true);
           }}
         >
           <Pencil className="h-4 w-4 text-gray-600" />

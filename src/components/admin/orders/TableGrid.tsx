@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useTableManagement } from '@/hooks/useTableManagement';
+import { useToast } from "@/components/ui/use-toast";
 
 export const TableGrid = () => {
   const [selectedTable, setSelectedTable] = React.useState<any>(null);
@@ -14,8 +15,9 @@ export const TableGrid = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
   const [newTableNumber, setNewTableNumber] = React.useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
   
-  const { tables, addTable, refetch } = useTableManagement();
+  const { tables, addTable, updateTable, refetch } = useTableManagement();
 
   const handleViewOrder = (orderId: string) => {
     navigate(`/admin/waiter/order/${orderId}`);
@@ -26,6 +28,17 @@ export const TableGrid = () => {
     if (success) {
       setIsAddDialogOpen(false);
       setNewTableNumber('');
+    }
+  };
+
+  const handleEditTable = async (table: any, newTableNumber: string) => {
+    const success = await updateTable(table.id, newTableNumber);
+    if (success) {
+      toast({
+        title: "Table updated",
+        description: `Table number changed to ${newTableNumber}`,
+      });
+      refetch();
     }
   };
 
@@ -48,9 +61,7 @@ export const TableGrid = () => {
               table={table}
               onSelect={() => setSelectedTable(table)}
               onViewOrder={handleViewOrder}
-              onEdit={() => {
-                setSelectedTable(table);
-              }}
+              onEdit={(newTableNumber) => handleEditTable(table, newTableNumber)}
               onDelete={() => {
                 setSelectedTable(table);
                 setIsDeleteDialogOpen(true);
