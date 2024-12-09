@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import { CalendarIcon } from "lucide-react";
-import { format, startOfDay } from "date-fns";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getAvailableDays, getAvailableTimeSlots } from "@/utils/businessHours";
-import { TimeSelectors } from "./time-picker/TimeSelectors";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface StoreTimePickerProps {
   date?: Date;
@@ -21,6 +21,7 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
   const [availableDays, setAvailableDays] = React.useState<Date[]>([]);
   const [availableTimes, setAvailableTimes] = React.useState<string[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState("date");
 
   React.useEffect(() => {
     const loadAvailableDays = async () => {
@@ -57,33 +58,19 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // If there's no existing selectedDate, initialize with noon
       const newDate = selectedDate 
         ? new Date(date.setHours(selectedDate.getHours(), selectedDate.getMinutes()))
         : new Date(date.setHours(12, 0));
       setSelectedDate(newDate);
+      setActiveTab("time");
     }
   };
 
-  const handleTimeChange = (
-    type: "hour" | "minute" | "ampm",
-    value: string
-  ) => {
+  const handleTimeSelect = (timeString: string) => {
     if (selectedDate) {
+      const [hours, minutes] = timeString.split(':').map(Number);
       const newDate = new Date(selectedDate);
-      if (type === "hour") {
-        newDate.setHours(
-          (parseInt(value) % 12) + (newDate.getHours() >= 12 ? 12 : 0)
-        );
-      } else if (type === "minute") {
-        newDate.setMinutes(parseInt(value));
-      } else if (type === "ampm") {
-        const currentHours = newDate.getHours();
-        const isPM = value === "PM";
-        newDate.setHours(
-          isPM ? (currentHours % 12) + 12 : currentHours % 12
-        );
-      }
+      newDate.setHours(hours, minutes);
       setSelectedDate(newDate);
       onSelect(newDate);
     }
@@ -92,7 +79,7 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
   const isDateUnavailable = (date: Date) => {
     return !availableDays.some(
       availableDate => 
-        startOfDay(availableDate).getTime() === startOfDay(date).getTime()
+        new Date(availableDate).setHours(0,0,0,0) === new Date(date).setHours(0,0,0,0)
     );
   };
 
@@ -124,19 +111,35 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-white">
-        <div className="flex flex-col sm:flex-row">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleDateSelect}
-            disabled={isDateUnavailable}
-            initialFocus
-          />
-          <TimeSelectors 
-            selectedDate={selectedDate}
-            onTimeChange={handleTimeChange}
-          />
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="date">Date</TabsTrigger>
+            <TabsTrigger value="time" disabled={!selectedDate}>Time</TabsTrigger>
+          </TabsList>
+          <TabsContent value="date" className="p-0">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              disabled={isDateUnavailable}
+              initialFocus
+            />
+          </TabsContent>
+          <TabsContent value="time" className="p-4">
+            <div className="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
+              {availableTimes.map((time) => (
+                <Button
+                  key={time}
+                  variant={selectedDate && format(selectedDate, 'HH:mm') === time ? "default" : "outline"}
+                  onClick={() => handleTimeSelect(time)}
+                  className="w-full"
+                >
+                  {format(new Date(`2000-01-01T${time}`), 'h:mm aa')}
+                </Button>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </PopoverContent>
     </Popover>
   );
