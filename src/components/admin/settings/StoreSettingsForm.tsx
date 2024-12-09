@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { BusinessInfoForm } from "./BusinessInfoForm";
-import { CurrentBusinessInfo } from "./CurrentBusinessInfo";
 
 interface StoreSettingsFormData {
   store_name: string;
@@ -72,13 +71,6 @@ export const StoreSettingsForm = () => {
           onSubmit={mutation.mutate}
         />
       </div>
-
-      {settings && (
-        <CurrentBusinessInfo
-          storeName={settings.store_name}
-          address={settings.address}
-        />
-      )}
     </div>
   );
 };
