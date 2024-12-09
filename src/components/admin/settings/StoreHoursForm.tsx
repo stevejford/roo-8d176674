@@ -17,8 +17,8 @@ import {
 interface StoreHours {
   id: string;
   day_of_week: string;
-  open_time: string;
-  close_time: string;
+  open_time: string | null;
+  close_time: string | null;
   is_closed: boolean;
 }
 
@@ -41,9 +41,21 @@ export const StoreHoursForm = () => {
 
   const mutation = useMutation({
     mutationFn: async (hours: StoreHours) => {
+      // If the day is closed, set times to null
+      const updatedHours = hours.is_closed ? {
+        ...hours,
+        open_time: null,
+        close_time: null
+      } : {
+        ...hours,
+        // Only send time values if they're not empty strings
+        open_time: hours.open_time || null,
+        close_time: hours.close_time || null
+      };
+
       const { error } = await supabase
         .from('store_hours')
-        .upsert(hours);
+        .upsert(updatedHours);
 
       if (error) throw error;
     },
@@ -67,14 +79,22 @@ export const StoreHoursForm = () => {
   const handleTimeChange = (id: string, field: 'open_time' | 'close_time', value: string) => {
     const hour = hours?.find(h => h.id === id);
     if (hour) {
-      mutation.mutate({ ...hour, [field]: value });
+      mutation.mutate({
+        ...hour,
+        [field]: value || null
+      });
     }
   };
 
   const handleClosedToggle = (id: string, value: boolean) => {
     const hour = hours?.find(h => h.id === id);
     if (hour) {
-      mutation.mutate({ ...hour, is_closed: value });
+      mutation.mutate({
+        ...hour,
+        is_closed: value,
+        open_time: value ? null : hour.open_time,
+        close_time: value ? null : hour.close_time
+      });
     }
   };
 
