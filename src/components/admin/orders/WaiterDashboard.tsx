@@ -7,7 +7,9 @@ import { WaiterOrderCard } from './WaiterOrderCard';
 import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
 import { TableGrid } from './TableGrid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, ArrowLeft } from "lucide-react";
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 
@@ -22,9 +24,37 @@ const statusColors = {
 };
 
 export const WaiterDashboard = () => {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  // Query for single order if orderId is present
+  const { data: singleOrder, isLoading: isLoadingSingle } = useQuery({
+    queryKey: ['single-order', orderId],
+    queryFn: async () => {
+      if (!orderId) return null;
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *,
+            product:products (
+              title
+            )
+          )
+        `)
+        .eq('id', orderId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orderId
+  });
+
+  // Query for all waiter orders
   const { data: orders, isLoading } = useQuery({
     queryKey: ['waiter-orders'],
     queryFn: async () => {
@@ -45,6 +75,7 @@ export const WaiterDashboard = () => {
       if (error) throw error;
       return data;
     },
+    enabled: !orderId // Only fetch all orders when not viewing a single order
   });
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
@@ -65,6 +96,7 @@ export const WaiterDashboard = () => {
         description: `Order status updated to ${newStatus}`,
       });
       queryClient.invalidateQueries({ queryKey: ['waiter-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['single-order', orderId] });
     }
   };
 
@@ -90,6 +122,9 @@ export const WaiterDashboard = () => {
           }
 
           await queryClient.invalidateQueries({ queryKey: ['waiter-orders'] });
+          if (orderId) {
+            await queryClient.invalidateQueries({ queryKey: ['single-order', orderId] });
+          }
         }
       )
       .subscribe();
@@ -97,8 +132,52 @@ export const WaiterDashboard = () => {
     return () => {
       ordersSubscription.unsubscribe();
     };
-  }, [queryClient, toast]);
+  }, [queryClient, toast, orderId]);
 
+  // If viewing a single order
+  if (orderId) {
+    if (isLoadingSingle) {
+      return <KitchenOrderSkeleton />;
+    }
+
+    if (!singleOrder) {
+      return (
+        <div className="space-y-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/admin/waiter')}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Tables
+          </Button>
+          <div className="text-center">
+            <p>Order not found</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/admin/waiter')}
+          className="mb-4"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Tables
+        </Button>
+        <WaiterOrderCard
+          order={singleOrder}
+          onUpdateStatus={updateOrderStatus}
+          statusColors={statusColors}
+        />
+      </div>
+    );
+  }
+
+  // Main dashboard view
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
