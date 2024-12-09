@@ -25,6 +25,7 @@ import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
 import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
 import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
 import { UserManagement } from '@/components/admin/users/UserManagement';
+import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
 
 const Dashboard = () => (
   <div className="space-y-6">
@@ -83,14 +84,18 @@ const Analytics = () => (
 const SettingsPanel = () => (
   <div className="space-y-8">
     <div>
-      <h2 className="text-2xl font-bold mb-4">Business Information</h2>
-      <p className="text-gray-600 mb-4">Manage your restaurant's basic information and contact details</p>
+      <SettingsSectionHeader
+        title="Business Information"
+        description="Manage your restaurant's basic information and contact details"
+      />
       <StoreSettingsForm />
     </div>
     
     <div>
-      <h2 className="text-2xl font-bold mb-4">Operating Hours</h2>
-      <p className="text-gray-600 mb-4">Set your restaurant's opening and closing hours for each day of the week</p>
+      <SettingsSectionHeader
+        title="Operating Hours"
+        description="Set your restaurant's opening and closing hours for each day of the week"
+      />
       <StoreHoursForm />
     </div>
   </div>
@@ -167,4 +172,3 @@ const Admin = () => {
 };
 
 export default Admin;
-

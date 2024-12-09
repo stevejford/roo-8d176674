@@ -1,18 +1,9 @@
 import React from "react";
-import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { BusinessInfoForm } from "./BusinessInfoForm";
+import { CurrentBusinessInfo } from "./CurrentBusinessInfo";
 
 interface StoreSettingsFormData {
   store_name: string;
@@ -35,23 +26,6 @@ export const StoreSettingsForm = () => {
       return data;
     },
   });
-
-  const form = useForm<StoreSettingsFormData>({
-    defaultValues: {
-      store_name: settings?.store_name || '',
-      address: settings?.address || '',
-    },
-  });
-
-  // Reset form when settings data is loaded
-  React.useEffect(() => {
-    if (settings) {
-      form.reset({
-        store_name: settings.store_name,
-        address: settings.address,
-      });
-    }
-  }, [settings, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: StoreSettingsFormData) => {
@@ -83,10 +57,6 @@ export const StoreSettingsForm = () => {
     },
   });
 
-  const onSubmit = (data: StoreSettingsFormData) => {
-    mutation.mutate(data);
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -94,60 +64,20 @@ export const StoreSettingsForm = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow-sm">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="store_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Enter your business name" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Address</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Enter your business address" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button 
-              type="submit"
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              Save Changes
-            </Button>
-          </form>
-        </Form>
+        <BusinessInfoForm
+          defaultValues={{
+            store_name: settings?.store_name || '',
+            address: settings?.address || '',
+          }}
+          onSubmit={mutation.mutate}
+        />
       </div>
 
       {settings && (
-        <div className="bg-gray-50 p-6 rounded-lg">
-          <h3 className="text-lg font-medium mb-4">Current Information</h3>
-          <div className="space-y-3">
-            <div>
-              <span className="font-medium">Business Name: </span>
-              <span>{settings.store_name}</span>
-            </div>
-            <div>
-              <span className="font-medium">Business Address: </span>
-              <span>{settings.address}</span>
-            </div>
-          </div>
-        </div>
+        <CurrentBusinessInfo
+          storeName={settings.store_name}
+          address={settings.address}
+        />
       )}
     </div>
   );
