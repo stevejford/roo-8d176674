@@ -1,89 +1,45 @@
-import React from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog } from "@/components/ui/dialog";
 import { TableCard } from './TableCard';
-import { TableAllocationDialog } from './TableAllocationDialog';
 import { TableManagementDialogs } from './TableManagementDialogs';
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useTableManagement } from '@/hooks/useTableManagement';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export const TableGrid = () => {
-  const [selectedTable, setSelectedTable] = React.useState<any>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
-  const [newTableNumber, setNewTableNumber] = React.useState('');
   const navigate = useNavigate();
-  
-  const { tables, addTable, updateTable, refetch } = useTableManagement();
+  const { tables } = useTableManagement();
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
-  const handleViewOrder = (orderId: string) => {
-    navigate(`/admin/waiter/order/${orderId}`);
-  };
-
-  const handleAddTable = async () => {
-    const success = await addTable(newTableNumber);
-    if (success) {
-      setIsAddDialogOpen(false);
-      setNewTableNumber('');
+  const handleTableClick = (tableNumber: string, orderId?: string) => {
+    if (orderId) {
+      navigate(`/admin/waiter/${orderId}`);
     }
   };
-
-  const handleEditTable = async (table: any, newTableNumber: string) => {
-    const success = await updateTable(table.id, newTableNumber);
-    if (success) {
-      refetch();
-    }
-  };
-
-  if (!tables) return null;
-
-  const tableArray = Object.values(tables);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Tables</h2>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Tables</h3>
+        <Button onClick={() => setShowAddDialog(true)} size="sm">
           <Plus className="w-4 h-4 mr-2" />
           Add Table
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {tableArray.map((table) => (
-          <Dialog key={table.table_number}>
-            <TableCard
-              table={table}
-              onSelect={() => setSelectedTable(table)}
-              onViewOrder={handleViewOrder}
-              onEdit={(newTableNumber) => handleEditTable(table, newTableNumber)}
-              onDelete={() => {
-                setSelectedTable(table);
-                setIsDeleteDialogOpen(true);
-              }}
-            />
-            {selectedTable && (
-              <TableAllocationDialog
-                table={selectedTable}
-                onClose={() => setSelectedTable(null)}
-                onSuccess={refetch}
-              />
-            )}
-          </Dialog>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {tables && Object.values(tables).map((table) => (
+          <TableCard
+            key={table.id}
+            table={table}
+            onClick={() => handleTableClick(table.table_number, table.order_id)}
+          />
         ))}
       </div>
 
       <TableManagementDialogs
-        isAddDialogOpen={isAddDialogOpen}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-        isDeleteDialogOpen={isDeleteDialogOpen}
-        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-        selectedTable={selectedTable}
-        setSelectedTable={setSelectedTable}
-        newTableNumber={newTableNumber}
-        setNewTableNumber={setNewTableNumber}
-        handleAddTable={handleAddTable}
+        showAddDialog={showAddDialog}
+        onCloseAddDialog={() => setShowAddDialog(false)}
       />
     </div>
   );
