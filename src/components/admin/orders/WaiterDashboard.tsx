@@ -5,6 +5,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Database } from '@/integrations/supabase/types';
 import { WaiterOrderCard } from './WaiterOrderCard';
 import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
+import { TableGrid } from './TableGrid';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList } from "lucide-react";
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -97,47 +99,49 @@ export const WaiterDashboard = () => {
     };
   }, [queryClient, toast]);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Waiter Orders</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <KitchenOrderSkeleton />
-          <KitchenOrderSkeleton />
-          <KitchenOrderSkeleton />
-        </div>
-      </div>
-    );
-  }
-
-  if (!orders?.length) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4 text-gray-500">
-        <ClipboardList className="w-12 h-12" />
-        <h3 className="text-xl font-semibold">No Orders to Handle</h3>
-        <p>When new orders come in or are ready for delivery, they will appear here.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Waiter Orders</h2>
+        <h2 className="text-2xl font-bold">Waiter Dashboard</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {orders?.map((order) => (
-          <WaiterOrderCard
-            key={order.id}
-            order={order}
-            onUpdateStatus={updateOrderStatus}
-            statusColors={statusColors}
-          />
-        ))}
-      </div>
+      <Tabs defaultValue="tables">
+        <TabsList>
+          <TabsTrigger value="tables">Tables</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="tables" className="mt-4">
+          <TableGrid />
+        </TabsContent>
+        
+        <TabsContent value="orders">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <KitchenOrderSkeleton />
+              <KitchenOrderSkeleton />
+              <KitchenOrderSkeleton />
+            </div>
+          ) : !orders?.length ? (
+            <div className="flex flex-col items-center justify-center h-64 space-y-4 text-gray-500">
+              <ClipboardList className="w-12 h-12" />
+              <h3 className="text-xl font-semibold">No Orders to Handle</h3>
+              <p>When new orders come in or are ready for delivery, they will appear here.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {orders?.map((order) => (
+                <WaiterOrderCard
+                  key={order.id}
+                  order={order}
+                  onUpdateStatus={updateOrderStatus}
+                  statusColors={statusColors}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
