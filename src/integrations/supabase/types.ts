@@ -230,6 +230,60 @@ export type Database = {
         }
         Relationships: []
       }
+      store_hours: {
+        Row: {
+          close_time: string | null
+          created_at: string | null
+          day_of_week: string
+          id: string
+          is_closed: boolean | null
+          open_time: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          close_time?: string | null
+          created_at?: string | null
+          day_of_week: string
+          id?: string
+          is_closed?: boolean | null
+          open_time?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          close_time?: string | null
+          created_at?: string | null
+          day_of_week?: string
+          id?: string
+          is_closed?: boolean | null
+          open_time?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          address: string
+          created_at: string | null
+          id: string
+          store_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string | null
+          id?: string
+          store_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string | null
+          id?: string
+          store_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

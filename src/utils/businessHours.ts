@@ -1,18 +1,37 @@
 import { format, addDays, isAfter, isBefore, parse, setHours, setMinutes } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 type DaySchedule = {
   open: string;
   close: string;
 } | null;
 
-export const businessHours: { [key: string]: DaySchedule } = {
-  Sunday: { open: '11:00', close: '20:30' },
-  Monday: null,
-  Tuesday: { open: '16:00', close: '20:30' },
-  Wednesday: { open: '16:00', close: '20:30' },
-  Thursday: { open: '16:00', close: '20:30' },
-  Friday: { open: '11:00', close: '20:30' },
-  Saturday: { open: '11:00', close: '20:30' },
+export const getStoreHours = async () => {
+  const { data: hours, error } = await supabase
+    .from('store_hours')
+    .select('*')
+    .order('CASE day_of_week 
+      WHEN \'Sunday\' THEN 1 
+      WHEN \'Monday\' THEN 2 
+      WHEN \'Tuesday\' THEN 3 
+      WHEN \'Wednesday\' THEN 4 
+      WHEN \'Thursday\' THEN 5 
+      WHEN \'Friday\' THEN 6 
+      WHEN \'Saturday\' THEN 7 
+    END');
+
+  if (error) {
+    console.error('Error fetching store hours:', error);
+    return null;
+  }
+
+  return hours.reduce((acc: { [key: string]: DaySchedule }, hour) => {
+    acc[hour.day_of_week] = hour.is_closed ? null : {
+      open: hour.open_time,
+      close: hour.close_time
+    };
+    return acc;
+  }, {});
 };
 
 export const getAvailableDays = (startDate: Date = new Date()): Date[] => {
@@ -58,4 +77,32 @@ export const getAvailableTimeSlots = (date: Date): string[] => {
 
 const getMinutes = (date: Date): number => {
   return date.getMinutes();
+};
+
+export const isStoreOpen = async () => {
+  const hours = await getStoreHours();
+  if (!hours) return false;
+
+  const now = new Date();
+  const currentDay = format(now, 'EEEE');
+  const currentTime = format(now, 'HH:mm');
+  
+  const schedule = hours[currentDay];
+  if (!schedule) return false;
+
+  return currentTime >= schedule.open && currentTime <= schedule.close;
+};
+
+export const getStoreSettings = async () => {
+  const { data, error } = await supabase
+    .from('store_settings')
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('Error fetching store settings:', error);
+    return null;
+  }
+
+  return data;
 };

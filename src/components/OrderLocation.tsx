@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MapPin, Clock, Trash2, Plus } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -6,6 +6,8 @@ import { DeliveryModeSelector } from "./order/DeliveryModeSelector";
 import { TimeSelector } from "./order/TimeSelector";
 import { ComplementaryItems } from "./ComplementaryItems";
 import { useCartStore } from "@/stores/useCartStore";
+import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
+import { PickupTimeModal } from "./PickupTimeModal";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -15,10 +17,42 @@ interface OrderLocationProps {
 
 export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocationProps) => {
   const isMobile = useIsMobile();
-  const [selectedTime, setSelectedTime] = React.useState("Wednesday - Reopen");
-  const [showVoucherInput, setShowVoucherInput] = React.useState(false);
+  const [selectedTime, setSelectedTime] = useState("Wednesday - Reopen");
+  const [showVoucherInput, setShowVoucherInput] = useState(false);
+  const [storeAddress, setStoreAddress] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
+  const [showTimeModal, setShowTimeModal] = useState(false);
   
   const { items, updateQuantity, removeItem } = useCartStore();
+
+  useEffect(() => {
+    const loadStoreData = async () => {
+      const settings = await getStoreSettings();
+      if (settings) {
+        setStoreAddress(settings.address);
+        setStoreName(settings.store_name);
+      }
+
+      const storeOpen = await isStoreOpen();
+      setIsStoreCurrentlyOpen(storeOpen);
+    };
+
+    loadStoreData();
+    
+    // Check store status every minute
+    const interval = setInterval(async () => {
+      const storeOpen = await isStoreOpen();
+      setIsStoreCurrentlyOpen(storeOpen);
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleScheduleTime = (date: string, time: string) => {
+    setSelectedTime(`${date} at ${time}`);
+    setShowTimeModal(false);
+  };
 
   const content = (
     <div className="h-full flex flex-col bg-white">
@@ -33,10 +67,8 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
             <div className="flex items-start space-x-3">
               <MapPin className="h-5 w-5 text-gray-500 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-medium text-[#2D3648]">Town and Country Pizza</h3>
-                <p className="text-sm text-gray-600">
-                  16 Central Boulevard Armstrong Creek
-                </p>
+                <h3 className="font-medium text-[#2D3648]">{storeName}</h3>
+                <p className="text-sm text-gray-600">{storeAddress}</p>
               </div>
             </div>
 
@@ -50,7 +82,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
               </div>
               <button 
                 className="text-emerald-600 text-sm font-medium"
-                onClick={() => {}}
+                onClick={() => setShowTimeModal(true)}
               >
                 CHANGE
               </button>
@@ -134,12 +166,21 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
 
       <div className="mt-auto p-6">
         <button
-          className="w-full bg-red-500 text-white py-4 rounded-lg font-medium flex items-center justify-center space-x-2"
+          className={`w-full ${
+            isStoreCurrentlyOpen ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-500'
+          } text-white py-4 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors`}
+          disabled={!isStoreCurrentlyOpen && !selectedTime}
         >
-          <span>Store Closed</span>
-          <span className="ml-1">→</span>
+          <span>{isStoreCurrentlyOpen ? 'Place Order' : 'Store Closed'}</span>
+          {isStoreCurrentlyOpen && <span className="ml-1">→</span>}
         </button>
       </div>
+
+      <PickupTimeModal
+        isOpen={showTimeModal}
+        onClose={() => setShowTimeModal(false)}
+        onSchedule={handleScheduleTime}
+      />
     </div>
   );
 
