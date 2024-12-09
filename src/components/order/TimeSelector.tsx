@@ -16,7 +16,7 @@ export const TimeSelector = ({ mode, selectedTime, onTimeChange }: TimeSelectorP
           <h3 className="font-medium text-[#2D3648]">{mode === 'pickup' ? 'Pickup Time' : 'Delivery Time'}</h3>
           <button 
             onClick={onTimeChange}
-            className="px-3 py-1 border border-[#10B981] text-[#10B981] text-sm font-medium rounded hover:bg-[#10B981]/5 transition-colors"
+            className="text-[#10B981] text-sm font-medium hover:text-[#059669] transition-colors"
           >
             CHANGE
           </button>

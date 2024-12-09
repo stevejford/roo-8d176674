@@ -28,6 +28,7 @@ const Index = () => {
   } | null>(null);
 
   const [showLocationSheet, setShowLocationSheet] = useState(!isMobile);
+  const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
 
   // Transform products into category-based structure
   const productsByCategory = useMemo(() => {
@@ -78,7 +79,7 @@ const Index = () => {
       </div>
 
       <OrderLocation 
-        mode="delivery" 
+        mode={deliveryMode}
         isOpen={showLocationSheet}
         onOpenChange={setShowLocationSheet}
       />
