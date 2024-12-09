@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Check } from "lucide-react";
 import { useCartStore } from "@/stores/useCartStore";
 import { useVoucherValidation } from "@/hooks/useVoucherValidation";
 import { cn } from "@/lib/utils";
@@ -47,17 +47,25 @@ export const OrderItems = () => {
               {isValidating ? (
                 <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
               ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowVoucherInput(false);
-                    setVoucherCode('');
-                    clearVoucher();
-                  }}
-                  className="text-red-500"
-                >
-                  Cancel
-                </button>
+                <>
+                  <button
+                    type="submit"
+                    className="text-red-500 font-medium hover:text-red-600"
+                  >
+                    Apply
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowVoucherInput(false);
+                      setVoucherCode('');
+                      clearVoucher();
+                    }}
+                    className="text-gray-400 hover:text-gray-500"
+                  >
+                    Cancel
+                  </button>
+                </>
               )}
             </div>
           </form>
@@ -67,13 +75,16 @@ export const OrderItems = () => {
         </div>
       ) : validVoucher ? (
         <div className="bg-green-50 p-3 rounded-lg flex items-center justify-between mb-4">
-          <div>
-            <span className="text-green-700 font-medium">{validVoucher.code}</span>
-            <p className="text-sm text-green-600">
-              {validVoucher.discount_type === 'percentage' 
-                ? `${validVoucher.discount_value}% off`
-                : `$${validVoucher.discount_value} off`}
-            </p>
+          <div className="flex items-center gap-2">
+            <Check className="h-5 w-5 text-green-600" />
+            <div>
+              <span className="text-green-700 font-medium">{validVoucher.code}</span>
+              <p className="text-sm text-green-600">
+                {validVoucher.discount_type === 'percentage' 
+                  ? `${validVoucher.discount_value}% off`
+                  : `$${validVoucher.discount_value} off`}
+              </p>
+            </div>
           </div>
           <button
             onClick={() => {
