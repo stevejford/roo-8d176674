@@ -81,18 +81,23 @@ export const OrderManagement = ({
     );
   }
 
+  const handleOrderClick = (order: any) => {
+    console.log('Order clicked:', order);
+    setSelectedOrder(order);
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {orders?.map((order) => (
           <div 
             key={order.id}
-            onClick={() => setSelectedOrder(order)}
+            onClick={() => handleOrderClick(order)}
             className="cursor-pointer"
           >
             <WaiterOrderCard
               order={order}
-              onUpdateStatus={onUpdateStatus}
+              onUpdateStatus={(status) => onUpdateStatus(order.id, status)}
               statusColors={statusColors}
               isNew={newOrderIds.has(order.id)}
             />
