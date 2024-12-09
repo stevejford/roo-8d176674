@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from 'date-fns';
+import { useToast } from "@/components/ui/use-toast";
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -23,6 +24,9 @@ const statusColors = {
 };
 
 export const OrderList = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const { data: orders, isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
@@ -43,6 +47,45 @@ export const OrderList = () => {
       return data;
     },
   });
+
+  React.useEffect(() => {
+    // Subscribe to changes in the orders table
+    const ordersSubscription = supabase
+      .channel('orders-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders'
+        },
+        async (payload) => {
+          console.log('Received real-time update:', payload);
+          
+          // Show toast notification based on the type of change
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "New Order Received",
+              description: `Order #${payload.new.id.slice(0, 8)} has been created.`,
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            toast({
+              title: "Order Updated",
+              description: `Order #${payload.new.id.slice(0, 8)} status changed to ${payload.new.status}.`,
+            });
+          }
+
+          // Invalidate the orders query to trigger a refetch
+          await queryClient.invalidateQueries({ queryKey: ['orders'] });
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on component unmount
+    return () => {
+      ordersSubscription.unsubscribe();
+    };
+  }, [queryClient, toast]);
 
   if (isLoading) {
     return (
