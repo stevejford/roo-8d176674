@@ -19,6 +19,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { Database } from '@/integrations/supabase/types';
+
+type UserRole = Database['public']['Enums']['user_role'];
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 const roleColors = {
   admin: "bg-red-100 text-red-800",
@@ -28,13 +32,13 @@ const roleColors = {
   delivery: "bg-green-100 text-green-800",
   owner: "bg-indigo-100 text-indigo-800",
   user: "bg-gray-100 text-gray-800"
-};
+} as const;
 
 const statusColors = {
   active: "bg-green-100 text-green-800",
   inactive: "bg-red-100 text-red-800",
   pending: "bg-yellow-100 text-yellow-800"
-};
+} as const;
 
 export const UserManagement = () => {
   const { toast } = useToast();
@@ -49,12 +53,12 @@ export const UserManagement = () => {
         .order('role');
       
       if (error) throw error;
-      return data;
+      return data as Profile[];
     },
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: async ({ id, role, status }: { id: string, role?: string, status?: string }) => {
+    mutationFn: async ({ id, role, status }: { id: string, role?: UserRole, status?: string }) => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -82,7 +86,7 @@ export const UserManagement = () => {
     },
   });
 
-  const handleRoleChange = (userId: string, newRole: string) => {
+  const handleRoleChange = (userId: string, newRole: UserRole) => {
     updateUserMutation.mutate({ id: userId, role: newRole });
   };
 
@@ -133,7 +137,7 @@ export const UserManagement = () => {
               <TableCell>
                 <Select
                   value={user.role || 'user'}
-                  onValueChange={(value) => handleRoleChange(user.id, value)}
+                  onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
                 >
                   <SelectTrigger className="w-[140px]">
                     <SelectValue>
