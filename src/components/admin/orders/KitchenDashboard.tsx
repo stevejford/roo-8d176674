@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
-import { Clock, CheckCircle, XCircle } from "lucide-react";
+import { Clock, CheckCircle, XCircle, UtensilsCrossed } from "lucide-react";
 import { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -110,6 +110,16 @@ export const KitchenDashboard = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (!orders?.length) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4 text-gray-500">
+        <UtensilsCrossed className="w-12 h-12" />
+        <h3 className="text-xl font-semibold">No Orders to Prepare</h3>
+        <p>When new orders come in, they will appear here.</p>
       </div>
     );
   }
