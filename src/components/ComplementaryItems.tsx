@@ -39,7 +39,7 @@ export const ComplementaryItems = () => {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold leading-tight tracking-normal text-left mb-3 last:mb-0 text-5.75 sm:text-5.5 !tracking-s-tight text-primary-title">
+      <h3 className="font-semibold text-lg text-[#2D3648]">
         Compliment your Order
       </h3>
       <div className="relative">
@@ -58,7 +58,7 @@ export const ComplementaryItems = () => {
             <ComplementaryItem
               key={item.id}
               name={item.title}
-              price={24.00}
+              price={item.price || 24.00}
               image={item.image_url || '/placeholder.svg'}
             />
           ))}
