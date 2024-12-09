@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, X, Clock, Trash2, Plus } from "lucide-react";
+import { MapPin, Clock, Trash2, Plus } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DeliveryModeSelector } from "./order/DeliveryModeSelector";
@@ -106,11 +106,13 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
                 {orderItems.map((item, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <img 
-                        src={item.image} 
-                        alt={item.name}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
+                      <div className="w-12 h-12 rounded-lg overflow-hidden">
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <div>
                         <h4 className="font-medium text-[#2D3648]">{item.name}</h4>
                         <p className="text-sm text-gray-500">{item.size}</p>
@@ -121,7 +123,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
                       <button className="text-gray-400">
                         <Trash2 className="h-5 w-5" />
                       </button>
-                      <span className="text-[#2D3648]">{item.quantity}</span>
+                      <span className="text-[#2D3648] font-medium">{item.quantity}</span>
                       <button className="text-gray-600 font-medium">+</button>
                     </div>
                   </div>
