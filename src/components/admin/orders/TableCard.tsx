@@ -32,22 +32,22 @@ export const TableCard = ({ table, onSelect, onViewOrder }: TableCardProps) => {
     <DialogTrigger asChild>
       <Button
         variant={table.status === 'available' ? 'outline' : 'default'}
-        className={`min-h-[10rem] w-full transition-all duration-300 hover:shadow-lg ${getTableStatusColor(table.status)}`}
+        className={`min-h-[12rem] w-full transition-all duration-300 hover:shadow-lg ${getTableStatusColor(table.status)}`}
         onClick={onSelect}
       >
-        <div className="flex flex-col items-center justify-center w-full space-y-3 p-4">
-          <div className="text-xl font-semibold mb-1">Table {table.table_number}</div>
+        <div className="flex flex-col items-center justify-center w-full space-y-4 p-6">
+          <div className="text-2xl font-semibold mb-2">Table {table.table_number}</div>
           {table.status === 'occupied' ? (
             <>
-              <Users className="h-7 w-7 mb-2 opacity-90" />
+              <Users className="h-8 w-8 mb-3 opacity-90" />
               {table.customer_name && (
-                <div className="text-sm font-medium opacity-90">
+                <div className="text-base font-medium opacity-90">
                   {table.customer_name}
                 </div>
               )}
               <Badge 
                 variant="secondary" 
-                className="bg-white/20 text-white font-medium px-3 py-1"
+                className="bg-white/20 text-white font-medium px-4 py-1.5 text-sm"
               >
                 {table.order_status || 'Occupied'}
               </Badge>
@@ -55,7 +55,7 @@ export const TableCard = ({ table, onSelect, onViewOrder }: TableCardProps) => {
                 <Button
                   size="sm"
                   variant="secondary"
-                  className="mt-2 bg-white/20 hover:bg-white/30 text-white font-medium"
+                  className="mt-3 bg-white/20 hover:bg-white/30 text-white font-medium px-4"
                   onClick={(e) => {
                     e.stopPropagation();
                     onViewOrder(table.order_id!);
@@ -68,10 +68,10 @@ export const TableCard = ({ table, onSelect, onViewOrder }: TableCardProps) => {
             </>
           ) : (
             <>
-              <Plus className="h-7 w-7 mb-2" />
+              <Plus className="h-8 w-8 mb-3" />
               <Badge 
                 variant="secondary"
-                className="px-3 py-1 font-medium"
+                className="px-4 py-1.5 font-medium text-sm"
               >
                 Available
               </Badge>

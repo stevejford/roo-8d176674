@@ -20,12 +20,9 @@ export const TableGrid = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  console.log('Fetching table data...');
-
   const { data: tables, refetch } = useQuery({
     queryKey: ['tables'],
     queryFn: async () => {
-      console.log('Executing table query...');
       const { data: orders } = await supabase
         .from('orders')
         .select('*')
@@ -33,9 +30,6 @@ export const TableGrid = () => {
         .in('status', ['pending', 'confirmed', 'preparing', 'ready', 'delivered'])
         .order('created_at', { ascending: false });
 
-      console.log('Orders fetched:', orders);
-
-      // Create a map of tables with their current status
       const tableMap: Record<string, Table> = {};
       for (let i = 1; i <= 12; i++) {
         const tableNumber = i.toString();
@@ -52,7 +46,6 @@ export const TableGrid = () => {
         };
       }
       
-      console.log('Processed table map:', tableMap);
       return tableMap;
     }
   });
@@ -68,7 +61,6 @@ export const TableGrid = () => {
           table: 'orders'
         },
         (payload) => {
-          console.log('Order update received:', payload);
           if (payload.eventType === 'UPDATE' && payload.new.status === 'completed') {
             toast({
               title: "Table Available",
@@ -85,30 +77,32 @@ export const TableGrid = () => {
     };
   }, [refetch, toast]);
 
-  if (!tables) return null;
-
   const handleViewOrder = (orderId: string) => {
     navigate(`/admin/waiter/order/${orderId}`);
   };
 
+  if (!tables) return null;
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
-      {Object.values(tables).map((table) => (
-        <Dialog key={table.table_number}>
-          <TableCard
-            table={table}
-            onSelect={() => setSelectedTable(table)}
-            onViewOrder={handleViewOrder}
-          />
-          {selectedTable && (
-            <TableAllocationDialog
-              table={selectedTable}
-              onClose={() => setSelectedTable(null)}
-              onSuccess={refetch}
+    <div className="p-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+        {Object.values(tables).map((table) => (
+          <Dialog key={table.table_number}>
+            <TableCard
+              table={table}
+              onSelect={() => setSelectedTable(table)}
+              onViewOrder={handleViewOrder}
             />
-          )}
-        </Dialog>
-      ))}
+            {selectedTable && (
+              <TableAllocationDialog
+                table={selectedTable}
+                onClose={() => setSelectedTable(null)}
+                onSuccess={refetch}
+              />
+            )}
+          </Dialog>
+        ))}
+      </div>
     </div>
   );
 };
