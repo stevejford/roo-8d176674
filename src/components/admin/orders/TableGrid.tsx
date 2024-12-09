@@ -16,7 +16,7 @@ export const TableGrid = () => {
   const [newTableNumber, setNewTableNumber] = React.useState('');
   const navigate = useNavigate();
   
-  const { tables, addTable, updateTable, refetch } = useTableManagement();
+  const { tables, addTable, updateTable, updateTablePositions, refetch } = useTableManagement();
 
   const handleViewOrder = (orderId: string) => {
     navigate(`/admin/waiter/order/${orderId}`);
@@ -37,10 +37,16 @@ export const TableGrid = () => {
     }
   };
 
-  const handleDragEnd = (result: any) => {
-    // TODO: Implement position updating in the database
+  const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
-    console.log('Moved table from', result.source.index, 'to', result.destination.index);
+
+    const tableArray = Object.values(tables);
+    const [reorderedItem] = tableArray.splice(result.source.index, 1);
+    tableArray.splice(result.destination.index, 0, reorderedItem);
+
+    // Update positions in the database
+    const tableIds = tableArray.map(table => table.id);
+    await updateTablePositions(tableIds);
   };
 
   if (!tables) return null;

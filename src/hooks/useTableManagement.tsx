@@ -9,6 +9,7 @@ export interface Table {
   customer_name?: string;
   order_id?: string;
   order_status?: string;
+  position: number;
 }
 
 export const useTableManagement = () => {
@@ -22,7 +23,7 @@ export const useTableManagement = () => {
       const { data: tablesData, error: tablesError } = await supabase
         .from('tables')
         .select('*')
-        .order('table_number');
+        .order('position');
 
       if (tablesError) throw tablesError;
 
@@ -45,7 +46,8 @@ export const useTableManagement = () => {
           status: activeOrder ? 'occupied' : 'available',
           customer_name: activeOrder?.customer_name,
           order_id: activeOrder?.id,
-          order_status: activeOrder?.status
+          order_status: activeOrder?.status,
+          position: table.position
         };
       });
 
@@ -113,10 +115,34 @@ export const useTableManagement = () => {
     return true;
   };
 
+  const updateTablePositions = async (tableIds: string[]) => {
+    const updates = tableIds.map((id, index) => ({
+      id,
+      position: index + 1
+    }));
+
+    const { error } = await supabase
+      .from('tables')
+      .upsert(updates);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update table positions",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    await refetch();
+    return true;
+  };
+
   return {
     tables,
     refetch,
     addTable,
-    updateTable
+    updateTable,
+    updateTablePositions
   };
 };
