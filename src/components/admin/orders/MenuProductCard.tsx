@@ -32,12 +32,9 @@ export const MenuProductCard = ({
   
   // Calculate the correct price based on pricing hierarchy
   const calculatePrice = () => {
-    console.log('Calculating price for product:', product.title);
-    console.log('Base product:', product);
+    console.log('Calculating price for:', product.title);
     console.log('Product base price:', product.price);
-    console.log('Product pricing override:', productPricing);
-    console.log('Category pricing:', categoryPricing);
-
+    
     // First check for product-specific pricing override
     if (productPricing?.is_override) {
       const config = productPricing.config as PricingConfig;
