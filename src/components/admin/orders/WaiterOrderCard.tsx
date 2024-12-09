@@ -25,51 +25,51 @@ export const WaiterOrderCard = ({ order, onUpdateStatus, statusColors, isNew = f
   }, [isNew]);
 
   return (
-    <div className={`border rounded-lg p-4 bg-white shadow-sm space-y-4 transition-all duration-300 ${
+    <div className={`border rounded-lg p-6 bg-white shadow-sm space-y-6 transition-all duration-300 ${
       highlight ? 'ring-2 ring-blue-500 animate-pulse' : ''
     }`}>
       <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold">Order #{order.id.slice(0, 8)}</h3>
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold">Order #{order.id.slice(0, 8)}</h3>
           <p className="text-sm text-gray-500">
             {format(new Date(order.created_at), 'HH:mm')}
           </p>
           {order.table_number && (
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-base font-medium text-gray-700">
               Table {order.table_number}
             </p>
           )}
         </div>
         <Badge 
           variant="secondary"
-          className={statusColors[order.status as keyof typeof statusColors]}
+          className={`${statusColors[order.status as keyof typeof statusColors]} px-4 py-1.5`}
         >
           {order.status}
         </Badge>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {order.order_items?.map((item: any) => (
-          <div key={item.id} className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{item.quantity}x</span>
-              <span>{item.product?.title}</span>
+          <div key={item.id} className="flex justify-between items-center py-2 border-b last:border-0">
+            <div className="flex items-center gap-3">
+              <span className="font-semibold text-lg">{item.quantity}x</span>
+              <span className="text-base">{item.product?.title}</span>
             </div>
             {item.notes && (
-              <span className="text-sm text-gray-500">Note: {item.notes}</span>
+              <span className="text-sm text-gray-600 italic">Note: {item.notes}</span>
             )}
           </div>
         ))}
       </div>
 
-      <div className="flex gap-2 pt-2">
+      <div className="flex gap-3 pt-2">
         {order.status === 'pending' && (
           <Button
             onClick={() => onUpdateStatus(order.id, 'confirmed')}
             className="flex-1"
-            variant="outline"
+            size="lg"
           >
-            <Send className="w-4 h-4 mr-2" />
+            <Send className="w-5 h-5 mr-2" />
             Send to Kitchen
           </Button>
         )}
@@ -77,9 +77,9 @@ export const WaiterOrderCard = ({ order, onUpdateStatus, statusColors, isNew = f
           <Button
             onClick={() => onUpdateStatus(order.id, 'delivered')}
             className="flex-1"
-            variant="outline"
+            size="lg"
           >
-            <CheckCircle className="w-4 h-4 mr-2" />
+            <CheckCircle className="w-5 h-5 mr-2" />
             Mark Delivered
           </Button>
         )}
@@ -87,9 +87,10 @@ export const WaiterOrderCard = ({ order, onUpdateStatus, statusColors, isNew = f
           <Button
             onClick={() => onUpdateStatus(order.id, 'completed')}
             className="flex-1"
-            variant="outline"
+            size="lg"
+            variant="default"
           >
-            <CheckCircle className="w-4 h-4 mr-2" />
+            <CheckCircle className="w-5 h-5 mr-2" />
             Complete Order
           </Button>
         )}

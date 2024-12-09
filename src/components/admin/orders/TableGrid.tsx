@@ -84,8 +84,8 @@ export const TableGrid = () => {
   if (!tables) return null;
 
   return (
-    <div className="p-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+    <div className="p-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {Object.values(tables).map((table) => (
           <Dialog key={table.table_number}>
             <TableCard
