@@ -5,7 +5,7 @@ import { OrderItems } from './waiter/OrderItems';
 import { OrderActions } from './waiter/OrderActions';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { KitchenIcon } from "lucide-react";
+import { UtensilsCrossed } from "lucide-react";
 
 interface WaiterOrderCardProps {
   order: any;
@@ -150,7 +150,7 @@ export const WaiterOrderCard = ({
               className="flex-1 bg-orange-500 hover:bg-orange-600"
               onClick={handleSendToKitchen}
             >
-              <KitchenIcon className="w-4 h-4 mr-2" />
+              <UtensilsCrossed className="w-4 h-4 mr-2" />
               Send to Kitchen
             </Button>
           )}
