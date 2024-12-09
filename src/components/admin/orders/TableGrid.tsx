@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus, Users, ClipboardCheck } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ interface Table {
 }
 
 export const TableGrid = () => {
+  const navigate = useNavigate();
   const [selectedTable, setSelectedTable] = React.useState<Table | null>(null);
   const [customerName, setCustomerName] = React.useState('');
   const { toast } = useToast();
@@ -148,8 +150,7 @@ export const TableGrid = () => {
                 <Button 
                   className="w-full"
                   onClick={() => {
-                    // Navigate to order creation
-                    window.location.href = `/admin/waiter/order/${table.order_id}`;
+                    navigate(`/admin/waiter/order/${table.order_id}`);
                   }}
                 >
                   <ClipboardCheck className="mr-2 h-4 w-4" />

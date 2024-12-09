@@ -15,7 +15,6 @@ import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSecti
 import {
   Card,
   CardHeader,
-  CardFooter,
   CardTitle,
   CardDescription,
   CardContent,
@@ -175,6 +174,7 @@ const Admin = () => {
             <Route path="orders/*" element={<Orders />} />
             <Route path="kitchen/*" element={<KitchenDashboard />} />
             <Route path="waiter/*" element={<WaiterDashboard />} />
+            <Route path="waiter/order/:orderId" element={<WaiterDashboard />} />
             <Route path="users/*" element={<UsersManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
             <Route path="settings/*" element={<SettingsPanel />} />
