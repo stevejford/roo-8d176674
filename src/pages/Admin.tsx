@@ -102,9 +102,9 @@ const Admin = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar isAdmin={isAdmin} onCategoryClick={() => {}} onSignOut={handleSignOut} />
       
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex pt-16">
         {/* Sidebar */}
-        <div className="hidden md:flex w-64 flex-col bg-white border-r">
+        <div className="hidden md:flex w-64 flex-col bg-white border-r fixed h-[calc(100vh-4rem)] top-16">
           <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
             <nav className="mt-5 flex-1 px-2 space-y-1">
               {navigation.map((item) => {
@@ -133,7 +133,7 @@ const Admin = () => {
         </div>
 
         {/* Main content */}
-        <div className="flex-1 overflow-auto p-8">
+        <div className="flex-1 ml-64 p-8">
           <Routes>
             <Route index element={<Dashboard />} />
             <Route path="products/*" element={<Products />} />
