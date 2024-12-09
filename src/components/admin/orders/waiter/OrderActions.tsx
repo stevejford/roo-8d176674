@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MenuBrowserDialog } from '../menu/MenuBrowserDialog';
 import { DollarSign, CreditCard, Banknote, Plus } from "lucide-react";

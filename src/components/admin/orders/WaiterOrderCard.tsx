@@ -3,6 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { OrderHeader } from './waiter/OrderHeader';
 import { OrderItems } from './waiter/OrderItems';
 import { OrderActions } from './waiter/OrderActions';
+import { supabase } from "@/integrations/supabase/client";
 
 interface WaiterOrderCardProps {
   order: any;
