@@ -94,7 +94,8 @@ export const UserManagement = () => {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={user.status === "active" ? "success" : "destructive"}
+                    variant={user.status === "active" ? "secondary" : "destructive"}
+                    className={user.status === "active" ? "bg-green-100 text-green-800" : ""}
                   >
                     {user.status}
                   </Badge>
