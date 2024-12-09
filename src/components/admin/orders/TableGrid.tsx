@@ -1,13 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { TableCard } from './TableCard';
 import { TableAllocationDialog } from './TableAllocationDialog';
+import { TableManagementDialogs } from './TableManagementDialogs';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useTableManagement } from '@/hooks/useTableManagement';
-import { useToast } from "@/components/ui/use-toast";
 
 export const TableGrid = () => {
   const [selectedTable, setSelectedTable] = React.useState<any>(null);
@@ -15,7 +14,6 @@ export const TableGrid = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
   const [newTableNumber, setNewTableNumber] = React.useState('');
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   const { tables, addTable, updateTable, refetch } = useTableManagement();
 
@@ -34,10 +32,6 @@ export const TableGrid = () => {
   const handleEditTable = async (table: any, newTableNumber: string) => {
     const success = await updateTable(table.id, newTableNumber);
     if (success) {
-      toast({
-        title: "Table updated",
-        description: `Table number changed to ${newTableNumber}`,
-      });
       refetch();
     }
   };
@@ -78,49 +72,17 @@ export const TableGrid = () => {
         ))}
       </div>
 
-      {/* Add Table Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Table</DialogTitle>
-            <DialogDescription>
-              Enter the number for the new table.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <Input
-              value={newTableNumber}
-              onChange={(e) => setNewTableNumber(e.target.value)}
-              placeholder="Table number"
-              className="col-span-2"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddTable}>Add Table</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Table Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Table</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete Table {selectedTable?.table_number}? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={async () => {
-              // For now, we'll just close the dialog as delete functionality will be implemented later
-              setIsDeleteDialogOpen(false);
-              setSelectedTable(null);
-            }}>Delete</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TableManagementDialogs
+        isAddDialogOpen={isAddDialogOpen}
+        setIsAddDialogOpen={setIsAddDialogOpen}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        selectedTable={selectedTable}
+        setSelectedTable={setSelectedTable}
+        newTableNumber={newTableNumber}
+        setNewTableNumber={setNewTableNumber}
+        handleAddTable={handleAddTable}
+      />
     </div>
   );
 };

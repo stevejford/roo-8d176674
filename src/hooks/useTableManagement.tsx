@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 export interface Table {
+  id: string;
   table_number: string;
   status: 'available' | 'occupied' | 'reserved';
   customer_name?: string;
@@ -39,6 +40,7 @@ export const useTableManagement = () => {
       tablesData?.forEach(table => {
         const activeOrder = orders?.find(o => o.table_number === table.table_number);
         tableMap[table.table_number] = {
+          id: table.id,
           table_number: table.table_number,
           status: activeOrder ? 'occupied' : 'available',
           customer_name: activeOrder?.customer_name,
@@ -83,9 +85,38 @@ export const useTableManagement = () => {
     return true;
   };
 
+  const updateTable = async (tableId: string, newTableNumber: string) => {
+    if (!newTableNumber.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a table number",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const { error } = await supabase
+      .from('tables')
+      .update({ table_number: newTableNumber })
+      .eq('id', tableId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    await refetch();
+    return true;
+  };
+
   return {
     tables,
     refetch,
-    addTable
+    addTable,
+    updateTable
   };
 };
