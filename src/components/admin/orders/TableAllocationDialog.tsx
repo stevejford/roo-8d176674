@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogContent,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,6 +85,12 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
             : `Table ${table.table_number} - ${table.customer_name}`
           }
         </DialogTitle>
+        <DialogDescription>
+          {table.status === 'available' 
+            ? "Enter customer details to allocate this table"
+            : "View or manage the current table allocation"
+          }
+        </DialogDescription>
       </DialogHeader>
       {table.status === 'available' ? (
         <div className="space-y-4">

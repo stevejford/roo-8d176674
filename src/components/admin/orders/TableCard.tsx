@@ -33,10 +33,20 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
   return (
     <div className="relative">
       <DialogTrigger asChild>
-        <Button
-          variant={table.status === 'available' ? 'outline' : 'default'}
-          className={`relative h-[12rem] w-full transition-all duration-300 hover:shadow-lg ${getTableStatusColor(table.status)}`}
+        <div
+          role="button"
+          tabIndex={0}
+          className={`relative h-[12rem] w-full transition-all duration-300 hover:shadow-lg ${
+            table.status === 'available' 
+              ? 'border rounded-md border-input bg-background hover:bg-accent hover:text-accent-foreground' 
+              : `text-white ${getTableStatusColor(table.status)}`
+          }`}
           onClick={onSelect}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onSelect();
+            }
+          }}
         >
           <div className="absolute top-3 left-3 text-left">
             <div className="text-2xl font-bold mb-1">Table {table.table_number}</div>
@@ -83,7 +93,7 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
               </>
             )}
           </div>
-        </Button>
+        </div>
       </DialogTrigger>
       
       {/* Table management buttons */}

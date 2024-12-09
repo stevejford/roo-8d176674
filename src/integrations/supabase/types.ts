@@ -170,33 +170,81 @@ export type Database = {
       }
       orders: {
         Row: {
+          appetizer_cleared_at: string | null
+          appetizer_ordered_at: string | null
+          appetizer_served_at: string | null
           created_at: string | null
           created_by: string | null
           customer_name: string | null
+          dessert_cleared_at: string | null
+          dessert_ordered_at: string | null
+          dessert_served_at: string | null
+          dessert_suggested_at: string | null
+          drinks_suggested_at: string | null
+          food_delivered_at: string | null
+          food_ready_at: string | null
           id: string
+          last_check_at: string | null
+          main_cleared_at: string | null
+          main_ordered_at: string | null
+          main_served_at: string | null
           notes: string | null
+          order_taken_at: string | null
+          seated_at: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           table_number: string | null
           total_amount: number | null
           updated_at: string | null
         }
         Insert: {
+          appetizer_cleared_at?: string | null
+          appetizer_ordered_at?: string | null
+          appetizer_served_at?: string | null
           created_at?: string | null
           created_by?: string | null
           customer_name?: string | null
+          dessert_cleared_at?: string | null
+          dessert_ordered_at?: string | null
+          dessert_served_at?: string | null
+          dessert_suggested_at?: string | null
+          drinks_suggested_at?: string | null
+          food_delivered_at?: string | null
+          food_ready_at?: string | null
           id?: string
+          last_check_at?: string | null
+          main_cleared_at?: string | null
+          main_ordered_at?: string | null
+          main_served_at?: string | null
           notes?: string | null
+          order_taken_at?: string | null
+          seated_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           table_number?: string | null
           total_amount?: number | null
           updated_at?: string | null
         }
         Update: {
+          appetizer_cleared_at?: string | null
+          appetizer_ordered_at?: string | null
+          appetizer_served_at?: string | null
           created_at?: string | null
           created_by?: string | null
           customer_name?: string | null
+          dessert_cleared_at?: string | null
+          dessert_ordered_at?: string | null
+          dessert_served_at?: string | null
+          dessert_suggested_at?: string | null
+          drinks_suggested_at?: string | null
+          food_delivered_at?: string | null
+          food_ready_at?: string | null
           id?: string
+          last_check_at?: string | null
+          main_cleared_at?: string | null
+          main_ordered_at?: string | null
+          main_served_at?: string | null
           notes?: string | null
+          order_taken_at?: string | null
+          seated_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           table_number?: string | null
           total_amount?: number | null
@@ -417,6 +465,7 @@ export type Database = {
           address: string
           created_at: string | null
           id: string
+          service_timings: Json | null
           store_name: string
           updated_at: string | null
         }
@@ -424,6 +473,7 @@ export type Database = {
           address: string
           created_at?: string | null
           id?: string
+          service_timings?: Json | null
           store_name: string
           updated_at?: string | null
         }
@@ -431,6 +481,7 @@ export type Database = {
           address?: string
           created_at?: string | null
           id?: string
+          service_timings?: Json | null
           store_name?: string
           updated_at?: string | null
         }
