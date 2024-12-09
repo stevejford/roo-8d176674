@@ -131,13 +131,13 @@ const Index = () => {
         {shouldShowCartButton && (
           <button
             onClick={() => setShowLocationSheet(true)}
-            className="fixed bottom-4 right-4 bg-primary text-white rounded-full p-4 shadow-lg flex items-center space-x-2 z-50"
+            className="fixed bottom-0 left-0 right-0 bg-[#D84A4A] text-white py-4 flex items-center justify-center space-x-3 z-50 shadow-lg"
           >
-            <ShoppingCart className="h-6 w-6" />
+            <span className="text-lg font-medium">View Order</span>
             {cartCount > 0 && (
-              <span className="bg-white text-primary rounded-full h-6 w-6 flex items-center justify-center font-bold">
+              <div className="flex items-center justify-center bg-white text-[#D84A4A] rounded-full h-6 w-6 font-bold text-sm">
                 {cartCount}
-              </span>
+              </div>
             )}
           </button>
         )}
