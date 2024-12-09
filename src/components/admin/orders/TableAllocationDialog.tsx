@@ -33,9 +33,6 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { toast } = useToast();
 
-  console.log('Table status:', table.status);
-  console.log('Table order_id:', table.order_id);
-
   const handleAllocation = async () => {
     if (!customerName.trim()) {
       toast({
@@ -84,31 +81,78 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
   };
 
   const handleAddItem = async (product: any) => {
-    if (!table.order_id) return;
+    if (!table.order_id) {
+      toast({
+        title: "Error",
+        description: "No active order found for this table",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const { error } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: table.order_id,
-        product_id: product.id,
-        price: product.price,
+    try {
+      // First, check if the item already exists in the order
+      const { data: existingItems } = await supabase
+        .from('order_items')
+        .select('*')
+        .eq('order_id', table.order_id)
+        .eq('product_id', product.id)
+        .single();
+
+      if (existingItems) {
+        // Update quantity if item exists
+        const { error: updateError } = await supabase
+          .from('order_items')
+          .update({ 
+            quantity: existingItems.quantity + 1,
+            price: product.price
+          })
+          .eq('id', existingItems.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new item if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('order_items')
+          .insert({
+            order_id: table.order_id,
+            product_id: product.id,
+            quantity: 1,
+            price: product.price,
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      toast({
+        title: "Success",
+        description: `Added ${product.title} to the order`,
       });
 
-    if (error) {
+      // Update the total amount in the orders table
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('price, quantity')
+        .eq('order_id', table.order_id);
+
+      if (orderItems) {
+        const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        await supabase
+          .from('orders')
+          .update({ total_amount: totalAmount })
+          .eq('id', table.order_id);
+      }
+
+      setIsMenuOpen(false);
+    } catch (error) {
       console.error('Error adding item:', error);
       toast({
         title: "Error",
         description: "Failed to add item to order",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: `Added ${product.title} to the order`,
-    });
-    setIsMenuOpen(false);
   };
 
   return (
