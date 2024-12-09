@@ -13,6 +13,7 @@ interface OrderLocationProps {
 
 export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocationProps) => {
   const isMobile = useIsMobile();
+
   const [selectedTime, setSelectedTime] = React.useState("Tomorrow - Reopen");
 
   const content = (
@@ -51,7 +52,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+        <SheetContent side="right" className="w-[400px] sm:w-[540px] z-50">
           <div className="mt-6">
             {content}
           </div>
@@ -61,7 +62,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   }
 
   return (
-    <div className="fixed top-0 right-0 w-[400px] h-screen bg-white border-l border-gray-200 p-4 z-50">
+    <div className="fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)] bg-white border-l border-gray-200 p-4 z-50">
       {content}
     </div>
   );

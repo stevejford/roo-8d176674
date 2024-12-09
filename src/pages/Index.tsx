@@ -28,7 +28,6 @@ const Index = () => {
     category_id?: string;
   } | null>(null);
 
-  // Initialize showLocationSheet based on screen width - default to true for desktop
   const isDesktopWidth = windowWidth >= 1280;
   const [showLocationSheet, setShowLocationSheet] = useState(isDesktopWidth);
   const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
@@ -103,7 +102,7 @@ const Index = () => {
           />
 
           {shouldShowSidebar && (
-            <div className="fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)]">
+            <div className="fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)] z-50">
               <OrderLocation 
                 mode={deliveryMode}
                 isOpen={showLocationSheet}
@@ -131,7 +130,6 @@ const Index = () => {
           />
         )}
 
-        {/* Cart Button for Mobile/Tablet */}
         {shouldShowCartButton && (
           <button
             onClick={() => setShowLocationSheet(true)}
