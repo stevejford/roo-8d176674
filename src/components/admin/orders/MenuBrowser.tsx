@@ -9,19 +9,20 @@ import type { Database } from '@/integrations/supabase/types';
 
 type PricingStrategy = Database['public']['Tables']['pricing_strategies']['Row'];
 type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'];
+type ProductRow = Database['public']['Tables']['products']['Row'];
 
 interface ProductPricing extends ProductPricingRow {
   pricing_strategies: PricingStrategy;
 }
 
-interface Product extends Database['public']['Tables']['products']['Row'] {
+interface Product extends ProductRow {
   product_pricing?: ProductPricing[];
 }
 
 interface MenuBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (product: any) => void;
+  onSelect: (product: Product) => void;
 }
 
 export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => {

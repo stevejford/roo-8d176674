@@ -7,12 +7,13 @@ import type { PricingConfig } from '@/types/pricing';
 
 type PricingStrategy = Database['public']['Tables']['pricing_strategies']['Row'];
 type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'];
+type ProductRow = Database['public']['Tables']['products']['Row'];
 
 interface ProductPricing extends ProductPricingRow {
   pricing_strategies: PricingStrategy;
 }
 
-interface Product extends Database['public']['Tables']['products']['Row'] {
+interface Product extends ProductRow {
   product_pricing?: ProductPricing[];
 }
 
