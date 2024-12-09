@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, ClipboardList } from "lucide-react";
 import { OrderManagement } from './OrderManagement';
+import { TableGrid } from './TableGrid';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -134,18 +135,22 @@ export const WaiterDashboard = () => {
     );
   }
 
-  // Show the order management view when no specific order is selected
+  // Show the table grid and order management view when no specific order is selected
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Active Orders</h1>
+    <div className="container mx-auto py-8 space-y-8">
+      <TableGrid />
+      
+      <div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Active Orders</h1>
+        </div>
+        <OrderManagement 
+          orders={orders}
+          isLoading={isLoading}
+          onUpdateStatus={handleStatusChange}
+          statusColors={statusColors}
+        />
       </div>
-      <OrderManagement 
-        orders={orders}
-        isLoading={isLoading}
-        onUpdateStatus={handleStatusChange}
-        statusColors={statusColors}
-      />
     </div>
   );
 };
