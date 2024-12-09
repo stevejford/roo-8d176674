@@ -31,11 +31,15 @@ export const StoreHoursForm = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('store_hours')
-        .select('*')
-        .order('id');
+        .select('*');
 
       if (error) throw error;
-      return data as StoreHours[];
+
+      // Sort the days in correct order
+      const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      return data.sort((a, b) => 
+        dayOrder.indexOf(a.day_of_week) - dayOrder.indexOf(b.day_of_week)
+      ) as StoreHours[];
     },
   });
 
