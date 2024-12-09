@@ -10,15 +10,15 @@ export const getStoreHours = async () => {
   const { data: hours, error } = await supabase
     .from('store_hours')
     .select('*')
-    .order('CASE day_of_week 
-      WHEN \'Sunday\' THEN 1 
-      WHEN \'Monday\' THEN 2 
-      WHEN \'Tuesday\' THEN 3 
-      WHEN \'Wednesday\' THEN 4 
-      WHEN \'Thursday\' THEN 5 
-      WHEN \'Friday\' THEN 6 
-      WHEN \'Saturday\' THEN 7 
-    END');
+    .order(`CASE day_of_week 
+      WHEN 'Sunday' THEN 1 
+      WHEN 'Monday' THEN 2 
+      WHEN 'Tuesday' THEN 3 
+      WHEN 'Wednesday' THEN 4 
+      WHEN 'Thursday' THEN 5 
+      WHEN 'Friday' THEN 6 
+      WHEN 'Saturday' THEN 7 
+    END`);
 
   if (error) {
     console.error('Error fetching store hours:', error);
@@ -41,7 +41,8 @@ export const getAvailableDays = (startDate: Date = new Date()): Date[] => {
   // Get next 7 days
   for (let i = 0; i < 7; i++) {
     const dayName = format(currentDate, 'EEEE');
-    if (businessHours[dayName]) {
+    const hours = await getStoreHours();
+    if (hours && hours[dayName]) {
       days.push(currentDate);
     }
     currentDate = addDays(currentDate, 1);
@@ -52,7 +53,8 @@ export const getAvailableDays = (startDate: Date = new Date()): Date[] => {
 
 export const getAvailableTimeSlots = (date: Date): string[] => {
   const dayName = format(date, 'EEEE');
-  const schedule = businessHours[dayName];
+  const hours = await getStoreHours();
+  const schedule = hours?.[dayName];
   
   if (!schedule) return [];
 
