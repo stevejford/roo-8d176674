@@ -78,6 +78,140 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          order_id: string | null
+          price: number
+          product_id: string | null
+          quantity: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          price: number
+          product_id?: string | null
+          quantity?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          price?: number
+          product_id?: string | null
+          quantity?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          order_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          status: Database["public"]["Enums"]["order_status"]
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          customer_name: string | null
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          table_number: string | null
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          table_number?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          table_number?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_strategies: {
         Row: {
           config: Json
@@ -372,6 +506,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "preparing"
+        | "ready"
+        | "delivered"
+        | "completed"
+        | "cancelled"
       pricing_strategy_type:
         | "simple"
         | "size_based"
