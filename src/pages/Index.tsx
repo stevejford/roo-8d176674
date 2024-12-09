@@ -102,7 +102,7 @@ const Index = () => {
           />
 
           {shouldShowSidebar && (
-            <div className="fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)] z-50">
+            <div className="fixed top-0 right-0 w-[400px] h-screen">
               <OrderLocation 
                 mode={deliveryMode}
                 isOpen={showLocationSheet}

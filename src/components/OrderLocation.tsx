@@ -62,7 +62,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   }
 
   return (
-    <div className="fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)] bg-white border-l border-gray-200 p-4 z-50">
+    <div className="fixed top-0 right-0 w-[400px] h-screen bg-white border-l border-gray-200 p-4 pt-20 z-40">
       {content}
     </div>
   );
