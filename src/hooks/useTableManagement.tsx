@@ -9,7 +9,6 @@ export interface Table {
   customer_name?: string;
   order_id?: string;
   order_status?: string;
-  position: number;
 }
 
 export const useTableManagement = () => {
@@ -22,8 +21,7 @@ export const useTableManagement = () => {
       // First, get all tables
       const { data: tablesData, error: tablesError } = await supabase
         .from('tables')
-        .select('*')
-        .order('position');
+        .select('*');
 
       if (tablesError) throw tablesError;
 
@@ -47,7 +45,6 @@ export const useTableManagement = () => {
           customer_name: activeOrder?.customer_name,
           order_id: activeOrder?.id,
           order_status: activeOrder?.status,
-          position: table.position
         };
       });
 
@@ -65,21 +62,9 @@ export const useTableManagement = () => {
       return false;
     }
 
-    // Get the current maximum position
-    const { data: maxPositionData } = await supabase
-      .from('tables')
-      .select('position')
-      .order('position', { ascending: false })
-      .limit(1);
-
-    const nextPosition = (maxPositionData?.[0]?.position || 0) + 1;
-
     const { error } = await supabase
       .from('tables')
-      .insert({ 
-        table_number: tableNumber,
-        position: nextPosition 
-      });
+      .insert({ table_number: tableNumber });
 
     if (error) {
       toast({
@@ -127,54 +112,10 @@ export const useTableManagement = () => {
     return true;
   };
 
-  const updateTablePositions = async (tableIds: string[]) => {
-    // First, get all table data to preserve table_numbers
-    const { data: currentTables, error: fetchError } = await supabase
-      .from('tables')
-      .select('id, table_number')
-      .in('id', tableIds);
-
-    if (fetchError) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch current table data",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    // Create updates array with all required fields
-    const updates = tableIds.map((id, index) => {
-      const currentTable = currentTables?.find(table => table.id === id);
-      return {
-        id,
-        position: index + 1,
-        table_number: currentTable?.table_number // Include the existing table_number
-      };
-    });
-
-    const { error } = await supabase
-      .from('tables')
-      .upsert(updates);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update table positions",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    await refetch();
-    return true;
-  };
-
   return {
     tables,
     refetch,
     addTable,
     updateTable,
-    updateTablePositions
   };
 };
