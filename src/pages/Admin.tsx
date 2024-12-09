@@ -12,22 +12,8 @@ import {
   BarChart,
   DollarSign,
   Utensils,
+  ClipboardList,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ProductList } from '@/components/admin/products/ProductList';
-import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
-import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
-import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
-import { UserManagement } from '@/components/admin/users/UserManagement';
-import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
-import { OrderList } from '@/components/admin/orders/OrderList';
-import { KitchenDashboard } from '@/components/admin/orders/KitchenDashboard';
 
 const Dashboard = () => (
   <div className="space-y-6">
@@ -123,6 +109,7 @@ const Admin = () => {
     { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Kitchen', href: '/admin/kitchen', icon: Utensils },
+    { name: 'Waiter', href: '/admin/waiter', icon: ClipboardList },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart },
     { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
@@ -170,6 +157,7 @@ const Admin = () => {
             <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />
             <Route path="kitchen/*" element={<KitchenDashboard />} />
+            <Route path="waiter/*" element={<WaiterDashboard />} />
             <Route path="users/*" element={<UsersManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
             <Route path="settings/*" element={<SettingsPanel />} />
