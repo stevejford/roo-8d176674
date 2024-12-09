@@ -20,6 +20,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [sidebarWasOpen, setSidebarWasOpen] = useState(true);
 
   const [selectedProduct, setSelectedProduct] = useState<{
     title: string;
@@ -29,16 +30,21 @@ const Index = () => {
     category_id?: string;
   } | null>(null);
 
-  const [showLocationSheet, setShowLocationSheet] = useState(false);
+  const [showLocationSheet, setShowLocationSheet] = useState(window.innerWidth >= 1280);
   const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
   const [cartCount, setCartCount] = useState(2);
 
   useEffect(() => {
     const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-      if (window.innerWidth >= 1280) {
-        setShowLocationSheet(true);
+      const newWidth = window.innerWidth;
+      setWindowWidth(newWidth);
+      
+      if (newWidth >= 1280) {
+        // If we're going back to desktop size and the sidebar was previously open
+        setShowLocationSheet(sidebarWasOpen);
       } else {
+        // Store the current state before closing
+        setSidebarWasOpen(showLocationSheet);
         setShowLocationSheet(false);
       }
     };
@@ -47,7 +53,7 @@ const Index = () => {
     handleResize(); // Initial check
 
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [showLocationSheet, sidebarWasOpen]);
 
   // Transform products into category-based structure
   const productsByCategory = React.useMemo(() => {
@@ -114,13 +120,21 @@ const Index = () => {
         <OrderSidebar
           selectedProduct={selectedProduct}
           onClose={() => setSelectedProduct(null)}
-          onAfterClose={() => setShowLocationSheet(shouldShowSidebar)}
+          onAfterClose={() => {
+            if (shouldShowSidebar) {
+              setShowLocationSheet(true);
+              setSidebarWasOpen(true);
+            }
+          }}
         />
 
         {/* Cart Button for Mobile/Tablet */}
         {shouldShowCartButton && (
           <button
-            onClick={() => setShowLocationSheet(true)}
+            onClick={() => {
+              setShowLocationSheet(true);
+              setSidebarWasOpen(true);
+            }}
             className="fixed bottom-4 right-4 bg-primary text-white rounded-full p-4 shadow-lg flex items-center space-x-2 z-50"
           >
             <ShoppingCart className="h-6 w-6" />
