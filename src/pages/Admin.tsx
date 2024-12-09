@@ -3,7 +3,6 @@ import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 import { 
   LayoutDashboard, 
   Package, 
@@ -26,6 +25,7 @@ import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm
 import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
 import { UserManagement } from '@/components/admin/users/UserManagement';
 import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
+import { OrderList } from '@/components/admin/orders/OrderList';
 
 const Dashboard = () => (
   <div className="space-y-6">
@@ -68,7 +68,12 @@ const Products = () => (
 );
 
 const Orders = () => (
-  <div>Orders management coming soon</div>
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
+    </div>
+    <OrderList />
+  </div>
 );
 
 const UsersManagement = () => (
