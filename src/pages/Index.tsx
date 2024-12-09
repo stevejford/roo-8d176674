@@ -69,31 +69,31 @@ const Index = () => {
         onCategoryClick={scrollToCategory}
       />
       
-      <div className="pt-16">
+      <div className="pt-16 relative">
         <MainContent
           categories={categories || []}
           productsByCategory={productsByCategory}
           categoryRefs={categoryRefs}
           onProductSelect={handleProductSelect}
         />
+
+        <OrderLocation 
+          mode={deliveryMode}
+          isOpen={showLocationSheet}
+          onOpenChange={setShowLocationSheet}
+        />
+
+        <OrderSidebar
+          selectedProduct={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAfterClose={() => setShowLocationSheet(true)}
+        />
       </div>
-
-      <OrderLocation 
-        mode={deliveryMode}
-        isOpen={showLocationSheet}
-        onOpenChange={setShowLocationSheet}
-      />
-
-      <OrderSidebar
-        selectedProduct={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-        onAfterClose={() => setShowLocationSheet(true)}
-      />
 
       <AppFooter 
         isAdmin={isAdmin}
         isLoggedIn={!!session}
-        onSignOut={() => {}} // This will be handled by the AppFooter component internally
+        onSignOut={() => {}}
       />
     </div>
   );

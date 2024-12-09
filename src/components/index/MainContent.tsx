@@ -8,7 +8,7 @@ interface MainContentProps {
   categories: any[];
   productsByCategory: { [key: string]: Product[] };
   categoryRefs: React.MutableRefObject<{ [key: string]: HTMLDivElement | null }>;
-  onProductSelect: (product: { title: string; description: string; image: string }) => void;
+  onProductSelect: (product: { title: string; description: string; image: string; price: number; category_id?: string }) => void;
 }
 
 export const MainContent = ({ 
@@ -27,16 +27,18 @@ export const MainContent = ({
     : categories;
 
   return (
-    <div className="space-y-12 px-4 max-w-[1400px] mx-auto">
-      {displayCategories.map((category) => (
-        <CategorySection
-          key={category.id}
-          ref={el => categoryRefs.current[category.title] = el}
-          category={category.title}
-          products={category.id === 'popular' ? popularProducts : (productsByCategory[category.id] || [])}
-          onProductSelect={onProductSelect}
-        />
-      ))}
+    <div className="px-4 max-w-[calc(100%-2rem)] md:max-w-[calc(100%-400px)] mx-auto">
+      <div className="space-y-12">
+        {displayCategories.map((category) => (
+          <CategorySection
+            key={category.id}
+            ref={el => categoryRefs.current[category.title] = el}
+            category={category.title}
+            products={category.id === 'popular' ? popularProducts : (productsByCategory[category.id] || [])}
+            onProductSelect={onProductSelect}
+          />
+        ))}
+      </div>
     </div>
   );
 };
