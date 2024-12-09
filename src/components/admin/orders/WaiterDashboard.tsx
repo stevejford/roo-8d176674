@@ -1,15 +1,17 @@
 import React from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/components/ui/use-toast";
-import { Database } from '@/integrations/supabase/types';
-import { WaiterOrderCard } from './WaiterOrderCard';
-import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
+import type { Database } from '@/integrations/supabase/types';
 import { TableGrid } from './TableGrid';
+import { OrderManagement } from './OrderManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardList, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { useWaiterOrders } from '@/hooks/useWaiterOrders';
+import { WaiterOrderCard } from './WaiterOrderCard';
+import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 
@@ -28,55 +30,7 @@ export const WaiterDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  // Query for single order if orderId is present
-  const { data: singleOrder, isLoading: isLoadingSingle } = useQuery({
-    queryKey: ['single-order', orderId],
-    queryFn: async () => {
-      if (!orderId) return null;
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *,
-            product:products (
-              title
-            )
-          )
-        `)
-        .eq('id', orderId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!orderId
-  });
-
-  // Query for all waiter orders
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['waiter-orders'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *,
-            product:products (
-              title
-            )
-          )
-        `)
-        .in('status', ['pending', 'ready'])
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !orderId // Only fetch all orders when not viewing a single order
-  });
+  const { singleOrder, orders, isLoading, isLoadingSingle } = useWaiterOrders(orderId);
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
     const { error } = await supabase
@@ -99,40 +53,6 @@ export const WaiterDashboard = () => {
       queryClient.invalidateQueries({ queryKey: ['single-order', orderId] });
     }
   };
-
-  React.useEffect(() => {
-    const ordersSubscription = supabase
-      .channel('waiter-orders-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders',
-          filter: `status=in.(pending,ready)`
-        },
-        async (payload) => {
-          console.log('Received waiter order update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            toast({
-              title: "New Order",
-              description: `Order #${payload.new.id.slice(0, 8)} has been placed.`,
-            });
-          }
-
-          await queryClient.invalidateQueries({ queryKey: ['waiter-orders'] });
-          if (orderId) {
-            await queryClient.invalidateQueries({ queryKey: ['single-order', orderId] });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      ordersSubscription.unsubscribe();
-    };
-  }, [queryClient, toast, orderId]);
 
   // If viewing a single order
   if (orderId) {
@@ -195,30 +115,12 @@ export const WaiterDashboard = () => {
         </TabsContent>
         
         <TabsContent value="orders">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <KitchenOrderSkeleton />
-              <KitchenOrderSkeleton />
-              <KitchenOrderSkeleton />
-            </div>
-          ) : !orders?.length ? (
-            <div className="flex flex-col items-center justify-center h-64 space-y-4 text-gray-500">
-              <ClipboardList className="w-12 h-12" />
-              <h3 className="text-xl font-semibold">No Orders to Handle</h3>
-              <p>When new orders come in or are ready for delivery, they will appear here.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {orders?.map((order) => (
-                <WaiterOrderCard
-                  key={order.id}
-                  order={order}
-                  onUpdateStatus={updateOrderStatus}
-                  statusColors={statusColors}
-                />
-              ))}
-            </div>
-          )}
+          <OrderManagement
+            orders={orders}
+            isLoading={isLoading}
+            onUpdateStatus={updateOrderStatus}
+            statusColors={statusColors}
+          />
         </TabsContent>
       </Tabs>
     </div>
