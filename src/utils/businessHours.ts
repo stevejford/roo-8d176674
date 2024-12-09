@@ -34,14 +34,14 @@ export const getStoreHours = async () => {
   }, {});
 };
 
-export const getAvailableDays = (startDate: Date = new Date()): Date[] => {
+export const getAvailableDays = async (startDate: Date = new Date()): Promise<Date[]> => {
   const days: Date[] = [];
   let currentDate = startDate;
+  const hours = await getStoreHours();
 
   // Get next 7 days
   for (let i = 0; i < 7; i++) {
     const dayName = format(currentDate, 'EEEE');
-    const hours = await getStoreHours();
     if (hours && hours[dayName]) {
       days.push(currentDate);
     }
@@ -51,7 +51,7 @@ export const getAvailableDays = (startDate: Date = new Date()): Date[] => {
   return days;
 };
 
-export const getAvailableTimeSlots = (date: Date): string[] => {
+export const getAvailableTimeSlots = async (date: Date): Promise<string[]> => {
   const dayName = format(date, 'EEEE');
   const hours = await getStoreHours();
   const schedule = hours?.[dayName];
