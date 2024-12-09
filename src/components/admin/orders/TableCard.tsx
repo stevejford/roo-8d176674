@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Users, ClipboardList, Pencil, Trash2 } from "lucide-react";
+import { Plus, Users, ClipboardList, Pencil, Trash2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DialogTrigger } from "@/components/ui/dialog";
@@ -66,24 +66,27 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
             <div className="flex items-start justify-between mb-3">
               <div className="flex flex-col items-start">
                 {isEditing ? (
-                  <form onSubmit={handleEditSubmit} onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={newTableNumber}
-                        onChange={(e) => setNewTableNumber(e.target.value)}
-                        className="w-24 h-8"
-                        autoFocus
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <Button 
-                        type="submit" 
-                        size="sm"
-                        variant="secondary"
-                        className="h-8"
-                      >
-                        Save
-                      </Button>
-                    </div>
+                  <form 
+                    onSubmit={handleEditSubmit} 
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-2 mb-2"
+                  >
+                    <Input
+                      value={newTableNumber}
+                      onChange={(e) => setNewTableNumber(e.target.value)}
+                      className="w-24 h-8"
+                      autoFocus
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <Button 
+                      type="submit" 
+                      size="sm"
+                      variant="secondary"
+                      className="h-8 whitespace-nowrap"
+                    >
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
                   </form>
                 ) : (
                   <h3 className="text-xl font-bold mb-1">Table {table.table_number}</h3>
@@ -140,30 +143,32 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
       </DialogTrigger>
       
       {/* Table management buttons */}
-      <div className="absolute top-4 right-4 flex space-x-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsEditing(true);
-          }}
-        >
-          <Pencil className="h-4 w-4 text-gray-600" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete?.();
-          }}
-        >
-          <Trash2 className="h-4 w-4 text-red-600" />
-        </Button>
-      </div>
+      {!isEditing && (
+        <div className="absolute top-4 right-4 flex space-x-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditing(true);
+            }}
+          >
+            <Pencil className="h-4 w-4 text-gray-600" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.();
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
