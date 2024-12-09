@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { X } from "lucide-react";
 import { IngredientsEditor } from "./IngredientsEditor";
 import { ExtrasEditor } from "./ExtrasEditor";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { PricingOptions } from "./product/PricingOptions";
 import { PastaTypeSelector } from "./product/PastaTypeSelector";
-import type { PricingConfig } from "@/types/pricing";
-import { cn } from "@/lib/utils";
+import { ProductHeader } from "./product/ProductHeader";
+import { ProductInfo } from "./product/ProductInfo";
+import { ProductActions } from "./product/ProductActions";
 
 interface ProductDetailsProps {
   title: string;
@@ -66,12 +65,10 @@ export const ProductDetails = ({
           )
         `)
         .eq('category_id', category_id)
-        .limit(1);
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
-      if (!data?.length) return null;
-      
-      return data[0];
+      return data;
     },
     enabled: !!category_id
   });
@@ -102,7 +99,7 @@ export const ProductDetails = ({
             )
           `)
           .eq('product_id', products[0].id)
-          .maybeSingle(); // Use maybeSingle() instead of limit(1)
+          .maybeSingle();
 
         if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
         return pricing || null;
@@ -133,44 +130,21 @@ export const ProductDetails = ({
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-auto">
-        <div className="relative">
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 z-10 p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <X className="h-6 w-6 text-gray-500" />
-          </button>
-          <div className="aspect-square w-full">
-            <img
-              src={image}
-              alt={title}
-              className="h-full w-full object-cover"
-            />
-          </div>
-        </div>
+        <ProductHeader 
+          title={title}
+          image={image}
+          onClose={onClose}
+        />
 
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-2xl font-semibold text-[#2D3648]">{title}</h2>
-            <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-sm font-medium">
-              Gluten Free
-            </span>
-          </div>
-          <p className="text-gray-600 mb-6">{description}</p>
-
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg text-[#2D3648]">Options</h3>
-            {pricingStrategy && pricingConfig && (
-              <PricingOptions
-                strategy={pricingStrategy}
-                config={pricingConfig as PricingConfig}
-                selectedSize={selectedSize}
-                onSizeSelect={handleSizeSelect}
-                defaultPrice={price}
-              />
-            )}
-          </div>
-        </div>
+        <ProductInfo
+          title={title}
+          description={description}
+          pricingStrategy={pricingStrategy}
+          pricingConfig={pricingConfig}
+          selectedSize={selectedSize}
+          onSizeSelect={handleSizeSelect}
+          defaultPrice={price}
+        />
       </div>
 
       <PastaTypeSelector
@@ -180,22 +154,10 @@ export const ProductDetails = ({
         onClose={() => setShowPastaTypes(false)}
       />
 
-      <div className="border-t border-gray-200 p-4 mt-auto">
-        <div className="grid grid-cols-2 gap-4">
-          <button 
-            onClick={() => setShowExtrasEditor(true)}
-            className="py-3 px-4 text-[#2D3648] border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Add Extras
-          </button>
-          <button 
-            onClick={() => setShowIngredientsEditor(true)}
-            className="py-3 px-4 text-[#2D3648] border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Edit Ingredients
-          </button>
-        </div>
-      </div>
+      <ProductActions
+        onShowExtras={() => setShowExtrasEditor(true)}
+        onShowIngredients={() => setShowIngredientsEditor(true)}
+      />
 
       <IngredientsEditor
         isOpen={showIngredientsEditor}

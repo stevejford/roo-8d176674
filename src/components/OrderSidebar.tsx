@@ -50,10 +50,10 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
           pricing_strategies (*)
         `)
         .eq('category_id', selectedProduct.category_id)
-        .limit(1);
+        .maybeSingle();
       
-      if (error) throw error;
-      return data?.[0] as CategoryPricing || null;
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
     },
     enabled: !!selectedProduct?.category_id
   });
@@ -64,26 +64,31 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     queryFn: async () => {
       if (!selectedProduct?.title) return null;
       
-      const { data: products, error: productError } = await supabase
-        .from('products')
-        .select('id')
-        .eq('title', selectedProduct.title)
-        .limit(1);
+      try {
+        const { data: products, error: productError } = await supabase
+          .from('products')
+          .select('id')
+          .eq('title', selectedProduct.title)
+          .limit(1);
 
-      if (productError) throw productError;
-      if (!products?.length) return null;
+        if (productError) throw productError;
+        if (!products?.length) return null;
 
-      const { data: pricing, error: pricingError } = await supabase
-        .from('product_pricing')
-        .select(`
-          *,
-          pricing_strategies (*)
-        `)
-        .eq('product_id', products[0].id)
-        .limit(1);
+        const { data: pricing, error: pricingError } = await supabase
+          .from('product_pricing')
+          .select(`
+            *,
+            pricing_strategies (*)
+          `)
+          .eq('product_id', products[0].id)
+          .maybeSingle();
 
-      if (pricingError) throw pricingError;
-      return pricing?.[0] as ProductPricing || null;
+        if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
+        return pricing || null;
+      } catch (error) {
+        console.error('Error fetching product pricing:', error);
+        return null;
+      }
     },
     enabled: !!selectedProduct?.title
   });
