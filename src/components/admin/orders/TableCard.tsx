@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TableCardProps {
   table: {
+    id: string;
     table_number: string;
     status: 'available' | 'occupied' | 'reserved';
     customer_name?: string;
@@ -20,9 +23,10 @@ interface TableCardProps {
   onDelete?: () => void;
 }
 
-export const TableCard = ({ table, onClick, onSelect, onViewOrder, onEdit, onDelete }: TableCardProps) => {
+export const TableCard = ({ table, onClick, onSelect, onViewOrder, onDelete }: TableCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTableNumber, setNewTableNumber] = useState(table.table_number);
+  const { toast } = useToast();
 
   const getTableStatusColor = (status: string) => {
     switch (status) {
@@ -35,12 +39,39 @@ export const TableCard = ({ table, onClick, onSelect, onViewOrder, onEdit, onDel
     }
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onEdit) {
-      onEdit(newTableNumber);
+    
+    if (!newTableNumber.trim()) {
+      toast({
+        title: "Error",
+        description: "Table number cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('tables')
+        .update({ table_number: newTableNumber })
+        .eq('id', table.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Table number updated successfully",
+      });
       setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating table:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update table number",
+        variant: "destructive",
+      });
     }
   };
 
