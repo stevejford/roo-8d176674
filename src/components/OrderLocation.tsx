@@ -17,16 +17,15 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
 
   const content = (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Order</h2>
-        {isMobile && (
-          <button 
-            onClick={() => onOpenChange?.(false)}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        )}
+      <div className="flex justify-between items-center border-b border-gray-200 pb-4">
+        <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
+        <button 
+          onClick={() => onOpenChange?.(false)}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          aria-label="Close order sheet"
+        >
+          <X className="h-6 w-6 text-gray-600" />
+        </button>
       </div>
       
       <DeliveryModeSelector mode={mode} setMode={() => {}} />
