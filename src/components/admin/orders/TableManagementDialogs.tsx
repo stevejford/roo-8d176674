@@ -4,18 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface TableManagementDialogsProps {
-  isAddDialogOpen: boolean;
-  setIsAddDialogOpen: (open: boolean) => void;
-  isDeleteDialogOpen: boolean;
-  setIsDeleteDialogOpen: (open: boolean) => void;
-  selectedTable: any;
-  setSelectedTable: (table: any) => void;
-  newTableNumber: string;
-  setNewTableNumber: (number: string) => void;
-  handleAddTable: () => void;
+  showAddDialog: boolean;  // Add this line
+  onCloseAddDialog: () => void;  // Add this line
+  isAddDialogOpen?: boolean;
+  setIsAddDialogOpen?: (open: boolean) => void;
+  isDeleteDialogOpen?: boolean;
+  setIsDeleteDialogOpen?: (open: boolean) => void;
+  selectedTable?: any;
+  setSelectedTable?: (table: any) => void;
+  newTableNumber?: string;
+  setNewTableNumber?: (number: string) => void;
+  handleAddTable?: () => void;
 }
 
 export const TableManagementDialogs: React.FC<TableManagementDialogsProps> = ({
+  showAddDialog,
+  onCloseAddDialog,
   isAddDialogOpen,
   setIsAddDialogOpen,
   isDeleteDialogOpen,
@@ -29,7 +33,7 @@ export const TableManagementDialogs: React.FC<TableManagementDialogsProps> = ({
   return (
     <>
       {/* Add Table Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      <Dialog open={showAddDialog} onOpenChange={onCloseAddDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Table</DialogTitle>
@@ -40,13 +44,13 @@ export const TableManagementDialogs: React.FC<TableManagementDialogsProps> = ({
           <div className="grid gap-4 py-4">
             <Input
               value={newTableNumber}
-              onChange={(e) => setNewTableNumber(e.target.value)}
+              onChange={(e) => setNewTableNumber?.(e.target.value)}
               placeholder="Table number"
               className="col-span-2"
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => onCloseAddDialog()}>Cancel</Button>
             <Button onClick={handleAddTable}>Add Table</Button>
           </DialogFooter>
         </DialogContent>
@@ -62,10 +66,10 @@ export const TableManagementDialogs: React.FC<TableManagementDialogsProps> = ({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen?.(false)}>Cancel</Button>
             <Button variant="destructive" onClick={() => {
-              setIsDeleteDialogOpen(false);
-              setSelectedTable(null);
+              setIsDeleteDialogOpen?.(false);
+              setSelectedTable?.(null);
             }}>Delete</Button>
           </DialogFooter>
         </DialogContent>

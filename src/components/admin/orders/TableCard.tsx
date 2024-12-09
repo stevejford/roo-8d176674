@@ -13,13 +13,14 @@ interface TableCardProps {
     order_id?: string;
     order_status?: string;
   };
-  onSelect: () => void;
+  onClick: () => void;  // Add this line
+  onSelect?: () => void;
   onViewOrder?: (orderId: string) => void;
   onEdit?: (newTableNumber: string) => void;
   onDelete?: () => void;
 }
 
-export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: TableCardProps) => {
+export const TableCard = ({ table, onClick, onSelect, onViewOrder, onEdit, onDelete }: TableCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTableNumber, setNewTableNumber] = useState(table.table_number);
 
@@ -54,10 +55,10 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
               ? 'border rounded-md border-input bg-background hover:bg-accent hover:text-accent-foreground' 
               : `text-white ${getTableStatusColor(table.status)}`
           }`}
-          onClick={onSelect}
+          onClick={onClick}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
-              onSelect();
+              onClick();
             }
           }}
         >
