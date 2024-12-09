@@ -62,14 +62,10 @@ export const ProductDetails = ({
             pricing_strategies (*)
           `)
           .eq('category_id', category_id)
-          .single();
+          .maybeSingle();
 
-        if (error) {
-          if (error.code === 'PGRST116') return null;
-          throw error;
-        }
-
-        return data as CategoryPricing;
+        if (error) throw error;
+        return data as CategoryPricing | null;
       } catch (error) {
         console.error('Error fetching category pricing:', error);
         return null;
@@ -87,13 +83,9 @@ export const ProductDetails = ({
           .from('products')
           .select('id')
           .eq('title', title)
-          .single();
+          .maybeSingle();
 
-        if (productError) {
-          if (productError.code === 'PGRST116') return null;
-          throw productError;
-        }
-
+        if (productError) throw productError;
         if (!products) return null;
 
         const { data: pricing, error: pricingError } = await supabase
@@ -103,14 +95,10 @@ export const ProductDetails = ({
             pricing_strategies (*)
           `)
           .eq('product_id', products.id)
-          .single();
+          .maybeSingle();
 
-        if (pricingError) {
-          if (pricingError.code === 'PGRST116') return null;
-          throw pricingError;
-        }
-
-        return pricing as ProductPricing;
+        if (pricingError) throw pricingError;
+        return pricing as ProductPricing | null;
       } catch (error) {
         console.error('Error fetching product pricing:', error);
         return null;
