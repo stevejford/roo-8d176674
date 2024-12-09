@@ -80,7 +80,7 @@ const Index = () => {
             onProductSelect={handleProductSelect}
           />
 
-          <div className={`${isMobile ? 'hidden' : 'fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)]'}`}>
+          <div className={`${isMobile ? 'hidden' : 'fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)] xl:block hidden'}`}>
             <OrderLocation 
               mode={deliveryMode}
               isOpen={showLocationSheet}
@@ -96,10 +96,10 @@ const Index = () => {
         />
 
         {/* Cart Button for Mobile/Tablet */}
-        {isMobile && !selectedProduct && (
+        {(isMobile || window.innerWidth < 1280) && !selectedProduct && (
           <button
             onClick={() => setShowLocationSheet(true)}
-            className="fixed bottom-4 right-4 bg-primary text-white rounded-full p-4 shadow-lg flex items-center space-x-2"
+            className="fixed bottom-4 right-4 bg-primary text-white rounded-full p-4 shadow-lg flex items-center space-x-2 z-50"
           >
             <ShoppingCart className="h-6 w-6" />
             {cartCount > 0 && (

@@ -109,8 +109,8 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
         </h3>
         <div className={`grid gap-4 sm:gap-6 ${
           isSpecialsCategory 
-            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2'
-            : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'
+            ? 'grid-cols-1 sm:grid-cols-2'
+            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
         }`}>
           {displayProducts.map((item) => {
             const price = calculatePrice(item);

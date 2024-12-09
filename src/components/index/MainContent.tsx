@@ -31,7 +31,7 @@ export const MainContent = ({
 
   return (
     <div className="relative">
-      <div className={`px-4 mx-auto ${!isMobile ? 'lg:mr-[400px]' : ''}`}>
+      <div className={`px-4 mx-auto ${!isMobile ? 'xl:mr-[400px]' : ''}`}>
         <div className="space-y-12">
           {displayCategories.map((category) => (
             <CategorySection
