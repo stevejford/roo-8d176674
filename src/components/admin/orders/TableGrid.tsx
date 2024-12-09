@@ -7,6 +7,7 @@ import { TableManagementDialogs } from './TableManagementDialogs';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useTableManagement } from '@/hooks/useTableManagement';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 export const TableGrid = () => {
   const [selectedTable, setSelectedTable] = React.useState<any>(null);
@@ -15,7 +16,7 @@ export const TableGrid = () => {
   const [newTableNumber, setNewTableNumber] = React.useState('');
   const navigate = useNavigate();
   
-  const { tables, addTable, updateTable, refetch } = useTableManagement();
+  const { tables, addTable, updateTable, refetch, updateTablePositions } = useTableManagement();
 
   const handleViewOrder = (orderId: string) => {
     navigate(`/admin/waiter/order/${orderId}`);
@@ -36,6 +37,24 @@ export const TableGrid = () => {
     }
   };
 
+  const handleDragEnd = (result: any) => {
+    if (!result.destination || !tables) return;
+
+    const items = Object.values(tables);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Create updates array with new positions while preserving table numbers
+    const updates = items.map((table: any, index: number) => ({
+      id: table.id,
+      table_number: table.table_number, // Preserve table number
+      position: index + 1,
+      status: table.status, // Preserve status
+    }));
+
+    updateTablePositions(updates);
+  };
+
   if (!tables) return null;
 
   return (
@@ -48,29 +67,54 @@ export const TableGrid = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {Object.values(tables).map((table) => (
-          <Dialog key={table.table_number}>
-            <TableCard
-              table={table}
-              onSelect={() => setSelectedTable(table)}
-              onViewOrder={handleViewOrder}
-              onEdit={(newTableNumber) => handleEditTable(table, newTableNumber)}
-              onDelete={() => {
-                setSelectedTable(table);
-                setIsDeleteDialogOpen(true);
-              }}
-            />
-            {selectedTable && (
-              <TableAllocationDialog
-                table={selectedTable}
-                onClose={() => setSelectedTable(null)}
-                onSuccess={refetch}
-              />
-            )}
-          </Dialog>
-        ))}
-      </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="tables" direction="horizontal">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              {Object.values(tables).map((table, index) => (
+                <Draggable 
+                  key={table.id} 
+                  draggableId={table.id} 
+                  index={index}
+                >
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <Dialog>
+                        <TableCard
+                          table={table}
+                          onSelect={() => setSelectedTable(table)}
+                          onViewOrder={handleViewOrder}
+                          onEdit={(newTableNumber) => handleEditTable(table, newTableNumber)}
+                          onDelete={() => {
+                            setSelectedTable(table);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        />
+                        {selectedTable && (
+                          <TableAllocationDialog
+                            table={selectedTable}
+                            onClose={() => setSelectedTable(null)}
+                            onSuccess={refetch}
+                          />
+                        )}
+                      </Dialog>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       <TableManagementDialogs
         isAddDialogOpen={isAddDialogOpen}
