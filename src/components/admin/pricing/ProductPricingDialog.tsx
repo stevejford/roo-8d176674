@@ -23,19 +23,27 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: existingPricing } = useQuery({
+  const { data: existingPricing, isError } = useQuery({
     queryKey: ['product-pricing', product?.id],
     queryFn: async () => {
       if (!product?.id) return null;
       
-      const { data, error } = await supabase
-        .from('product_pricing')
-        .select('*')
-        .eq('product_id', product.id)
-        .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('product_pricing')
+          .select('*')
+          .eq('product_id', product.id)
+          .maybeSingle(); // Using maybeSingle() instead of single()
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching product pricing:', error);
+          throw error;
+        }
+        return data;
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        return null;
+      }
     },
     enabled: !!product?.id,
   });
@@ -110,6 +118,14 @@ export const ProductPricingDialog = ({ open, onOpenChange, product, onClose }: P
       });
     }
   };
+
+  if (isError) {
+    toast({
+      title: "Error",
+      description: "Failed to load product pricing",
+      variant: "destructive",
+    });
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
