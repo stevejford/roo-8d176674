@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { OrderSidebar } from '@/components/OrderSidebar';
 import { useCategories } from '@/hooks/useCategories';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/components/admin/products/types';
-import { Sidebar, SidebarContent } from "@/components/ui/sidebar";
+import { SidebarProvider, Sidebar, SidebarContent } from "@/components/ui/sidebar";
 import { OrderLocation } from '@/components/OrderLocation';
 
 const Index = () => {
@@ -28,7 +28,7 @@ const Index = () => {
   } | null>(null);
 
   // Transform products into category-based structure
-  const productsByCategory = useMemo(() => {
+  const productsByCategory = React.useMemo(() => {
     if (!products) return {};
     
     return products.reduce((acc: { [key: string]: Product[] }, product) => {
@@ -75,11 +75,13 @@ const Index = () => {
         />
       </div>
 
-      <Sidebar open={showLocationSidebar} onOpenChange={setShowLocationSidebar}>
-        <SidebarContent className="w-[400px] sm:w-[540px] p-6">
-          <OrderLocation mode="delivery" />
-        </SidebarContent>
-      </Sidebar>
+      <SidebarProvider defaultOpen={showLocationSidebar} open={showLocationSidebar} onOpenChange={setShowLocationSidebar}>
+        <Sidebar>
+          <SidebarContent className="w-[400px] sm:w-[540px] p-6">
+            <OrderLocation mode="delivery" />
+          </SidebarContent>
+        </Sidebar>
+      </SidebarProvider>
 
       <OrderSidebar
         selectedProduct={selectedProduct}
