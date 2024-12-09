@@ -80,31 +80,36 @@ export const ProductDetails = ({
   const { data: productPricing } = useQuery({
     queryKey: ['product-pricing', title],
     queryFn: async () => {
-      const { data: products, error: productError } = await supabase
-        .from('products')
-        .select('id')
-        .eq('title', title)
-        .limit(1);
+      try {
+        const { data: products, error: productError } = await supabase
+          .from('products')
+          .select('id')
+          .eq('title', title)
+          .limit(1);
 
-      if (productError) throw productError;
-      if (!products?.length) return null;
+        if (productError) throw productError;
+        if (!products?.length) return null;
 
-      const { data: pricing, error: pricingError } = await supabase
-        .from('product_pricing')
-        .select(`
-          *,
-          pricing_strategies (
-            id,
-            name,
-            type,
-            config
-          )
-        `)
-        .eq('product_id', products[0].id)
-        .limit(1);
+        const { data: pricing, error: pricingError } = await supabase
+          .from('product_pricing')
+          .select(`
+            *,
+            pricing_strategies (
+              id,
+              name,
+              type,
+              config
+            )
+          `)
+          .eq('product_id', products[0].id)
+          .maybeSingle(); // Use maybeSingle() instead of limit(1)
 
-      if (pricingError) throw pricingError;
-      return pricing?.[0] || null;
+        if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
+        return pricing || null;
+      } catch (error) {
+        console.error('Error fetching product pricing:', error);
+        return null;
+      }
     },
     enabled: !!title
   });
