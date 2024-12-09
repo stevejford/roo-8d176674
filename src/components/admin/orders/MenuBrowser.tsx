@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { MenuProductCard } from './MenuProductCard';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MenuProductCard } from './MenuProductCard';
-import type { Database } from '@/integrations/supabase/types';
-
-type Product = Database['public']['Tables']['products']['Row'];
 
 interface MenuBrowserProps {
-  onSelectItem: (product: Product) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectProduct: (product: any) => void;
 }
 
-export const MenuBrowser = ({ onSelectItem }: MenuBrowserProps) => {
+export const MenuBrowser = ({ isOpen, onClose, onSelectProduct }: MenuBrowserProps) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -27,72 +29,100 @@ export const MenuBrowser = ({ onSelectItem }: MenuBrowserProps) => {
   });
 
   const { data: products } = useQuery({
-    queryKey: ['products'],
+    queryKey: ['products-with-pricing'],
     queryFn: async () => {
-      console.log('Fetching products with pricing information');
+      console.log('Fetching products with complete pricing information');
       const { data, error } = await supabase
         .from('products')
         .select(`
           *,
-          category_id,
-          price
+          product_pricing (
+            *,
+            pricing_strategies (
+              *
+            )
+          )
         `)
         .eq('active', true)
         .order('position');
       
       if (error) throw error;
-      console.log('Fetched products:', data);
+      console.log('Fetched products with pricing:', data);
       return data;
     },
   });
 
-  const productsByCategory = React.useMemo(() => {
-    if (!products) return {};
-    
-    return products.reduce((acc: { [key: string]: Product[] }, product) => {
-      const categoryId = product.category_id || 'uncategorized';
-      if (!acc[categoryId]) {
-        acc[categoryId] = [];
-      }
-      acc[categoryId].push(product);
-      return acc;
-    }, {});
-  }, [products]);
+  const { data: categoryPricing } = useQuery({
+    queryKey: ['category-pricing'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('category_pricing')
+        .select(`
+          *,
+          pricing_strategies (
+            *
+          )
+        `);
+      
+      if (error) throw error;
+      console.log('Fetched category pricing:', data);
+      return data;
+    },
+  });
 
-  if (!categories || !products) return null;
+  const handleProductSelect = (product: any) => {
+    console.log('Selected product:', product);
+    onSelectProduct(product);
+    onClose();
+  };
+
+  const filteredProducts = selectedCategory
+    ? products?.filter(p => p.category_id === selectedCategory)
+    : products;
 
   return (
-    <Tabs defaultValue={categories[0]?.id} className="w-full">
-      <ScrollArea className="w-full">
-        <TabsList className="w-full justify-start">
-          {categories.map((category) => (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+        <Tabs defaultValue={selectedCategory || 'all'} className="w-full">
+          <TabsList className="mb-4">
             <TabsTrigger 
-              key={category.id} 
-              value={category.id}
-              className="px-4 py-2"
+              value="all"
+              onClick={() => setSelectedCategory(null)}
             >
-              {category.title}
+              All Items
             </TabsTrigger>
-          ))}
-        </TabsList>
-      </ScrollArea>
+            {categories?.map((category) => (
+              <TabsTrigger
+                key={category.id}
+                value={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+              >
+                {category.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-      {categories.map((category) => (
-        <TabsContent 
-          key={category.id} 
-          value={category.id}
-          className="mt-4 space-y-2"
-        >
-          {productsByCategory[category.id]?.map((product) => (
-            <MenuProductCard
-              key={product.id}
-              product={product}
-              categoryId={category.id}
-              onSelect={onSelectItem}
-            />
-          ))}
-        </TabsContent>
-      ))}
-    </Tabs>
+          <ScrollArea className="flex-1 px-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+              {filteredProducts?.map((product) => {
+                const categoryPrice = categoryPricing?.find(
+                  cp => cp.category_id === product.category_id
+                );
+                
+                return (
+                  <MenuProductCard
+                    key={product.id}
+                    product={product}
+                    productPricing={product.product_pricing?.[0]}
+                    categoryPricing={categoryPrice}
+                    onSelect={handleProductSelect}
+                  />
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
   );
 };
