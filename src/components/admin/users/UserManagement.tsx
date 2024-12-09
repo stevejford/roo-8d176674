@@ -20,15 +20,9 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { UserActions } from './UserActions';
+import { EditUserDialog } from './EditUserDialog';
+import { DeleteUserDialog } from './DeleteUserDialog';
 import type { Database } from '@/integrations/supabase/types';
 
 type UserRole = Database['public']['Enums']['user_role'];
@@ -55,6 +49,7 @@ export const UserManagement = () => {
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['profiles'],
@@ -102,20 +97,6 @@ export const UserManagement = () => {
 
   const handleStatusChange = (userId: string, newStatus: string) => {
     updateUserMutation.mutate({ id: userId, updates: { status: newStatus } });
-  };
-
-  const handleProfileUpdate = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedUser) return;
-
-    const formData = new FormData(e.currentTarget);
-    const updates = {
-      first_name: formData.get('first_name') as string,
-      last_name: formData.get('last_name') as string,
-      phone: formData.get('phone') as string,
-    };
-
-    updateUserMutation.mutate({ id: selectedUser.id, updates });
   };
 
   if (isLoading) {
@@ -210,60 +191,28 @@ export const UserManagement = () => {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Dialog open={isEditDialogOpen && selectedUser?.id === user.id} onOpenChange={(open) => {
-                    setIsEditDialogOpen(open);
-                    if (!open) setSelectedUser(null);
-                  }}>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedUser(user)}
-                      >
-                        Edit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit User Profile</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleProfileUpdate} className="space-y-4">
-                        <div>
-                          <label htmlFor="first_name" className="text-sm font-medium">
-                            First Name
-                          </label>
-                          <Input
-                            id="first_name"
-                            name="first_name"
-                            defaultValue={user.first_name || ''}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="last_name" className="text-sm font-medium">
-                            Last Name
-                          </label>
-                          <Input
-                            id="last_name"
-                            name="last_name"
-                            defaultValue={user.last_name || ''}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="phone" className="text-sm font-medium">
-                            Phone
-                          </label>
-                          <Input
-                            id="phone"
-                            name="phone"
-                            defaultValue={user.phone || ''}
-                          />
-                        </div>
-                        <Button type="submit">
-                          Save Changes
-                        </Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setIsEditDialogOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -275,6 +224,37 @@ export const UserManagement = () => {
           ))}
         </TableBody>
       </Table>
+
+      {selectedUser && (
+        <>
+          <EditUserDialog
+            isOpen={isEditDialogOpen}
+            onClose={() => {
+              setIsEditDialogOpen(false);
+              setSelectedUser(null);
+            }}
+            user={selectedUser}
+            onSave={(updates) => {
+              updateUserMutation.mutate({
+                id: selectedUser.id,
+                updates,
+              });
+            }}
+          />
+          <DeleteUserDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => {
+              setIsDeleteDialogOpen(false);
+              setSelectedUser(null);
+            }}
+            userId={selectedUser.id}
+            userName={`${selectedUser.first_name} ${selectedUser.last_name}`}
+            onDeleted={() => {
+              queryClient.invalidateQueries({ queryKey: ['profiles'] });
+            }}
+          />
+        </>
+      )}
     </div>
   );
 };
