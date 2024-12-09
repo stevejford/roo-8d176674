@@ -6,7 +6,8 @@ import { MenuBrowser } from './MenuBrowser';
 import { WaiterOrderCard } from './WaiterOrderCard';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, ClipboardList } from "lucide-react";
+import { OrderManagement } from './OrderManagement';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -25,6 +26,7 @@ export const WaiterDashboard = () => {
   const { orderId } = useParams();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
+  // Query for specific order when orderId is present
   const { data: order } = useQuery({
     queryKey: ['order', orderId],
     queryFn: async () => {
@@ -46,6 +48,27 @@ export const WaiterDashboard = () => {
       return data;
     },
     enabled: !!orderId,
+  });
+
+  // Query for all active orders when no specific order is selected
+  const { data: orders, isLoading } = useQuery({
+    queryKey: ['orders', 'active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *,
+            product:products (*)
+          )
+        `)
+        .in('status', ['pending', 'confirmed', 'preparing', 'ready', 'delivered'])
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
   });
 
   const handleAddItem = async (product: any) => {
@@ -80,32 +103,48 @@ export const WaiterDashboard = () => {
     }
   };
 
-  if (!order) return null;
+  // If we have an orderId and the order data, show the order details
+  if (orderId && order) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Order #{order.id.slice(0, 8)}</h1>
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
+              <Button>
+                <Menu className="mr-2 h-4 w-4" />
+                Add Items
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+              <div className="h-full py-6">
+                <MenuBrowser onSelectItem={handleAddItem} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
 
+        <WaiterOrderCard 
+          order={order}
+          onUpdateStatus={handleStatusChange}
+          statusColors={statusColors}
+          isNew={false}
+        />
+      </div>
+    );
+  }
+
+  // Show the order management view when no specific order is selected
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Order #{order.id.slice(0, 8)}</h1>
-        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetTrigger asChild>
-            <Button>
-              <Menu className="mr-2 h-4 w-4" />
-              Add Items
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-            <div className="h-full py-6">
-              <MenuBrowser onSelectItem={handleAddItem} />
-            </div>
-          </SheetContent>
-        </Sheet>
+        <h1 className="text-2xl font-bold">Active Orders</h1>
       </div>
-
-      <WaiterOrderCard 
-        order={order}
+      <OrderManagement 
+        orders={orders}
+        isLoading={isLoading}
         onUpdateStatus={handleStatusChange}
         statusColors={statusColors}
-        isNew={false}
       />
     </div>
   );
