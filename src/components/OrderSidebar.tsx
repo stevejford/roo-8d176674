@@ -15,7 +15,7 @@ interface OrderSidebarProps {
     category_id?: string;
   } | null;
   onClose: () => void;
-  onAfterClose?: () => void;  // New prop for after close callback
+  onAfterClose?: () => void;
 }
 
 export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSidebarProps) => {
@@ -27,7 +27,6 @@ export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSi
     setTimeout(() => {
       setIsClosing(false);
       onClose();
-      // Call onAfterClose after the animation completes
       setTimeout(() => {
         onAfterClose?.();
       }, 100);
@@ -54,9 +53,9 @@ export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSi
             pricing_strategies (*)
           `)
           .eq('category_id', selectedProduct.category_id)
-          .maybeSingle();
+          .single();
         
-        if (error) throw error;
+        if (error && error.code !== 'PGRST116') throw error;
         return data as CategoryPricing | null;
       } catch (error) {
         console.error('Error fetching category pricing:', error);
@@ -77,9 +76,9 @@ export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSi
           .from('products')
           .select('id')
           .eq('title', selectedProduct.title)
-          .maybeSingle();
+          .single();
 
-        if (productError) throw productError;
+        if (productError && productError.code !== 'PGRST116') throw productError;
         if (!products) return null;
 
         const { data: pricing, error: pricingError } = await supabase
@@ -89,9 +88,9 @@ export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSi
             pricing_strategies (*)
           `)
           .eq('product_id', products.id)
-          .maybeSingle();
+          .single();
 
-        if (pricingError) throw pricingError;
+        if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
         return pricing as ProductPricing | null;
       } catch (error) {
         console.error('Error fetching product pricing:', error);
