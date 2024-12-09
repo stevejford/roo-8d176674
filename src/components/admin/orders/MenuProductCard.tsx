@@ -5,22 +5,18 @@ import { Button } from "@/components/ui/button";
 import type { Database } from '@/integrations/supabase/types';
 import type { PricingConfig } from '@/types/pricing';
 
+type ProductPricing = Database['public']['Tables']['product_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+};
+
 type Product = Database['public']['Tables']['products']['Row'] & {
-  product_pricing?: Array<{
-    config: any;
-    is_override: boolean;
-    pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
-  }>;
+  product_pricing?: ProductPricing[];
 };
 
 interface MenuProductCardProps {
   product: Product;
   categoryId: string;
-  productPricing?: {
-    config: any;
-    is_override: boolean;
-    pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
-  };
+  productPricing?: ProductPricing;
   categoryPricing?: {
     config: any;
     pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
@@ -75,7 +71,7 @@ export const MenuProductCard = ({
     if (increment && newQuantity === 1) {
       const productWithPrice = {
         ...product,
-        price // Ensure we pass the calculated price
+        price
       };
       console.log('Selecting product with calculated price:', productWithPrice);
       onSelect(productWithPrice);
