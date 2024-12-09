@@ -7,13 +7,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from '@/integrations/supabase/types';
 
-type ProductPricing = Database['public']['Tables']['product_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
-};
+type PricingStrategy = Database['public']['Tables']['pricing_strategies']['Row'];
+type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'];
 
-type Product = Database['public']['Tables']['products']['Row'] & {
+interface ProductPricing extends ProductPricingRow {
+  pricing_strategies: PricingStrategy;
+}
+
+interface Product extends Database['public']['Tables']['products']['Row'] {
   product_pricing?: ProductPricing[];
-};
+}
 
 interface MenuBrowserProps {
   isOpen: boolean;
@@ -55,7 +58,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
       
       if (error) throw error;
       console.log('Fetched products with pricing:', data);
-      return data as Product[];
+      return data as unknown as Product[];
     },
   });
 
@@ -76,7 +79,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
     },
   });
 
-  const handleProductSelect = (product: any) => {
+  const handleProductSelect = (product: Product) => {
     console.log('Selected product with pricing:', product);
     onSelect(product);
     onClose();

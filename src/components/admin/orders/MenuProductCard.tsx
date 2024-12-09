@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import type { Database } from '@/integrations/supabase/types';
 import type { PricingConfig } from '@/types/pricing';
 
-type ProductPricing = Database['public']['Tables']['product_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
-};
+type PricingStrategy = Database['public']['Tables']['pricing_strategies']['Row'];
+type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'];
 
-type Product = Database['public']['Tables']['products']['Row'] & {
+interface ProductPricing extends ProductPricingRow {
+  pricing_strategies: PricingStrategy;
+}
+
+interface Product extends Database['public']['Tables']['products']['Row'] {
   product_pricing?: ProductPricing[];
-};
+}
 
 interface MenuProductCardProps {
   product: Product;
@@ -19,7 +22,7 @@ interface MenuProductCardProps {
   productPricing?: ProductPricing;
   categoryPricing?: {
     config: any;
-    pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+    pricing_strategies: PricingStrategy;
   };
   onSelect: (product: Product) => void;
 }
