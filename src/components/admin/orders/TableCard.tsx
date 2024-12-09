@@ -74,7 +74,7 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
                     <Input
                       value={newTableNumber}
                       onChange={(e) => setNewTableNumber(e.target.value)}
-                      className="w-24 h-8"
+                      className="w-24 h-8 bg-white text-gray-900"
                       autoFocus
                       onClick={(e) => e.stopPropagation()}
                     />
@@ -82,7 +82,7 @@ export const TableCard = ({ table, onSelect, onViewOrder, onEdit, onDelete }: Ta
                       type="submit" 
                       size="sm"
                       variant="secondary"
-                      className="h-8 whitespace-nowrap"
+                      className="h-8 whitespace-nowrap bg-white text-gray-900 hover:bg-gray-100"
                     >
                       <Save className="h-4 w-4 mr-1" />
                       Save
