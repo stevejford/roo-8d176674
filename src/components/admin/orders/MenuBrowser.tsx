@@ -7,15 +7,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from '@/integrations/supabase/types';
 
-type PricingStrategy = Database['public']['Tables']['pricing_strategies']['Row'];
-type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'];
-type ProductRow = Database['public']['Tables']['products']['Row'];
+type Tables = Database['public']['Tables'];
+type PricingStrategy = Tables['pricing_strategies']['Row'];
+type ProductPricingRow = Tables['product_pricing']['Row'];
+type ProductRow = Tables['products']['Row'];
 
-interface ProductPricing extends ProductPricingRow {
+interface ProductPricing extends Omit<ProductPricingRow, 'pricing_strategies'> {
   pricing_strategies: PricingStrategy;
 }
 
-interface Product extends ProductRow {
+interface Product extends Omit<ProductRow, 'product_pricing'> {
   product_pricing?: ProductPricing[];
 }
 
