@@ -41,11 +41,16 @@ export const TableGrid = () => {
     if (!result.destination) return;
 
     const tableArray = Object.values(tables);
-    const [reorderedItem] = tableArray.splice(result.source.index, 1);
-    tableArray.splice(result.destination.index, 0, reorderedItem);
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
 
-    // Update positions in the database
-    const tableIds = tableArray.map(table => table.id);
+    // Create a new array with the updated positions
+    const reorderedTables = [...tableArray];
+    const [movedTable] = reorderedTables.splice(sourceIndex, 1);
+    reorderedTables.splice(destinationIndex, 0, movedTable);
+
+    // Update positions in the database using the table IDs in their new order
+    const tableIds = reorderedTables.map(table => table.id);
     await updateTablePositions(tableIds);
   };
 
@@ -73,8 +78,8 @@ export const TableGrid = () => {
             >
               {tableArray.map((table, index) => (
                 <Draggable 
-                  key={table.table_number} 
-                  draggableId={table.table_number} 
+                  key={table.id} 
+                  draggableId={table.id} 
                   index={index}
                 >
                   {(provided) => (
