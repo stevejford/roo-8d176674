@@ -33,6 +33,9 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { toast } = useToast();
 
+  console.log('Table status:', table.status);
+  console.log('Table order_id:', table.order_id);
+
   const handleAllocation = async () => {
     if (!customerName.trim()) {
       toast({
