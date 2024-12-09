@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { CheckCircle, Send, Eye, DollarSign, CreditCard, Banknote } from "lucide-react";
+import { CheckCircle, Send, DollarSign, CreditCard, Banknote } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,9 @@ import {
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from '@/integrations/supabase/types';
+
+type OrderStatus = Database['public']['Enums']['order_status'];
 
 interface WaiterOrderCardProps {
   order: any;
@@ -69,7 +72,7 @@ export const WaiterOrderCard = ({ order, onUpdateStatus, statusColors, isNew = f
 
   return (
     <div className={`border rounded-lg p-6 bg-white shadow-sm space-y-6 transition-all duration-300 ${
-      highlight ? 'ring-2 ring-blue-500 animate-pulse' : ''
+      isNew ? 'ring-2 ring-blue-500 animate-pulse' : ''
     }`}>
       <div className="flex justify-between items-start">
         <div className="space-y-1">
