@@ -1,6 +1,7 @@
 import React from "react";
 import { CategorySection } from "./CategorySection";
 import type { Database } from "@/integrations/supabase/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Product = Database['public']['Tables']['products']['Row'];
 
@@ -17,6 +18,8 @@ export const MainContent = ({
   categoryRefs, 
   onProductSelect 
 }: MainContentProps) => {
+  const isMobile = useIsMobile();
+  
   // Get all products across all categories
   const allProducts = Object.values(productsByCategory).flat();
   
@@ -27,17 +30,19 @@ export const MainContent = ({
     : categories;
 
   return (
-    <div className="px-4 max-w-[calc(100%-2rem)] md:max-w-[calc(100%-400px)] mx-auto">
-      <div className="space-y-12">
-        {displayCategories.map((category) => (
-          <CategorySection
-            key={category.id}
-            ref={el => categoryRefs.current[category.title] = el}
-            category={category.title}
-            products={category.id === 'popular' ? popularProducts : (productsByCategory[category.id] || [])}
-            onProductSelect={onProductSelect}
-          />
-        ))}
+    <div className="relative">
+      <div className={`px-4 mx-auto ${!isMobile ? 'mr-[400px]' : ''}`}>
+        <div className="space-y-12">
+          {displayCategories.map((category) => (
+            <CategorySection
+              key={category.id}
+              ref={el => categoryRefs.current[category.title] = el}
+              category={category.title}
+              products={category.id === 'popular' ? popularProducts : (productsByCategory[category.id] || [])}
+              onProductSelect={onProductSelect}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

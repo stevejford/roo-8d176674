@@ -69,19 +69,23 @@ const Index = () => {
         onCategoryClick={scrollToCategory}
       />
       
-      <div className="pt-16 relative">
-        <MainContent
-          categories={categories || []}
-          productsByCategory={productsByCategory}
-          categoryRefs={categoryRefs}
-          onProductSelect={handleProductSelect}
-        />
+      <div className="pt-16">
+        <div className="relative flex">
+          <MainContent
+            categories={categories || []}
+            productsByCategory={productsByCategory}
+            categoryRefs={categoryRefs}
+            onProductSelect={handleProductSelect}
+          />
 
-        <OrderLocation 
-          mode={deliveryMode}
-          isOpen={showLocationSheet}
-          onOpenChange={setShowLocationSheet}
-        />
+          <div className={`${isMobile ? '' : 'fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)]'}`}>
+            <OrderLocation 
+              mode={deliveryMode}
+              isOpen={showLocationSheet}
+              onOpenChange={setShowLocationSheet}
+            />
+          </div>
+        </div>
 
         <OrderSidebar
           selectedProduct={selectedProduct}
