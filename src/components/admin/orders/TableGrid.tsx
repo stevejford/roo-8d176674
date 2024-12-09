@@ -7,6 +7,7 @@ import { TableManagementDialogs } from './TableManagementDialogs';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useTableManagement } from '@/hooks/useTableManagement';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 export const TableGrid = () => {
   const [selectedTable, setSelectedTable] = React.useState<any>(null);
@@ -36,7 +37,15 @@ export const TableGrid = () => {
     }
   };
 
+  const handleDragEnd = (result: any) => {
+    // TODO: Implement position updating in the database
+    if (!result.destination) return;
+    console.log('Moved table from', result.source.index, 'to', result.destination.index);
+  };
+
   if (!tables) return null;
+
+  const tableArray = Object.values(tables);
 
   return (
     <div className="space-y-6">
@@ -48,29 +57,54 @@ export const TableGrid = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {Object.values(tables).map((table) => (
-          <Dialog key={table.table_number}>
-            <TableCard
-              table={table}
-              onSelect={() => setSelectedTable(table)}
-              onViewOrder={handleViewOrder}
-              onEdit={(newTableNumber) => handleEditTable(table, newTableNumber)}
-              onDelete={() => {
-                setSelectedTable(table);
-                setIsDeleteDialogOpen(true);
-              }}
-            />
-            {selectedTable && (
-              <TableAllocationDialog
-                table={selectedTable}
-                onClose={() => setSelectedTable(null)}
-                onSuccess={refetch}
-              />
-            )}
-          </Dialog>
-        ))}
-      </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="tables" direction="horizontal">
+          {(provided) => (
+            <div 
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              {tableArray.map((table, index) => (
+                <Draggable 
+                  key={table.table_number} 
+                  draggableId={table.table_number} 
+                  index={index}
+                >
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <Dialog>
+                        <TableCard
+                          table={table}
+                          onSelect={() => setSelectedTable(table)}
+                          onViewOrder={handleViewOrder}
+                          onEdit={(newTableNumber) => handleEditTable(table, newTableNumber)}
+                          onDelete={() => {
+                            setSelectedTable(table);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        />
+                        {selectedTable && (
+                          <TableAllocationDialog
+                            table={selectedTable}
+                            onClose={() => setSelectedTable(null)}
+                            onSuccess={refetch}
+                          />
+                        )}
+                      </Dialog>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       <TableManagementDialogs
         isAddDialogOpen={isAddDialogOpen}
