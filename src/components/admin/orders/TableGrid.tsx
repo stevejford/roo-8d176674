@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, ClipboardCheck } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface Table {
   table_number: string;
@@ -27,20 +28,30 @@ export const TableGrid = () => {
   const [customerName, setCustomerName] = React.useState('');
   const { toast } = useToast();
 
+  // Add console logs to track data fetching
+  console.log('Fetching table data...');
+
   const { data: tables, refetch } = useQuery({
     queryKey: ['tables'],
     queryFn: async () => {
+      console.log('Executing table query...');
       const { data: orders } = await supabase
         .from('orders')
         .select('*')
         .not('table_number', 'is', null)
         .order('created_at', { ascending: false });
 
+      console.log('Orders fetched:', orders);
+
       // Create a map of tables with their current status
       const tableMap: Record<string, Table> = {};
       for (let i = 1; i <= 12; i++) {
         const tableNumber = i.toString();
-        const activeOrder = orders?.find(o => o.table_number === tableNumber && o.status !== 'completed');
+        const activeOrder = orders?.find(o => 
+          o.table_number === tableNumber && 
+          ['pending', 'confirmed', 'preparing'].includes(o.status)
+        );
+        
         tableMap[tableNumber] = {
           table_number: tableNumber,
           status: activeOrder ? 'occupied' : 'available',
@@ -48,6 +59,8 @@ export const TableGrid = () => {
           order_id: activeOrder?.id
         };
       }
+      
+      console.log('Processed table map:', tableMap);
       return tableMap;
     }
   });
@@ -62,6 +75,8 @@ export const TableGrid = () => {
       return;
     }
 
+    console.log('Creating new order for table:', tableNumber);
+
     const { data, error } = await supabase
       .from('orders')
       .insert([
@@ -71,9 +86,12 @@ export const TableGrid = () => {
           status: 'pending',
           created_by: (await supabase.auth.getUser()).data.user?.id
         }
-      ]);
+      ])
+      .select()
+      .single();
 
     if (error) {
+      console.error('Error creating order:', error);
       toast({
         title: "Error",
         description: "Failed to allocate table",
@@ -81,6 +99,8 @@ export const TableGrid = () => {
       });
       return;
     }
+
+    console.log('Order created successfully:', data);
 
     toast({
       title: "Success",
@@ -92,6 +112,17 @@ export const TableGrid = () => {
     refetch();
   };
 
+  const getTableStatusColor = (status: string) => {
+    switch (status) {
+      case 'occupied':
+        return 'bg-green-600 hover:bg-green-700';
+      case 'reserved':
+        return 'bg-yellow-600 hover:bg-yellow-700';
+      default:
+        return '';
+    }
+  };
+
   if (!tables) return null;
 
   return (
@@ -101,9 +132,7 @@ export const TableGrid = () => {
           <DialogTrigger asChild>
             <Button
               variant={table.status === 'available' ? 'outline' : 'default'}
-              className={`h-32 w-full ${
-                table.status === 'occupied' ? 'bg-green-600 hover:bg-green-700' : ''
-              }`}
+              className={`h-32 w-full ${getTableStatusColor(table.status)}`}
               onClick={() => setSelectedTable(table)}
             >
               <div className="text-center space-y-2">
@@ -112,9 +141,17 @@ export const TableGrid = () => {
                   <>
                     <Users className="mx-auto h-6 w-6" />
                     <div className="text-sm">{table.customer_name}</div>
+                    <Badge variant="secondary" className="bg-white/20">
+                      Occupied
+                    </Badge>
                   </>
                 ) : (
-                  <Plus className="mx-auto h-6 w-6" />
+                  <>
+                    <Plus className="mx-auto h-6 w-6" />
+                    <Badge variant="secondary">
+                      Available
+                    </Badge>
+                  </>
                 )}
               </div>
             </Button>
@@ -153,7 +190,6 @@ export const TableGrid = () => {
                     navigate(`/admin/waiter/order/${table.order_id}`);
                   }}
                 >
-                  <ClipboardCheck className="mr-2 h-4 w-4" />
                   View/Edit Order
                 </Button>
               </div>
