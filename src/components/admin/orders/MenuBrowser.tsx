@@ -5,6 +5,15 @@ import { MenuProductCard } from './MenuProductCard';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Database } from '@/integrations/supabase/types';
+
+type ProductPricing = Database['public']['Tables']['product_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+};
+
+type Product = Database['public']['Tables']['products']['Row'] & {
+  product_pricing?: ProductPricing[];
+};
 
 interface MenuBrowserProps {
   isOpen: boolean;
@@ -38,9 +47,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
           *,
           product_pricing (
             *,
-            pricing_strategies (
-              *
-            )
+            pricing_strategies (*)
           )
         `)
         .eq('active', true)
@@ -48,7 +55,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
       
       if (error) throw error;
       console.log('Fetched products with pricing:', data);
-      return data;
+      return data as Product[];
     },
   });
 
@@ -60,9 +67,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
         .from('category_pricing')
         .select(`
           *,
-          pricing_strategies (
-            *
-          )
+          pricing_strategies (*)
         `);
       
       if (error) throw error;
