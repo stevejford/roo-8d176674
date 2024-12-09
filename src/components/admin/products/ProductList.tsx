@@ -7,7 +7,8 @@ import { UncategorizedProducts } from './UncategorizedProducts';
 import { ProductListHeader } from './ProductListHeader';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { supabase } from '@/integrations/supabase/client';
-import type { Product } from './types';
+import { CategorySidebar } from './CategorySidebar';
+import type { Product, Category } from './types';
 
 export const ProductList = () => {
   const {
@@ -75,89 +76,95 @@ export const ProductList = () => {
   );
 
   return (
-    <div className="space-y-4">
-      <ProductListHeader 
-        onAddCategory={() => setIsCategoryDialogOpen(true)}
-        onAddProduct={() => {
-          handleAddProduct('');
-          setIsProductDialogOpen(true);
-        }}
-      />
+    <div className="flex h-[calc(100vh-8rem)]">
+      <div className="flex-1 overflow-y-auto pr-4">
+        <ProductListHeader 
+          onAddCategory={() => setIsCategoryDialogOpen(true)}
+          onAddProduct={() => {
+            handleAddProduct('');
+            setIsProductDialogOpen(true);
+          }}
+        />
 
-      <DragDropContext onDragEnd={handleCategoryDragEnd}>
-        <Droppable droppableId="categories" type="CATEGORY">
-          {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef}>
-              {/* Always show Popular category first if it exists */}
-              {popularCategory && (
-                <CategorizedProducts
-                  key={popularCategory.id}
-                  category={popularCategory}
-                  products={popularProducts}
-                  onEdit={handleEditProduct}
-                  onDelete={deleteProduct}
-                  onEditCategory={setSelectedCategory}
-                  onDeleteCategory={deleteCategory}
-                  onAddProduct={handleAddProduct}
-                />
-              )}
+        <div className="mt-6">
+          <DragDropContext onDragEnd={handleCategoryDragEnd}>
+            <Droppable droppableId="categories" type="CATEGORY">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {/* Always show Popular category first if it exists */}
+                  {popularCategory && (
+                    <CategorizedProducts
+                      key={popularCategory.id}
+                      category={popularCategory}
+                      products={popularProducts}
+                      onEdit={handleEditProduct}
+                      onDelete={deleteProduct}
+                      onEditCategory={setSelectedCategory}
+                      onDeleteCategory={deleteCategory}
+                      onAddProduct={handleAddProduct}
+                    />
+                  )}
 
-              {/* Show other categories */}
-              {sortedCategories
-                .filter(cat => cat.title.toLowerCase() !== 'popular')
-                .map((category, index) => (
-                  <Draggable 
-                    key={category.id} 
-                    draggableId={category.id} 
-                    index={index}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
+                  {/* Show other categories */}
+                  {sortedCategories
+                    .filter(cat => cat.title.toLowerCase() !== 'popular')
+                    .map((category, index) => (
+                      <Draggable 
+                        key={category.id} 
+                        draggableId={category.id} 
+                        index={index}
                       >
-                        <CategorizedProducts
-                          category={category}
-                          products={categorizedProducts[category.id] || []}
-                          onEdit={handleEditProduct}
-                          onDelete={deleteProduct}
-                          onEditCategory={setSelectedCategory}
-                          onDeleteCategory={deleteCategory}
-                          onAddProduct={handleAddProduct}
-                          dragHandleProps={provided.dragHandleProps}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                          >
+                            <CategorizedProducts
+                              category={category}
+                              products={categorizedProducts[category.id] || []}
+                              onEdit={handleEditProduct}
+                              onDelete={deleteProduct}
+                              onEditCategory={setSelectedCategory}
+                              onDeleteCategory={deleteCategory}
+                              onAddProduct={handleAddProduct}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <UncategorizedProducts
-            products={categorizedProducts['uncategorized'] || []}
-            onEdit={handleEditProduct}
-            onDelete={deleteProduct}
-          />
-        </DragDropContext>
-      </DragDropContext>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <UncategorizedProducts
+                products={categorizedProducts['uncategorized'] || []}
+                onEdit={handleEditProduct}
+                onDelete={deleteProduct}
+              />
+            </DragDropContext>
+          </DragDropContext>
+        </div>
 
-      <ProductDialog
-        open={isProductDialogOpen}
-        onOpenChange={setIsProductDialogOpen}
-        product={selectedProduct}
-        categoryId={selectedCategoryId}
-        onClose={handleCloseProductDialog}
-      />
+        <ProductDialog
+          open={isProductDialogOpen}
+          onOpenChange={setIsProductDialogOpen}
+          product={selectedProduct}
+          categoryId={selectedCategoryId}
+          onClose={handleCloseProductDialog}
+        />
 
-      <CategoryDialog
-        open={isCategoryDialogOpen}
-        onOpenChange={setIsCategoryDialogOpen}
-        category={selectedCategory}
-        onClose={handleCloseCategoryDialog}
-      />
+        <CategoryDialog
+          open={isCategoryDialogOpen}
+          onOpenChange={setIsCategoryDialogOpen}
+          category={selectedCategory}
+          onClose={handleCloseCategoryDialog}
+        />
+      </div>
+
+      <CategorySidebar category={selectedCategory} />
     </div>
   );
 };
