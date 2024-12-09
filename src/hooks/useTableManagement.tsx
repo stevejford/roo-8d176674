@@ -65,9 +65,22 @@ export const useTableManagement = () => {
       return false;
     }
 
+    // Get the maximum position
+    const { data: maxPositionResult } = await supabase
+      .from('tables')
+      .select('position')
+      .order('position', { ascending: false })
+      .limit(1);
+
+    const newPosition = (maxPositionResult?.[0]?.position || 0) + 1;
+
     const { error } = await supabase
       .from('tables')
-      .insert({ table_number: tableNumber });
+      .insert({ 
+        table_number: tableNumber,
+        position: newPosition,
+        status: 'available'
+      });
 
     if (error) {
       toast({
@@ -116,10 +129,31 @@ export const useTableManagement = () => {
   };
 
   const updateTablePositions = async (tableIds: string[]) => {
-    const updates = tableIds.map((id, index) => ({
-      id,
-      position: index + 1
-    }));
+    // First, get the current table data
+    const { data: currentTables, error: fetchError } = await supabase
+      .from('tables')
+      .select('id, table_number, status')
+      .in('id', tableIds);
+
+    if (fetchError) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch current table data",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Create updates array with all required fields
+    const updates = tableIds.map((id, index) => {
+      const currentTable = currentTables?.find(t => t.id === id);
+      return {
+        id,
+        position: index + 1,
+        table_number: currentTable?.table_number || '',
+        status: currentTable?.status || 'available'
+      };
+    });
 
     const { error } = await supabase
       .from('tables')
