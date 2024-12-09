@@ -1,20 +1,11 @@
 import React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
-import { Clock, CheckCircle, XCircle, UtensilsCrossed } from "lucide-react";
+import { UtensilsCrossed } from "lucide-react";
 import { Database } from '@/integrations/supabase/types';
+import { KitchenOrderCard } from './KitchenOrderCard';
+import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 
@@ -108,8 +99,15 @@ export const KitchenDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Kitchen Orders</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <KitchenOrderSkeleton />
+          <KitchenOrderSkeleton />
+          <KitchenOrderSkeleton />
+        </div>
       </div>
     );
   }
@@ -132,71 +130,12 @@ export const KitchenDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {orders?.map((order) => (
-          <div 
+          <KitchenOrderCard
             key={order.id}
-            className="border rounded-lg p-4 bg-white shadow-sm space-y-4"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold">Order #{order.id.slice(0, 8)}</h3>
-                <p className="text-sm text-gray-500">
-                  {format(new Date(order.created_at), 'HH:mm')}
-                </p>
-              </div>
-              <Badge 
-                variant="secondary"
-                className={statusColors[order.status as keyof typeof statusColors]}
-              >
-                {order.status}
-              </Badge>
-            </div>
-
-            <div className="space-y-2">
-              {order.order_items?.map((item: any) => (
-                <div key={item.id} className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{item.quantity}x</span>
-                    <span>{item.product?.title}</span>
-                  </div>
-                  {item.notes && (
-                    <span className="text-sm text-gray-500">Note: {item.notes}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              {order.status === 'confirmed' && (
-                <Button
-                  onClick={() => updateOrderStatus(order.id, 'preparing')}
-                  className="flex-1"
-                  variant="outline"
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Start Preparing
-                </Button>
-              )}
-              {order.status === 'preparing' && (
-                <>
-                  <Button
-                    onClick={() => updateOrderStatus(order.id, 'ready')}
-                    className="flex-1"
-                    variant="outline"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Mark Ready
-                  </Button>
-                  <Button
-                    onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                    variant="destructive"
-                    size="icon"
-                  >
-                    <XCircle className="w-4 h-4" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
+            order={order}
+            onUpdateStatus={updateOrderStatus}
+            statusColors={statusColors}
+          />
         ))}
       </div>
     </div>
