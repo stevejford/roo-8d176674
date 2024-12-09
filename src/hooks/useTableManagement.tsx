@@ -9,7 +9,6 @@ export interface Table {
   customer_name?: string;
   order_id?: string;
   order_status?: string;
-  position: number;
 }
 
 export const useTableManagement = () => {
@@ -23,7 +22,7 @@ export const useTableManagement = () => {
       const { data: tablesData, error: tablesError } = await supabase
         .from('tables')
         .select('*')
-        .order('position');
+        .order('table_number');
 
       if (tablesError) throw tablesError;
 
@@ -46,8 +45,7 @@ export const useTableManagement = () => {
           status: activeOrder ? 'occupied' : 'available',
           customer_name: activeOrder?.customer_name,
           order_id: activeOrder?.id,
-          order_status: activeOrder?.status,
-          position: table.position
+          order_status: activeOrder?.status
         };
       });
 
@@ -65,22 +63,9 @@ export const useTableManagement = () => {
       return false;
     }
 
-    // Get the maximum position
-    const { data: maxPositionResult } = await supabase
-      .from('tables')
-      .select('position')
-      .order('position', { ascending: false })
-      .limit(1);
-
-    const newPosition = (maxPositionResult?.[0]?.position || 0) + 1;
-
     const { error } = await supabase
       .from('tables')
-      .insert({ 
-        table_number: tableNumber,
-        position: newPosition,
-        status: 'available'
-      });
+      .insert({ table_number: tableNumber });
 
     if (error) {
       toast({
@@ -128,55 +113,10 @@ export const useTableManagement = () => {
     return true;
   };
 
-  const updateTablePositions = async (tableIds: string[]) => {
-    // Create updates array with new positions while preserving existing data
-    const updates = await Promise.all(tableIds.map(async (id, index) => {
-      // Get current table data
-      const { data: currentTable, error: fetchError } = await supabase
-        .from('tables')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (fetchError) {
-        console.error('Error fetching table data:', fetchError);
-        return null;
-      }
-
-      // Only update the position, preserve all other fields
-      return {
-        ...currentTable,
-        position: index + 1
-      };
-    }));
-
-    // Filter out any null values from failed fetches
-    const validUpdates = updates.filter(Boolean);
-
-    const { error } = await supabase
-      .from('tables')
-      .upsert(validUpdates, {
-        onConflict: 'id'
-      });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update table positions",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    await refetch();
-    return true;
-  };
-
   return {
     tables,
     refetch,
     addTable,
-    updateTable,
-    updateTablePositions
+    updateTable
   };
 };
