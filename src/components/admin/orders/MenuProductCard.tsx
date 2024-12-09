@@ -25,6 +25,7 @@ export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCa
   // Calculate the correct price based on pricing hierarchy
   const calculatePrice = () => {
     console.log('Calculating price for product:', product.title);
+    console.log('Base product:', product);
     console.log('Product base price:', product.price);
     console.log('Product pricing override:', productPricing);
     console.log('Category pricing:', categoryPricing);
@@ -32,17 +33,23 @@ export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCa
     // First check for product-specific pricing override
     if (productPricing?.is_override) {
       const config = productPricing.config as PricingConfig;
-      return config.price || product.price || 0;
+      const calculatedPrice = config.price || product.price || 0;
+      console.log('Using product override price:', calculatedPrice);
+      return calculatedPrice;
     }
 
     // Then check for category pricing
     if (categoryPricing?.pricing_strategies) {
       const config = categoryPricing.config as PricingConfig;
-      return config.price || product.price || 0;
+      const calculatedPrice = config.price || product.price || 0;
+      console.log('Using category price:', calculatedPrice);
+      return calculatedPrice;
     }
 
     // Fallback to product's default price
-    return product.price || 0;
+    const defaultPrice = product.price || 0;
+    console.log('Using default product price:', defaultPrice);
+    return defaultPrice;
   };
 
   const price = calculatePrice();
@@ -53,11 +60,12 @@ export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCa
     setQuantity(newQuantity);
     
     if (increment && newQuantity === 1) {
-      console.log('Selecting product with price:', price);
-      onSelect({
+      const productWithPrice = {
         ...product,
         price: price // Ensure we pass the calculated price
-      });
+      };
+      console.log('Selecting product with calculated price:', productWithPrice);
+      onSelect(productWithPrice);
     }
   };
 

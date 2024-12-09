@@ -29,13 +29,19 @@ export const MenuBrowser = ({ onSelectItem }: MenuBrowserProps) => {
   const { data: products } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
+      console.log('Fetching products with pricing information');
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          category_id,
+          price
+        `)
         .eq('active', true)
         .order('position');
       
       if (error) throw error;
+      console.log('Fetched products:', data);
       return data;
     },
   });
