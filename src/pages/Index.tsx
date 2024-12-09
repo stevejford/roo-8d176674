@@ -83,7 +83,7 @@ const Index = () => {
     }
   };
 
-  const shouldShowCartButton = (windowWidth < 1280 || isMobile) && !selectedProduct;
+  const shouldShowCartButton = (windowWidth < 1280 || isMobile) && !selectedProduct && !showLocationSheet;
   const shouldShowSidebar = windowWidth >= 1280 && !isMobile;
 
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DeliveryModeSelector } from "./order/DeliveryModeSelector";
@@ -17,6 +17,18 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
 
   const content = (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Order</h2>
+        {isMobile && (
+          <button 
+            onClick={() => onOpenChange?.(false)}
+            className="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+      
       <DeliveryModeSelector mode={mode} setMode={() => {}} />
       
       <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
@@ -51,7 +63,6 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
 
   return (
     <div className="fixed top-0 right-0 w-[400px] h-screen bg-white border-l border-gray-200 p-4 z-50">
-      <h2 className="text-2xl font-semibold mb-6">Order</h2>
       {content}
     </div>
   );
