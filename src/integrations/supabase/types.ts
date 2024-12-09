@@ -284,6 +284,36 @@ export type Database = {
         }
         Relationships: []
       }
+      vouchers: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
