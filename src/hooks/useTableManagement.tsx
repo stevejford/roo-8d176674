@@ -132,7 +132,7 @@ export const useTableManagement = () => {
     // First, get the current table data
     const { data: currentTables, error: fetchError } = await supabase
       .from('tables')
-      .select('id, table_number, status')
+      .select('*')
       .in('id', tableIds);
 
     if (fetchError) {
@@ -144,16 +144,18 @@ export const useTableManagement = () => {
       return false;
     }
 
-    // Create updates array with all required fields
+    // Create updates array preserving all existing table data, only updating positions
     const updates = tableIds.map((id, index) => {
       const currentTable = currentTables?.find(t => t.id === id);
+      if (!currentTable) {
+        console.error(`Table with id ${id} not found`);
+        return null;
+      }
       return {
-        id,
-        position: index + 1,
-        table_number: currentTable?.table_number || '',
-        status: currentTable?.status || 'available'
+        ...currentTable,
+        position: index + 1
       };
-    });
+    }).filter(Boolean);
 
     const { error } = await supabase
       .from('tables')
