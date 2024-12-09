@@ -1,14 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { MenuBrowser } from './MenuBrowser';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from "@/integrations/supabase/client";
 import { WaiterOrderCard } from './WaiterOrderCard';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu, ClipboardList } from "lucide-react";
-import { OrderManagement } from './OrderManagement';
-import { TableGrid } from './TableGrid';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -25,7 +19,7 @@ const statusColors = {
 
 export const WaiterDashboard = () => {
   const { orderId } = useParams();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const queryClient = useQueryClient();
 
   // Query for specific order when orderId is present
   const { data: order } = useQuery({
@@ -51,49 +45,44 @@ export const WaiterDashboard = () => {
     enabled: !!orderId,
   });
 
-  // Query for all active orders when no specific order is selected
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['orders', 'active'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *,
-            product:products (*)
-          )
-        `)
-        .in('status', ['pending', 'confirmed', 'preparing', 'ready', 'delivered'])
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Set up real-time subscription
+  useEffect(() => {
+    const orderChannel = supabase
+      .channel('order-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: orderId ? `id=eq.${orderId}` : undefined
+        },
+        () => {
+          // Invalidate and refetch
+          queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'order_items',
+          filter: orderId ? `order_id=eq.${orderId}` : undefined
+        },
+        () => {
+          // Invalidate and refetch
+          queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+        }
+      )
+      .subscribe();
 
-  const handleAddItem = async (product: any) => {
-    if (!orderId) return;
+    return () => {
+      orderChannel.unsubscribe();
+    };
+  }, [orderId, queryClient]);
 
-    const { error } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: orderId,
-        product_id: product.id,
-        price: product.price,
-      });
-
-    if (error) {
-      console.error('Error adding item:', error);
-      return;
-    }
-
-    setIsMenuOpen(false);
-  };
-
-  const handleStatusChange = async (status: OrderStatus) => {
-    if (!orderId) return;
-
+  const handleStatusChange = async (orderId: string, status: OrderStatus) => {
     const { error } = await supabase
       .from('orders')
       .update({ status })
@@ -110,19 +99,6 @@ export const WaiterDashboard = () => {
       <div className="container mx-auto py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Order #{order.id.slice(0, 8)}</h1>
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <Button>
-                <Menu className="mr-2 h-4 w-4" />
-                Add Items
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-              <div className="h-full py-6">
-                <MenuBrowser onSelectItem={handleAddItem} />
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
 
         <WaiterOrderCard 
@@ -135,21 +111,13 @@ export const WaiterDashboard = () => {
     );
   }
 
-  // Show the table grid and order management view when no specific order is selected
+  // Show a message if no order is selected
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <TableGrid />
-      
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Active Orders</h1>
-        </div>
-        <OrderManagement 
-          orders={orders}
-          isLoading={isLoading}
-          onUpdateStatus={handleStatusChange}
-          statusColors={statusColors}
-        />
+    <div className="container mx-auto py-8">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-gray-600">
+          Select an order to view details
+        </h2>
       </div>
     </div>
   );

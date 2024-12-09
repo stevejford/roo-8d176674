@@ -1,17 +1,13 @@
+import React from 'react';
 import { format } from 'date-fns';
-import { CheckCircle, Send, DollarSign, CreditCard, Banknote } from "lucide-react";
+import { CheckCircle, Send, DollarSign, CreditCard, Banknote, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { MenuBrowser } from '../orders/MenuBrowser';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -28,12 +24,60 @@ type PaymentMethod = 'cash' | 'card';
 export const WaiterOrderCard = ({ order, onUpdateStatus, statusColors, isNew = false }: WaiterOrderCardProps) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showMenuDialog, setShowMenuDialog] = useState(false);
   const { toast } = useToast();
 
   const calculateTotal = () => {
     return order.order_items?.reduce((acc: number, item: any) => {
       return acc + (item.price * item.quantity);
     }, 0) || 0;
+  };
+
+  const handleAddItem = async (product: any) => {
+    try {
+      // First, check if the item already exists in the order
+      const { data: existingItems } = await supabase
+        .from('order_items')
+        .select('*')
+        .eq('order_id', order.id)
+        .eq('product_id', product.id);
+
+      if (existingItems && existingItems.length > 0) {
+        // Update quantity if item exists
+        const existingItem = existingItems[0];
+        await supabase
+          .from('order_items')
+          .update({ 
+            quantity: existingItem.quantity + 1,
+            price: product.price
+          })
+          .eq('id', existingItem.id);
+      } else {
+        // Insert new item if it doesn't exist
+        await supabase
+          .from('order_items')
+          .insert({
+            order_id: order.id,
+            product_id: product.id,
+            quantity: 1,
+            price: product.price,
+          });
+      }
+
+      toast({
+        title: "Success",
+        description: `Added ${product.title} to the order`,
+      });
+
+      setShowMenuDialog(false);
+    } catch (error) {
+      console.error('Error adding item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to order",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePayment = async (method: PaymentMethod) => {
@@ -180,6 +224,26 @@ export const WaiterOrderCard = ({ order, onUpdateStatus, statusColors, isNew = f
             </Dialog>
           )}
         </div>
+
+        <Button 
+          onClick={() => setShowMenuDialog(true)}
+          variant="outline" 
+          className="w-full mt-3"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Items
+        </Button>
+
+        <Dialog open={showMenuDialog} onOpenChange={setShowMenuDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add Items to Order</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <MenuBrowser onSelectItem={handleAddItem} />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
