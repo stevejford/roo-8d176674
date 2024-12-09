@@ -7,8 +7,8 @@ import { MainContent } from '@/components/index/MainContent';
 import { OrderSidebar } from '@/components/OrderSidebar';
 import { useCategories } from '@/hooks/useCategories';
 import { useProducts } from '@/hooks/useProducts';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { Product } from '@/components/admin/products/types';
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { OrderLocation } from '@/components/OrderLocation';
 
 const Index = () => {
@@ -16,8 +16,8 @@ const Index = () => {
   const { isAdmin, session } = useAuth();
   const { categories } = useCategories();
   const { products } = useProducts();
+  const isMobile = useIsMobile();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const [showLocationSheet, setShowLocationSheet] = useState(true);
 
   const [selectedProduct, setSelectedProduct] = useState<{
     title: string;
@@ -26,6 +26,8 @@ const Index = () => {
     price: number;
     category_id?: string;
   } | null>(null);
+
+  const [showLocationSheet, setShowLocationSheet] = useState(!isMobile);
 
   // Transform products into category-based structure
   const productsByCategory = useMemo(() => {
@@ -75,13 +77,11 @@ const Index = () => {
         />
       </div>
 
-      <Sheet open={showLocationSheet} onOpenChange={setShowLocationSheet}>
-        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-          <div className="mt-6">
-            <OrderLocation mode="delivery" />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <OrderLocation 
+        mode="delivery" 
+        isOpen={showLocationSheet}
+        onOpenChange={setShowLocationSheet}
+      />
 
       <OrderSidebar
         selectedProduct={selectedProduct}
