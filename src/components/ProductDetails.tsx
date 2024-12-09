@@ -1,6 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { useCartStore } from "@/stores/useCartStore";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ProductDetailsProps {
   title: string;
@@ -20,6 +21,7 @@ export const ProductDetails = ({
   onClose 
 }: ProductDetailsProps) => {
   const addItem = useCartStore((state) => state.addItem);
+  const { toast } = useToast();
 
   const handleAddToCart = () => {
     addItem({
@@ -28,6 +30,13 @@ export const ProductDetails = ({
       price,
       image_url: image,
     });
+
+    toast({
+      title: "Added to Order",
+      description: `${title} has been added to your order.`,
+      variant: "default",
+    });
+
     onClose();
   };
 
@@ -55,9 +64,10 @@ export const ProductDetails = ({
       <div className="p-6 mt-auto">
         <button
           onClick={handleAddToCart}
-          className="w-full bg-red-500 text-white py-4 rounded-lg font-medium"
+          className="w-full bg-primary text-white py-4 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
         >
-          Add to Order - ${price.toFixed(2)}
+          <span>Add to Order</span>
+          <span>${price.toFixed(2)}</span>
         </button>
       </div>
     </div>
