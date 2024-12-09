@@ -24,6 +24,7 @@ import { ProductList } from '@/components/admin/products/ProductList';
 import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
 import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
 import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
+import { UserManagement } from '@/components/admin/users/UserManagement';
 
 const Dashboard = () => (
   <div className="space-y-6">
@@ -70,7 +71,9 @@ const Orders = () => (
 );
 
 const UsersManagement = () => (
-  <div>User management coming soon</div>
+  <div className="space-y-6">
+    <UserManagement />
+  </div>
 );
 
 const Analytics = () => (
