@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { getAvailableDays, getAvailableTimeSlots } from "@/utils/businessHours";
 
 interface PickupTimeModalProps {
   isOpen: boolean;
@@ -21,17 +22,50 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
   const [step, setStep] = useState<'date' | 'time'>('date');
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>();
+  const [availableDays, setAvailableDays] = useState<Date[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const timeSlots = Array.from({ length: 24 }, (_, hour) => {
-    return [0, 30].map(minutes => {
-      const time = new Date();
-      time.setHours(hour, minutes);
-      return format(time, 'h:mm aa');
-    });
-  }).flat();
+  // Load available days when modal opens
+  useEffect(() => {
+    const loadAvailableDays = async () => {
+      try {
+        const days = await getAvailableDays();
+        setAvailableDays(days);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading available days:', error);
+        setIsLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      loadAvailableDays();
+    }
+  }, [isOpen]);
+
+  // Load available time slots when date is selected
+  useEffect(() => {
+    const loadAvailableTimes = async () => {
+      if (selectedDate) {
+        try {
+          const times = await getAvailableTimeSlots(selectedDate);
+          setAvailableTimes(times);
+        } catch (error) {
+          console.error('Error loading available times:', error);
+          setAvailableTimes([]);
+        }
+      }
+    };
+
+    if (selectedDate) {
+      loadAvailableTimes();
+    }
+  }, [selectedDate]);
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
+    setSelectedTime(undefined);
     if (date) {
       setStep('time');
     }
@@ -54,6 +88,23 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
     setStep('date');
   };
 
+  const isDateUnavailable = (date: Date) => {
+    return !availableDays.some(
+      availableDate => 
+        availableDate.getTime() === new Date(date.setHours(0,0,0,0)).getTime()
+    );
+  };
+
+  if (isLoading && step === 'date') {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[400px] bg-white p-0">
+          <div className="p-6">Loading available dates...</div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px] bg-white p-0">
@@ -70,6 +121,7 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
                 mode="single"
                 selected={selectedDate}
                 onSelect={handleDateSelect}
+                disabled={isDateUnavailable}
                 className="rounded-md border"
               />
             </div>
@@ -86,7 +138,7 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
               
               <ScrollArea className="h-[300px] rounded-md border">
                 <div className="grid grid-cols-3 gap-2 p-4">
-                  {timeSlots.map((time) => (
+                  {availableTimes.map((time) => (
                     <Button
                       key={time}
                       variant={selectedTime === time ? "default" : "outline"}
@@ -96,7 +148,7 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
                       )}
                       onClick={() => handleTimeSelect(time)}
                     >
-                      {time}
+                      {format(new Date(`2000-01-01T${time}`), 'h:mm aa')}
                     </Button>
                   ))}
                 </div>
