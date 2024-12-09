@@ -97,7 +97,7 @@ export const OrderManagement = ({
           >
             <WaiterOrderCard
               order={order}
-              onUpdateStatus={(status) => onUpdateStatus(order.id, status)}
+              onUpdateStatus={(status: OrderStatus) => onUpdateStatus(order.id, status)}
               statusColors={statusColors}
               isNew={newOrderIds.has(order.id)}
             />
