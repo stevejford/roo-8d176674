@@ -40,25 +40,22 @@ export const TableGrid = () => {
   const handleDragEnd = (result: any) => {
     if (!result.destination || !tables) return;
 
-    const items = Array.from(Object.values(tables));
+    const items = Object.values(tables);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Create updates array with new positions while preserving table data
+    // Create updates array with new positions while preserving table numbers
     const updates = items.map((table: any, index: number) => ({
       id: table.id,
-      table_number: table.table_number,
+      table_number: table.table_number, // Preserve table number
       position: index + 1,
-      status: table.status
+      status: table.status, // Preserve status
     }));
 
-    // Update positions in the database
     updateTablePositions(updates);
   };
 
   if (!tables) return null;
-
-  const sortedTables = Object.values(tables).sort((a, b) => (a.position || 0) - (b.position || 0));
 
   return (
     <div className="space-y-6">
@@ -78,7 +75,7 @@ export const TableGrid = () => {
               ref={provided.innerRef}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
             >
-              {sortedTables.map((table, index) => (
+              {Object.values(tables).map((table, index) => (
                 <Draggable 
                   key={table.id} 
                   draggableId={table.id} 
