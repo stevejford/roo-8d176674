@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { OrderSidebar } from '@/components/OrderSidebar';
 import { useCategories } from '@/hooks/useCategories';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/components/admin/products/types';
-import { SidebarProvider, Sidebar, SidebarContent } from "@/components/ui/sidebar";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { OrderLocation } from '@/components/OrderLocation';
 
 const Index = () => {
@@ -17,7 +17,7 @@ const Index = () => {
   const { categories } = useCategories();
   const { products } = useProducts();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const [showLocationSidebar, setShowLocationSidebar] = useState(true);
+  const [showLocationSheet, setShowLocationSheet] = useState(true);
 
   const [selectedProduct, setSelectedProduct] = useState<{
     title: string;
@@ -28,7 +28,7 @@ const Index = () => {
   } | null>(null);
 
   // Transform products into category-based structure
-  const productsByCategory = React.useMemo(() => {
+  const productsByCategory = useMemo(() => {
     if (!products) return {};
     
     return products.reduce((acc: { [key: string]: Product[] }, product) => {
@@ -48,7 +48,7 @@ const Index = () => {
     price: number;
     category_id?: string;
   }) => {
-    setShowLocationSidebar(false);
+    setShowLocationSheet(false);
     setSelectedProduct(product);
   };
 
@@ -75,18 +75,18 @@ const Index = () => {
         />
       </div>
 
-      <SidebarProvider defaultOpen={showLocationSidebar} open={showLocationSidebar} onOpenChange={setShowLocationSidebar}>
-        <Sidebar>
-          <SidebarContent className="w-[400px] sm:w-[540px] p-6">
+      <Sheet open={showLocationSheet} onOpenChange={setShowLocationSheet}>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+          <div className="mt-6">
             <OrderLocation mode="delivery" />
-          </SidebarContent>
-        </Sidebar>
-      </SidebarProvider>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <OrderSidebar
         selectedProduct={selectedProduct}
         onClose={() => setSelectedProduct(null)}
-        onAfterClose={() => setShowLocationSidebar(true)}
+        onAfterClose={() => setShowLocationSheet(true)}
       />
 
       <AppFooter 
