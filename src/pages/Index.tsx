@@ -10,7 +10,6 @@ import { useProducts } from '@/hooks/useProducts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { Product } from '@/components/admin/products/types';
 import { OrderLocation } from '@/components/OrderLocation';
-import { ShoppingCart } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -43,9 +42,6 @@ const Index = () => {
       // On desktop (>= 1280px), show sidebar by default unless a product is selected
       if (newWidth >= 1280 && !selectedProduct) {
         setShowLocationSheet(true);
-      } else if (newWidth < 1280) {
-        // On mobile/tablet, hide the sidebar
-        setShowLocationSheet(false);
       }
     };
 
@@ -126,6 +122,14 @@ const Index = () => {
             }
           }}
         />
+
+        {!shouldShowSidebar && (
+          <OrderLocation 
+            mode={deliveryMode}
+            isOpen={showLocationSheet}
+            onOpenChange={setShowLocationSheet}
+          />
+        )}
 
         {/* Cart Button for Mobile/Tablet */}
         {shouldShowCartButton && (
