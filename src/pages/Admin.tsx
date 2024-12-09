@@ -8,6 +8,7 @@ import { OrderList } from '@/components/admin/orders/OrderList';
 import { UserManagement } from '@/components/admin/users/UserManagement';
 import { KitchenDashboard } from '@/components/admin/orders/KitchenDashboard';
 import { WaiterDashboard } from '@/components/admin/orders/WaiterDashboard';
+import { POSDashboard } from '@/components/admin/pos/POSDashboard';
 import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
 import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
 import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
@@ -29,6 +30,7 @@ import {
   DollarSign,
   Utensils,
   ClipboardList,
+  Plus,
 } from "lucide-react";
 
 const Dashboard = () => (
@@ -121,6 +123,7 @@ const Admin = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Quick Add Order', href: '/admin/pos', icon: Plus },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
@@ -169,6 +172,7 @@ const Admin = () => {
         <div className="flex-1 ml-64 p-8">
           <Routes>
             <Route index element={<Dashboard />} />
+            <Route path="pos/*" element={<POSDashboard />} />
             <Route path="products/*" element={<Products />} />
             <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />
