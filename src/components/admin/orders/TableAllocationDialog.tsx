@@ -1,18 +1,14 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MenuBrowser } from './MenuBrowser';
-import {
-  DialogHeader,
-  DialogTitle,
-  DialogContent,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import React from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus } from "lucide-react";
+import {
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { TableOrderActions } from './table/TableOrderActions';
+import { TableAllocationForm } from './table/TableAllocationForm';
 
 interface Table {
   table_number: string;
@@ -28,21 +24,9 @@ interface TableAllocationDialogProps {
 }
 
 export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAllocationDialogProps) => {
-  const navigate = useNavigate();
-  const [customerName, setCustomerName] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleAllocation = async () => {
-    if (!customerName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a customer name",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleAllocation = async (customerName: string) => {
     console.log('Creating new order for table:', table.table_number);
 
     const { data, error } = await supabase
@@ -75,7 +59,6 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
       description: `Table ${table.table_number} allocated to ${customerName}`,
     });
     
-    setCustomerName('');
     onClose();
     onSuccess();
   };
@@ -153,8 +136,6 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
           .update({ total_amount: totalAmount })
           .eq('id', table.order_id);
       }
-
-      setIsMenuOpen(false);
     } catch (error) {
       console.error('Error adding item:', error);
       toast({
@@ -182,48 +163,12 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
         </DialogDescription>
       </DialogHeader>
       {table.status === 'available' ? (
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">Customer Name</label>
-            <Input
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              placeholder="Enter customer name"
-            />
-          </div>
-          <Button 
-            className="w-full"
-            onClick={handleAllocation}
-          >
-            Allocate Table
-          </Button>
-        </div>
+        <TableAllocationForm onAllocate={handleAllocation} />
       ) : (
-        <div className="space-y-4">
-          <div className="flex gap-4">
-            <Button 
-              className="flex-1"
-              onClick={() => {
-                navigate(`/admin/waiter/order/${table.order_id}`);
-              }}
-            >
-              View Order Details
-            </Button>
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Items
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-                <div className="h-full py-6">
-                  <MenuBrowser onSelectItem={handleAddItem} />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
+        <TableOrderActions 
+          orderId={table.order_id!} 
+          onAddItem={handleAddItem}
+        />
       )}
     </DialogContent>
   );
