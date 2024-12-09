@@ -7,16 +7,7 @@ import { PastaTypeSelector } from "./product/PastaTypeSelector";
 import { ProductHeader } from "./product/ProductHeader";
 import { ProductInfo } from "./product/ProductInfo";
 import { ProductActions } from "./product/ProductActions";
-import type { Database } from "@/integrations/supabase/types";
-import type { PricingConfig } from "@/types/pricing/interfaces";
-
-type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
-};
-
-type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
-};
+import type { CategoryPricing, ProductPricing, PricingConfig } from "@/types/pricing/interfaces";
 
 interface ProductDetailsProps {
   title: string;
@@ -58,7 +49,7 @@ export const ProductDetails = ({
   };
 
   // Fetch category pricing
-  const { data: categoryPricing } = useQuery<CategoryPricingRow | null>({
+  const { data: categoryPricing } = useQuery<CategoryPricing | null>({
     queryKey: ['category-pricing', category_id],
     queryFn: async () => {
       if (!category_id) return null;
@@ -67,24 +58,19 @@ export const ProductDetails = ({
         .from('category_pricing')
         .select(`
           *,
-          pricing_strategies (
-            id,
-            name,
-            type,
-            config
-          )
+          pricing_strategies (*)
         `)
         .eq('category_id', category_id)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      return data as CategoryPricing;
     },
     enabled: !!category_id
   });
 
   // Fetch product pricing override
-  const { data: productPricing } = useQuery<ProductPricingRow | null>({
+  const { data: productPricing } = useQuery<ProductPricing | null>({
     queryKey: ['product-pricing', title],
     queryFn: async () => {
       try {
@@ -101,18 +87,13 @@ export const ProductDetails = ({
           .from('product_pricing')
           .select(`
             *,
-            pricing_strategies (
-              id,
-              name,
-              type,
-              config
-            )
+            pricing_strategies (*)
           `)
           .eq('product_id', products[0].id)
           .maybeSingle();
 
         if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
-        return pricing || null;
+        return pricing as ProductPricing;
       } catch (error) {
         console.error('Error fetching product pricing:', error);
         return null;
@@ -127,8 +108,8 @@ export const ProductDetails = ({
     : categoryPricing?.pricing_strategies;
 
   const pricingConfig = productPricing?.is_override
-    ? productPricing.config as PricingConfig
-    : categoryPricing?.config as PricingConfig;
+    ? productPricing.config
+    : categoryPricing?.config;
 
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size);

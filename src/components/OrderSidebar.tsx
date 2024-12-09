@@ -5,15 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductDetails } from "./ProductDetails";
 import { SizeBasedOrderSidebar } from "./order/sidebars/SizeBasedOrderSidebar";
 import type { CategoryPricing, ProductPricing, PricingConfig } from "@/types/pricing/interfaces";
-import type { Database } from "@/integrations/supabase/types";
-
-type CategoryPricingRow = Database['public']['Tables']['category_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
-};
-
-type ProductPricingRow = Database['public']['Tables']['product_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row']
-};
 
 interface OrderSidebarProps {
   selectedProduct: {
@@ -45,7 +36,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
   }, [selectedProduct]);
 
   // Fetch category pricing if product has a category
-  const { data: categoryPricing } = useQuery<CategoryPricingRow | null>({
+  const { data: categoryPricing } = useQuery<CategoryPricing | null>({
     queryKey: ['category-pricing', selectedProduct?.category_id],
     queryFn: async () => {
       if (!selectedProduct?.category_id) return null;
@@ -60,13 +51,13 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      return data as CategoryPricing;
     },
     enabled: !!selectedProduct?.category_id
   });
 
   // Fetch product pricing override if it exists
-  const { data: productPricing } = useQuery<ProductPricingRow | null>({
+  const { data: productPricing } = useQuery<ProductPricing | null>({
     queryKey: ['product-pricing', selectedProduct?.title],
     queryFn: async () => {
       if (!selectedProduct?.title) return null;
@@ -91,7 +82,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
           .maybeSingle();
 
         if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
-        return pricing;
+        return pricing as ProductPricing;
       } catch (error) {
         console.error('Error fetching product pricing:', error);
         return null;
@@ -109,8 +100,8 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     : categoryPricing?.pricing_strategies;
 
   const pricingConfig = productPricing?.is_override
-    ? productPricing.config as PricingConfig
-    : categoryPricing?.config as PricingConfig;
+    ? productPricing.config
+    : categoryPricing?.config;
 
   const baseClassName = `fixed ${
     isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'

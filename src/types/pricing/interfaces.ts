@@ -1,4 +1,5 @@
 import { Json } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/types";
 
 export interface PricingItem {
   name: string;
@@ -13,16 +14,7 @@ export interface PricingConfig {
   volumes?: PricingItem[];
 }
 
-export interface PricingStrategy {
-  id: string;
-  name: string;
-  type: string;
-  config: PricingConfig;
-  created_at?: string;
-  updated_at?: string;
-  preview_config?: Json;
-  preview_enabled?: boolean;
-}
+export type PricingStrategy = Database['public']['Tables']['pricing_strategies']['Row'];
 
 export interface BasePricing {
   id: string;
@@ -35,6 +27,7 @@ export interface BasePricing {
 
 export interface CategoryPricing extends BasePricing {
   category_id: string;
+  ingredients?: Json;
 }
 
 export interface ProductPricing extends BasePricing {
