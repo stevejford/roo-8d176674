@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { MenuBrowser } from './MenuBrowser';
 import {
   DialogHeader,
   DialogTitle,
@@ -10,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Plus } from "lucide-react";
 
 interface Table {
   table_number: string;
@@ -27,6 +30,7 @@ interface TableAllocationDialogProps {
 export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAllocationDialogProps) => {
   const navigate = useNavigate();
   const [customerName, setCustomerName] = React.useState('');
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { toast } = useToast();
 
   const handleAllocation = async () => {
@@ -76,6 +80,34 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
     onSuccess();
   };
 
+  const handleAddItem = async (product: any) => {
+    if (!table.order_id) return;
+
+    const { error } = await supabase
+      .from('order_items')
+      .insert({
+        order_id: table.order_id,
+        product_id: product.id,
+        price: product.price,
+      });
+
+    if (error) {
+      console.error('Error adding item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to order",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `Added ${product.title} to the order`,
+    });
+    setIsMenuOpen(false);
+  };
+
   return (
     <DialogContent>
       <DialogHeader>
@@ -111,14 +143,29 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
         </div>
       ) : (
         <div className="space-y-4">
-          <Button 
-            className="w-full"
-            onClick={() => {
-              navigate(`/admin/waiter/order/${table.order_id}`);
-            }}
-          >
-            View/Edit Order
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              className="flex-1"
+              onClick={() => {
+                navigate(`/admin/waiter/order/${table.order_id}`);
+              }}
+            >
+              View Order Details
+            </Button>
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Items
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+                <div className="h-full py-6">
+                  <MenuBrowser onSelectItem={handleAddItem} />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       )}
     </DialogContent>
