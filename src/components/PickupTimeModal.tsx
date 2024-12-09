@@ -27,17 +27,40 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [availableDays, setAvailableDays] = useState<Date[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setAvailableDays(getAvailableDays());
+    const loadAvailableDays = async () => {
+      try {
+        const days = await getAvailableDays();
+        setAvailableDays(days);
+        if (days.length > 0) {
+          setSelectedDate(days[0]);
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading available days:', error);
+        setIsLoading(false);
+      }
+    };
+
+    loadAvailableDays();
   }, []);
 
   useEffect(() => {
-    if (selectedDate) {
-      const times = getAvailableTimeSlots(selectedDate);
-      setAvailableTimes(times);
-      setSelectedTime(times[0] || "");
-    }
+    const loadAvailableTimes = async () => {
+      if (selectedDate) {
+        try {
+          const times = await getAvailableTimeSlots(selectedDate);
+          setAvailableTimes(times);
+          setSelectedTime(times[0] || "");
+        } catch (error) {
+          console.error('Error loading available times:', error);
+        }
+      }
+    };
+
+    loadAvailableTimes();
   }, [selectedDate]);
 
   const handleSchedule = () => {
@@ -48,6 +71,10 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
       );
     }
   };
+
+  if (isLoading) {
+    return null; // Or show a loading spinner
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

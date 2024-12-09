@@ -6,24 +6,29 @@ type DaySchedule = {
   close: string;
 } | null;
 
+const dayOrder = {
+  'Sunday': 1,
+  'Monday': 2,
+  'Tuesday': 3,
+  'Wednesday': 4,
+  'Thursday': 5,
+  'Friday': 6,
+  'Saturday': 7
+};
+
 export const getStoreHours = async () => {
   const { data: hours, error } = await supabase
     .from('store_hours')
     .select('*')
-    .order(`CASE day_of_week 
-      WHEN 'Sunday' THEN 1 
-      WHEN 'Monday' THEN 2 
-      WHEN 'Tuesday' THEN 3 
-      WHEN 'Wednesday' THEN 4 
-      WHEN 'Thursday' THEN 5 
-      WHEN 'Friday' THEN 6 
-      WHEN 'Saturday' THEN 7 
-    END`);
+    .order('day_of_week');
 
   if (error) {
     console.error('Error fetching store hours:', error);
     return null;
   }
+
+  // Sort the hours based on our custom order
+  hours.sort((a, b) => dayOrder[a.day_of_week as keyof typeof dayOrder] - dayOrder[b.day_of_week as keyof typeof dayOrder]);
 
   return hours.reduce((acc: { [key: string]: DaySchedule }, hour) => {
     acc[hour.day_of_week] = hour.is_closed ? null : {
@@ -38,11 +43,13 @@ export const getAvailableDays = async (startDate: Date = new Date()): Promise<Da
   const days: Date[] = [];
   let currentDate = startDate;
   const hours = await getStoreHours();
+  
+  if (!hours) return [];
 
   // Get next 7 days
   for (let i = 0; i < 7; i++) {
     const dayName = format(currentDate, 'EEEE');
-    if (hours && hours[dayName]) {
+    if (hours[dayName]) {
       days.push(currentDate);
     }
     currentDate = addDays(currentDate, 1);
