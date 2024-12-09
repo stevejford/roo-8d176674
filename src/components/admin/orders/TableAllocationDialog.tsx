@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,8 +29,8 @@ interface TableAllocationDialogProps {
 
 export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAllocationDialogProps) => {
   const navigate = useNavigate();
-  const [customerName, setCustomerName] = React.useState('');
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
 
   const handleAllocation = async () => {
