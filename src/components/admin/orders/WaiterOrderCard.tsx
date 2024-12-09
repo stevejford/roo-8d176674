@@ -4,6 +4,8 @@ import { OrderHeader } from './waiter/OrderHeader';
 import { OrderItems } from './waiter/OrderItems';
 import { OrderActions } from './waiter/OrderActions';
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { KitchenIcon } from "lucide-react";
 
 interface WaiterOrderCardProps {
   order: any;
@@ -23,7 +25,8 @@ export const WaiterOrderCard = ({
 
   const calculateTotal = () => {
     return order.order_items?.reduce((acc: number, item: any) => {
-      return acc + (item.price * item.quantity);
+      const itemPrice = Number(item.price) || 0;
+      return acc + (itemPrice * item.quantity);
     }, 0) || 0;
   };
 
@@ -55,6 +58,29 @@ export const WaiterOrderCard = ({
       });
     } finally {
       setIsProcessingPayment(false);
+    }
+  };
+
+  const handleSendToKitchen = async () => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'preparing' })
+        .eq('id', order.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Order Sent to Kitchen",
+        description: "The order has been sent to the kitchen for preparation",
+      });
+      onUpdateStatus(order.id, 'preparing');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send order to kitchen",
+        variant: "destructive",
+      });
     }
   };
 
@@ -112,13 +138,32 @@ export const WaiterOrderCard = ({
       
       <OrderItems items={order.order_items} />
       
-      <OrderActions
-        status={order.status}
-        orderTotal={calculateTotal()}
-        isProcessingPayment={isProcessingPayment}
-        onPayment={handlePayment}
-        onAddItem={handleAddItem}
-      />
+      <div className="border-t pt-4">
+        <div className="flex justify-between items-center mb-4">
+          <span className="font-semibold text-lg">Total</span>
+          <span className="font-bold text-xl">${calculateTotal().toFixed(2)}</span>
+        </div>
+
+        <div className="flex gap-3">
+          {order.status === 'pending' && (
+            <Button 
+              className="flex-1 bg-orange-500 hover:bg-orange-600"
+              onClick={handleSendToKitchen}
+            >
+              <KitchenIcon className="w-4 h-4 mr-2" />
+              Send to Kitchen
+            </Button>
+          )}
+          
+          <OrderActions
+            status={order.status}
+            orderTotal={calculateTotal()}
+            isProcessingPayment={isProcessingPayment}
+            onPayment={handlePayment}
+            onAddItem={handleAddItem}
+          />
+        </div>
+      </div>
     </div>
   );
 };
