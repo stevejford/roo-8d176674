@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,23 @@ interface OrderSidebarProps {
 
 export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) => {
   const isMobile = useIsMobile();
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Handle smooth closing animation
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300); // Match this with the animation duration
+  };
+
+  // Reset closing state when product changes
+  useEffect(() => {
+    if (selectedProduct) {
+      setIsClosing(false);
+    }
+  }, [selectedProduct]);
 
   // Fetch category pricing if product has a category
   const { data: categoryPricing } = useQuery<CategoryPricing | null>({
@@ -85,7 +102,9 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
 
   const baseClassName = `fixed ${
     isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'
-  } bg-white border-l border-gray-200 h-screen z-[60] animate-slide-in-right`; // Added animation class
+  } bg-white border-l border-gray-200 h-screen z-[60] ${
+    isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'
+  }`;
 
   // Show size-based sidebar for products with size-based pricing
   if (pricingStrategy?.type === 'size_based' && pricingConfig?.sizes) {
@@ -94,7 +113,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         <SizeBasedOrderSidebar
           product={selectedProduct}
           pricing={pricingConfig}
-          onClose={onClose}
+          onClose={handleClose}
         />
       </div>
     );
@@ -109,7 +128,7 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
         image={selectedProduct.image}
         price={selectedProduct.price}
         category_id={selectedProduct.category_id}
-        onClose={onClose}
+        onClose={handleClose}
       />
     </div>
   );
