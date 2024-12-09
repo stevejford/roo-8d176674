@@ -38,19 +38,17 @@ const Index = () => {
       const newWidth = window.innerWidth;
       setWindowWidth(newWidth);
       
-      // On desktop (>= 1280px), show sidebar by default unless a product is selected
       if (newWidth >= 1280 && !selectedProduct) {
         setShowLocationSheet(true);
       }
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
+    handleResize();
 
     return () => window.removeEventListener('resize', handleResize);
   }, [selectedProduct]);
 
-  // Transform products into category-based structure
   const productsByCategory = React.useMemo(() => {
     if (!products) return {};
     
@@ -87,10 +85,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar 
-        isAdmin={isAdmin} 
-        onCategoryClick={scrollToCategory}
-      />
+      <div className={`${shouldShowSidebar ? 'mr-[400px]' : ''}`}>
+        <Navbar 
+          isAdmin={isAdmin} 
+          onCategoryClick={scrollToCategory}
+        />
+      </div>
       
       <div className="pt-16">
         <div className="relative flex">
