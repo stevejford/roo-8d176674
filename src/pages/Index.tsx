@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ const Index = () => {
   const { products } = useProducts();
   const isMobile = useIsMobile();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const [selectedProduct, setSelectedProduct] = useState<{
     title: string;
@@ -28,9 +29,25 @@ const Index = () => {
     category_id?: string;
   } | null>(null);
 
-  const [showLocationSheet, setShowLocationSheet] = useState(!isMobile);
+  const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
-  const [cartCount, setCartCount] = useState(2); // This should be dynamic based on your cart state
+  const [cartCount, setCartCount] = useState(2);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      if (window.innerWidth >= 1280) {
+        setShowLocationSheet(true);
+      } else {
+        setShowLocationSheet(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Transform products into category-based structure
   const productsByCategory = React.useMemo(() => {
@@ -64,6 +81,9 @@ const Index = () => {
     }
   };
 
+  const shouldShowCartButton = (windowWidth < 1280 || isMobile) && !selectedProduct;
+  const shouldShowSidebar = windowWidth >= 1280 && !isMobile;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar 
@@ -80,23 +100,25 @@ const Index = () => {
             onProductSelect={handleProductSelect}
           />
 
-          <div className={`${isMobile ? 'hidden' : 'fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)] xl:block hidden'}`}>
-            <OrderLocation 
-              mode={deliveryMode}
-              isOpen={showLocationSheet}
-              onOpenChange={setShowLocationSheet}
-            />
-          </div>
+          {shouldShowSidebar && (
+            <div className="fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)]">
+              <OrderLocation 
+                mode={deliveryMode}
+                isOpen={showLocationSheet}
+                onOpenChange={setShowLocationSheet}
+              />
+            </div>
+          )}
         </div>
 
         <OrderSidebar
           selectedProduct={selectedProduct}
           onClose={() => setSelectedProduct(null)}
-          onAfterClose={() => setShowLocationSheet(true)}
+          onAfterClose={() => setShowLocationSheet(shouldShowSidebar)}
         />
 
         {/* Cart Button for Mobile/Tablet */}
-        {(isMobile || window.innerWidth < 1280) && !selectedProduct && (
+        {shouldShowCartButton && (
           <button
             onClick={() => setShowLocationSheet(true)}
             className="fixed bottom-4 right-4 bg-primary text-white rounded-full p-4 shadow-lg flex items-center space-x-2 z-50"
