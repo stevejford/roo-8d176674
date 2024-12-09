@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   BarChart,
   DollarSign,
+  Utensils,
 } from "lucide-react";
 import {
   Card,
@@ -26,6 +27,7 @@ import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
 import { UserManagement } from '@/components/admin/users/UserManagement';
 import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
 import { OrderList } from '@/components/admin/orders/OrderList';
+import { KitchenDashboard } from '@/components/admin/orders/KitchenDashboard';
 
 const Dashboard = () => (
   <div className="space-y-6">
@@ -120,6 +122,7 @@ const Admin = () => {
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+    { name: 'Kitchen', href: '/admin/kitchen', icon: Utensils },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart },
     { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
@@ -166,6 +169,7 @@ const Admin = () => {
             <Route path="products/*" element={<Products />} />
             <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />
+            <Route path="kitchen/*" element={<KitchenDashboard />} />
             <Route path="users/*" element={<UsersManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
             <Route path="settings/*" element={<SettingsPanel />} />
