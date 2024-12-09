@@ -68,14 +68,14 @@ export const StoreSettingsForm = () => {
       queryClient.invalidateQueries({ queryKey: ['store-settings'] });
       toast({
         title: "Settings updated",
-        description: "Store settings have been successfully updated.",
+        description: "Business information has been successfully updated.",
         duration: 3000,
       });
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to update store settings.",
+        description: "Failed to update business information.",
         variant: "destructive",
         duration: 3000,
       });
@@ -101,9 +101,9 @@ export const StoreSettingsForm = () => {
               name="store_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Store Name</FormLabel>
+                  <FormLabel>Business Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="Enter your business name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,9 +115,9 @@ export const StoreSettingsForm = () => {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Store Address</FormLabel>
+                  <FormLabel>Business Address</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="Enter your business address" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,7 +128,7 @@ export const StoreSettingsForm = () => {
               type="submit"
               className="bg-emerald-600 hover:bg-emerald-700"
             >
-              Save Settings
+              Save Changes
             </Button>
           </form>
         </Form>
@@ -136,14 +136,14 @@ export const StoreSettingsForm = () => {
 
       {settings && (
         <div className="bg-gray-50 p-6 rounded-lg">
-          <h3 className="text-lg font-medium mb-4">Current Settings</h3>
+          <h3 className="text-lg font-medium mb-4">Current Information</h3>
           <div className="space-y-3">
             <div>
-              <span className="font-medium">Store Name: </span>
+              <span className="font-medium">Business Name: </span>
               <span>{settings.store_name}</span>
             </div>
             <div>
-              <span className="font-medium">Store Address: </span>
+              <span className="font-medium">Business Address: </span>
               <span>{settings.address}</span>
             </div>
           </div>

@@ -83,12 +83,14 @@ const Analytics = () => (
 const SettingsPanel = () => (
   <div className="space-y-8">
     <div>
-      <h2 className="text-2xl font-bold mb-4">Store Settings</h2>
+      <h2 className="text-2xl font-bold mb-4">Business Information</h2>
+      <p className="text-gray-600 mb-4">Manage your restaurant's basic information and contact details</p>
       <StoreSettingsForm />
     </div>
     
     <div>
-      <h2 className="text-2xl font-bold mb-4">Store Hours</h2>
+      <h2 className="text-2xl font-bold mb-4">Operating Hours</h2>
+      <p className="text-gray-600 mb-4">Set your restaurant's opening and closing hours for each day of the week</p>
       <StoreHoursForm />
     </div>
   </div>
@@ -165,3 +167,4 @@ const Admin = () => {
 };
 
 export default Admin;
+
