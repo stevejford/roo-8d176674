@@ -65,9 +65,21 @@ export const useTableManagement = () => {
       return false;
     }
 
+    // Get the current maximum position
+    const { data: maxPositionData } = await supabase
+      .from('tables')
+      .select('position')
+      .order('position', { ascending: false })
+      .limit(1);
+
+    const nextPosition = (maxPositionData?.[0]?.position || 0) + 1;
+
     const { error } = await supabase
       .from('tables')
-      .insert({ table_number: tableNumber });
+      .insert({ 
+        table_number: tableNumber,
+        position: nextPosition
+      });
 
     if (error) {
       toast({
