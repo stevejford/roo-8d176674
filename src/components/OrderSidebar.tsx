@@ -83,7 +83,9 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     ? productPricing.config
     : categoryPricing?.config;
 
-  const baseClassName = `fixed ${isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'} bg-white border-l border-gray-200 h-screen z-[60]`; // Increased z-index to be higher than navbar
+  const baseClassName = `fixed ${
+    isMobile ? 'inset-0' : 'top-0 right-0 w-[400px]'
+  } bg-white border-l border-gray-200 h-screen z-[60] animate-slide-in-right`; // Added animation class
 
   // Show size-based sidebar for products with size-based pricing
   if (pricingStrategy?.type === 'size_based' && pricingConfig?.sizes) {
