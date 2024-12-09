@@ -81,32 +81,38 @@ export type Database = {
       order_items: {
         Row: {
           created_at: string | null
+          customizations: Json | null
           id: string
           notes: string | null
           order_id: string | null
           price: number
           product_id: string | null
           quantity: number
+          size: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          customizations?: Json | null
           id?: string
           notes?: string | null
           order_id?: string | null
           price: number
           product_id?: string | null
           quantity?: number
+          size?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          customizations?: Json | null
           id?: string
           notes?: string | null
           order_id?: string | null
           price?: number
           product_id?: string | null
           quantity?: number
+          size?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -190,6 +196,9 @@ export type Database = {
           main_served_at: string | null
           notes: string | null
           order_taken_at: string | null
+          paid_amount: number | null
+          payment_method: string | null
+          payment_status: string | null
           seated_at: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           table_number: string | null
@@ -217,6 +226,9 @@ export type Database = {
           main_served_at?: string | null
           notes?: string | null
           order_taken_at?: string | null
+          paid_amount?: number | null
+          payment_method?: string | null
+          payment_status?: string | null
           seated_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           table_number?: string | null
@@ -244,6 +256,9 @@ export type Database = {
           main_served_at?: string | null
           notes?: string | null
           order_taken_at?: string | null
+          paid_amount?: number | null
+          payment_method?: string | null
+          payment_status?: string | null
           seated_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           table_number?: string | null
