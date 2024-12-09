@@ -29,25 +29,28 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Reset state when modal opens
   useEffect(() => {
-    const loadAvailableDays = async () => {
-      try {
-        const days = await getAvailableDays();
-        setAvailableDays(days);
-        if (days.length > 0) {
-          setSelectedDate(days[0]);
-        }
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error loading available days:', error);
-        setIsLoading(false);
-      }
-    };
-
     if (isOpen) {
+      setIsLoading(true);
+      setSelectedTime("");
       loadAvailableDays();
     }
   }, [isOpen]);
+
+  const loadAvailableDays = async () => {
+    try {
+      const days = await getAvailableDays();
+      setAvailableDays(days);
+      if (days.length > 0) {
+        setSelectedDate(days[0]);
+      }
+    } catch (error) {
+      console.error('Error loading available days:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const loadAvailableTimes = async () => {
@@ -86,6 +89,15 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
     return null;
   }
 
+  const formatTimeForDisplay = (time: string) => {
+    try {
+      return format(parse(time, 'HH:mm', new Date()), "h:mm aa");
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return time;
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] bg-white">
@@ -95,52 +107,58 @@ export const PickupTimeModal = ({ isOpen, onClose, onSchedule }: PickupTimeModal
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <Select
-            value={selectedDate.toISOString()}
-            onValueChange={(value) => setSelectedDate(new Date(value))}
-          >
-            <SelectTrigger className="w-full bg-white border-gray-300 text-gray-900 shadow-sm">
-              <SelectValue>
-                {format(selectedDate, "EEEE, MMMM d")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-200">
-              {availableDays.map((day) => (
-                <SelectItem 
-                  key={day.toISOString()} 
-                  value={day.toISOString()}
-                  className="hover:bg-gray-100 cursor-pointer text-gray-900"
-                >
-                  {format(day, "EEEE, MMMM d")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Select Date</label>
+            <Select
+              value={selectedDate.toISOString()}
+              onValueChange={(value) => setSelectedDate(new Date(value))}
+            >
+              <SelectTrigger className="w-full bg-white border-gray-300 text-gray-900 shadow-sm">
+                <SelectValue>
+                  {format(selectedDate, "EEEE, MMMM d")}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-200">
+                {availableDays.map((day) => (
+                  <SelectItem 
+                    key={day.toISOString()} 
+                    value={day.toISOString()}
+                    className="hover:bg-gray-100 cursor-pointer text-gray-900"
+                  >
+                    {format(day, "EEEE, MMMM d")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Select
-            value={selectedTime}
-            onValueChange={setSelectedTime}
-          >
-            <SelectTrigger className="w-full bg-white border-gray-300 text-gray-900 shadow-sm">
-              <SelectValue>
-                {selectedTime ? format(parse(selectedTime, 'HH:mm', new Date()), "h:mm aa") : "Select time"}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-200">
-              {availableTimes.map((time) => (
-                <SelectItem 
-                  key={time} 
-                  value={time}
-                  className="hover:bg-gray-100 cursor-pointer text-gray-900"
-                >
-                  {format(parse(time, 'HH:mm', new Date()), "h:mm aa")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Select Time</label>
+            <Select
+              value={selectedTime}
+              onValueChange={setSelectedTime}
+            >
+              <SelectTrigger className="w-full bg-white border-gray-300 text-gray-900 shadow-sm">
+                <SelectValue>
+                  {selectedTime ? formatTimeForDisplay(selectedTime) : "Select time"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-200 max-h-[200px]">
+                {availableTimes.map((time) => (
+                  <SelectItem 
+                    key={time} 
+                    value={time}
+                    className="hover:bg-gray-100 cursor-pointer text-gray-900"
+                  >
+                    {formatTimeForDisplay(time)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <Button 
-            className="w-full bg-[#E86452] hover:bg-[#E86452]/90 text-white py-6"
+            className="w-full bg-[#E86452] hover:bg-[#E86452]/90 text-white py-6 mt-4"
             onClick={handleSchedule}
             disabled={!selectedTime}
           >
