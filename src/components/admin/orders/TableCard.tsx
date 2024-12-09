@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { Plus, Users, ClipboardList, Pencil, Trash2, Save } from "lucide-react";
+import { useState } from 'react';
+import { Plus, Users, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { TableStatusBadge } from './table/TableStatusBadge';
+import { TableManagementButtons } from './table/TableManagementButtons';
+import { TableEditForm } from './table/TableEditForm';
 
 interface TableCardProps {
   table: {
@@ -19,61 +18,11 @@ interface TableCardProps {
   onClick: () => void;
   onSelect?: () => void;
   onViewOrder?: (orderId: string) => void;
-  onEdit?: (newTableNumber: string) => void;
   onDelete?: () => void;
 }
 
-export const TableCard = ({ table, onClick, onSelect, onViewOrder, onDelete }: TableCardProps) => {
+export const TableCard = ({ table, onClick, onViewOrder, onDelete }: TableCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [newTableNumber, setNewTableNumber] = useState(table.table_number);
-  const { toast } = useToast();
-
-  const getTableStatusColor = (status: string) => {
-    switch (status) {
-      case 'occupied':
-        return 'bg-green-600 hover:bg-green-700';
-      case 'reserved':
-        return 'bg-yellow-600 hover:bg-yellow-700';
-      default:
-        return '';
-    }
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!newTableNumber.trim()) {
-      toast({
-        title: "Error",
-        description: "Table number cannot be empty",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('tables')
-        .update({ table_number: newTableNumber })
-        .eq('id', table.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Table number updated successfully",
-      });
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error updating table:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update table number",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="relative p-2">
@@ -85,7 +34,7 @@ export const TableCard = ({ table, onClick, onSelect, onViewOrder, onDelete }: T
             className={`relative h-[12rem] w-full transition-all duration-300 hover:shadow-lg ${
               table.status === 'available' 
                 ? 'border rounded-md border-input bg-background hover:bg-accent hover:text-accent-foreground' 
-                : `text-white ${getTableStatusColor(table.status)}`
+                : `text-white bg-${table.status === 'occupied' ? 'green' : 'yellow'}-600 hover:bg-${table.status === 'occupied' ? 'green' : 'yellow'}-700`
             }`}
             onClick={onClick}
             onKeyDown={(e) => {
@@ -99,41 +48,15 @@ export const TableCard = ({ table, onClick, onSelect, onViewOrder, onDelete }: T
               <div className="flex items-start justify-between mb-3">
                 <div className="flex flex-col items-start">
                   {isEditing ? (
-                    <form 
-                      onSubmit={handleEditSubmit} 
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-2 mb-2"
-                    >
-                      <Input
-                        value={newTableNumber}
-                        onChange={(e) => setNewTableNumber(e.target.value)}
-                        className="w-24 h-8 bg-white text-gray-900"
-                        autoFocus
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <Button 
-                        type="submit" 
-                        size="sm"
-                        variant="secondary"
-                        className="h-8 whitespace-nowrap bg-white text-gray-900 hover:bg-gray-100"
-                      >
-                        <Save className="h-4 w-4 mr-1" />
-                        Save
-                      </Button>
-                    </form>
+                    <TableEditForm
+                      tableId={table.id}
+                      initialTableNumber={table.table_number}
+                      onSuccess={() => setIsEditing(false)}
+                    />
                   ) : (
                     <h3 className="text-xl font-bold mb-1">Table {table.table_number}</h3>
                   )}
-                  <Badge 
-                    variant="secondary"
-                    className={`px-3 py-1 text-sm font-medium ${
-                      table.status === 'available' 
-                        ? 'bg-gray-100 text-gray-900' 
-                        : 'bg-white/20 text-white'
-                    }`}
-                  >
-                    {table.status === 'available' ? 'Available' : table.order_status || 'Occupied'}
-                  </Badge>
+                  <TableStatusBadge status={table.status} orderStatus={table.order_status} />
                 </div>
               </div>
 
@@ -178,30 +101,10 @@ export const TableCard = ({ table, onClick, onSelect, onViewOrder, onDelete }: T
       
       {/* Table management buttons */}
       {!isEditing && (
-        <div className="absolute top-4 right-4 flex space-x-1">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditing(true);
-            }}
-          >
-            <Pencil className="h-4 w-4 text-gray-600" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.();
-            }}
-          >
-            <Trash2 className="h-4 w-4 text-red-600" />
-          </Button>
-        </div>
+        <TableManagementButtons
+          onEdit={() => setIsEditing(true)}
+          onDelete={() => onDelete?.()}
+        />
       )}
     </div>
   );
