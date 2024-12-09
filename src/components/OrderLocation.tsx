@@ -5,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DeliveryModeSelector } from "./order/DeliveryModeSelector";
 import { TimeSelector } from "./order/TimeSelector";
 import { ComplementaryItems } from "./ComplementaryItems";
+import { useCartStore } from "@/stores/useCartStore";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -16,23 +17,8 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   const isMobile = useIsMobile();
   const [selectedTime, setSelectedTime] = React.useState("Wednesday - Reopen");
   const [showVoucherInput, setShowVoucherInput] = React.useState(false);
-
-  const orderItems = [
-    {
-      name: "Mexicana",
-      size: "Small",
-      price: 16.00,
-      image: "/lovable-uploads/234a1b1a-c6c2-4a81-9425-204ec6aed91e.png",
-      quantity: 1
-    },
-    {
-      name: "Carbonara",
-      size: "main",
-      price: 24.00,
-      image: "/lovable-uploads/234a1b1a-c6c2-4a81-9425-204ec6aed91e.png",
-      quantity: 1
-    }
-  ];
+  
+  const { items, updateQuantity, removeItem } = useCartStore();
 
   const content = (
     <div className="h-full flex flex-col bg-white">
@@ -103,28 +89,36 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
               </div>
             ) : (
               <div className="space-y-4">
-                {orderItems.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 rounded-lg overflow-hidden">
                         <img 
-                          src={item.image} 
-                          alt={item.name}
+                          src={item.image_url} 
+                          alt={item.title}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div>
-                        <h4 className="font-medium text-[#2D3648]">{item.name}</h4>
-                        <p className="text-sm text-gray-500">{item.size}</p>
+                        <h4 className="font-medium text-[#2D3648]">{item.title}</h4>
+                        {item.size && <p className="text-sm text-gray-500">{item.size}</p>}
                         <p className="font-medium">${item.price.toFixed(2)}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
-                      <button className="text-gray-400">
+                      <button 
+                        onClick={() => removeItem(item.id)}
+                        className="text-gray-400"
+                      >
                         <Trash2 className="h-5 w-5" />
                       </button>
                       <span className="text-[#2D3648] font-medium">{item.quantity}</span>
-                      <button className="text-gray-600 font-medium">+</button>
+                      <button 
+                        onClick={() => updateQuantity(item.id, true)}
+                        className="text-gray-600 font-medium"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                 ))}
