@@ -1,4 +1,4 @@
-import { format, addDays, isAfter, isBefore, parse, setMinutes } from "date-fns";
+import { format, addDays, isAfter, isBefore, parse, setMinutes, startOfDay, endOfDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
 type DaySchedule = {
@@ -26,7 +26,6 @@ export const getStoreHours = async () => {
     return null;
   }
 
-  // Sort the hours based on day order
   hours.sort((a, b) => 
     dayOrder[a.day_of_week as keyof typeof dayOrder] - 
     dayOrder[b.day_of_week as keyof typeof dayOrder]
@@ -48,7 +47,7 @@ export const getAvailableDays = async (startDate: Date = new Date()): Promise<Da
   if (!hours) return [];
 
   // Get next 7 days
-  let currentDate = startDate;
+  let currentDate = startOfDay(startDate);
   for (let i = 0; i < 7; i++) {
     const dayName = format(currentDate, 'EEEE');
     if (hours[dayName]) {
@@ -70,26 +69,27 @@ export const getAvailableTimeSlots = async (date: Date): Promise<string[]> => {
   if (!schedule) return [];
 
   const timeSlots: string[] = [];
-  const openTime = parse(schedule.open, 'HH:mm:ss', date);
-  const closeTime = parse(schedule.close, 'HH:mm:ss', date);
+  const [openHour, openMinute] = schedule.open.split(':').map(Number);
+  const [closeHour, closeMinute] = schedule.close.split(':').map(Number);
   
-  let currentTime = openTime;
+  let currentTime = new Date(date);
+  currentTime.setHours(openHour, openMinute, 0);
+  
+  const closeTime = new Date(date);
+  closeTime.setHours(closeHour, closeMinute, 0);
+  
   const now = new Date();
   
   // Generate 15-minute intervals
   while (isBefore(currentTime, closeTime)) {
     // If it's today, only show future times
-    if (!isAfter(date, now) || isAfter(currentTime, now)) {
+    if (isBefore(startOfDay(date), startOfDay(now)) || isAfter(currentTime, now)) {
       timeSlots.push(format(currentTime, 'HH:mm'));
     }
-    currentTime = setMinutes(currentTime, getMinutes(currentTime) + 15);
+    currentTime = setMinutes(currentTime, currentTime.getMinutes() + 15);
   }
 
   return timeSlots;
-};
-
-const getMinutes = (date: Date): number => {
-  return date.getMinutes();
 };
 
 export const isStoreOpen = async () => {
