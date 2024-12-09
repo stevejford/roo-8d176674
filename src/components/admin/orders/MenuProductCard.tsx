@@ -2,25 +2,33 @@ import React, { useState } from 'react';
 import { Plus, Minus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useCategoryPricing } from '@/hooks/useCategoryPricing';
-import { useProductPricing } from '@/hooks/useProductPricing';
 import type { Database } from '@/integrations/supabase/types';
 import type { PricingConfig } from '@/types/pricing';
 
 type Product = Database['public']['Tables']['products']['Row'];
+type ProductPricing = Database['public']['Tables']['product_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+};
+type CategoryPricing = Database['public']['Tables']['category_pricing']['Row'] & {
+  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+};
 
 interface MenuProductCardProps {
   product: Product;
   categoryId: string;
+  productPricing?: ProductPricing;
+  categoryPricing?: CategoryPricing;
   onSelect: (product: Product) => void;
 }
 
-export const MenuProductCard = ({ product, categoryId, onSelect }: MenuProductCardProps) => {
+export const MenuProductCard = ({ 
+  product, 
+  categoryId, 
+  productPricing,
+  categoryPricing,
+  onSelect 
+}: MenuProductCardProps) => {
   const [quantity, setQuantity] = useState(0);
-  const { data: categoryPricing } = useCategoryPricing(categoryId);
-  const { data: productPricingMap } = useProductPricing([product]);
-  
-  const productPricing = productPricingMap?.[product.id];
   
   // Calculate the correct price based on pricing hierarchy
   const calculatePrice = () => {

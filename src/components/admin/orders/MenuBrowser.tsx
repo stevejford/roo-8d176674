@@ -9,10 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface MenuBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectProduct: (product: any) => void;
+  onSelect: (product: any) => void;
 }
 
-export const MenuBrowser = ({ isOpen, onClose, onSelectProduct }: MenuBrowserProps) => {
+export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const { data: categories } = useQuery({
@@ -72,7 +72,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelectProduct }: MenuBrowserPro
 
   const handleProductSelect = (product: any) => {
     console.log('Selected product:', product);
-    onSelectProduct(product);
+    onSelect(product);
     onClose();
   };
 
@@ -104,21 +104,18 @@ export const MenuBrowser = ({ isOpen, onClose, onSelectProduct }: MenuBrowserPro
 
           <ScrollArea className="flex-1 px-1">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-              {filteredProducts?.map((product) => {
-                const categoryPrice = categoryPricing?.find(
-                  cp => cp.category_id === product.category_id
-                );
-                
-                return (
-                  <MenuProductCard
-                    key={product.id}
-                    product={product}
-                    productPricing={product.product_pricing?.[0]}
-                    categoryPricing={categoryPrice}
-                    onSelect={handleProductSelect}
-                  />
-                );
-              })}
+              {filteredProducts?.map((product) => (
+                <MenuProductCard
+                  key={product.id}
+                  product={product}
+                  categoryId={product.category_id || ''}
+                  productPricing={product.product_pricing?.[0]}
+                  categoryPricing={categoryPricing?.find(
+                    cp => cp.category_id === product.category_id
+                  )}
+                  onSelect={handleProductSelect}
+                />
+              ))}
             </div>
           </ScrollArea>
         </Tabs>

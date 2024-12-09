@@ -13,7 +13,11 @@ export const MenuBrowserDialog = ({ onSelectItem }: MenuBrowserDialogProps) => {
         <DialogTitle>Add Items to Order</DialogTitle>
       </DialogHeader>
       <div className="py-4">
-        <MenuBrowser onSelectItem={onSelectItem} />
+        <MenuBrowser 
+          isOpen={true} 
+          onClose={() => {}} 
+          onSelect={onSelectItem}
+        />
       </div>
     </DialogContent>
   );
