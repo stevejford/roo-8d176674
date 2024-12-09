@@ -3,16 +3,34 @@ import { Plus, Trash2, X, Loader2, Check } from "lucide-react";
 import { useCartStore } from "@/stores/useCartStore";
 import { useVoucherValidation } from "@/hooks/useVoucherValidation";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 export const OrderItems = () => {
   const [showVoucherInput, setShowVoucherInput] = React.useState(false);
   const [voucherCode, setVoucherCode] = React.useState('');
   const { items, updateQuantity, removeItem } = useCartStore();
   const { validateVoucher, clearVoucher, isValidating, validVoucher, error } = useVoucherValidation();
+  const { toast } = useToast();
 
   const handleVoucherSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await validateVoucher(voucherCode);
+    const result = await validateVoucher(voucherCode);
+    if (result) {
+      setShowVoucherInput(false);
+      toast({
+        title: "Voucher Applied Successfully!",
+        description: `${result.code} - ${result.discount_type === 'percentage' 
+          ? `${result.discount_value}% off`
+          : `$${result.discount_value} off`} has been applied to your order.`,
+        variant: "success",
+      });
+    } else if (error) {
+      toast({
+        title: "Invalid Voucher",
+        description: error,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -90,6 +108,11 @@ export const OrderItems = () => {
             onClick={() => {
               clearVoucher();
               setVoucherCode('');
+              toast({
+                title: "Voucher Removed",
+                description: "The voucher has been removed from your order.",
+                variant: "default",
+              });
             }}
             className="text-green-700 hover:text-green-800"
           >
