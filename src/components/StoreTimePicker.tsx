@@ -57,7 +57,11 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      setSelectedDate(date);
+      // If there's no existing selectedDate, initialize with noon
+      const newDate = selectedDate 
+        ? new Date(date.setHours(selectedDate.getHours(), selectedDate.getMinutes()))
+        : new Date(date.setHours(12, 0));
+      setSelectedDate(newDate);
     }
   };
 
@@ -75,8 +79,9 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
         newDate.setMinutes(parseInt(value));
       } else if (type === "ampm") {
         const currentHours = newDate.getHours();
+        const isPM = value === "PM";
         newDate.setHours(
-          value === "PM" ? currentHours + 12 : currentHours - 12
+          isPM ? (currentHours % 12) + 12 : currentHours % 12
         );
       }
       setSelectedDate(newDate);
@@ -119,7 +124,7 @@ export function StoreTimePicker({ date, onSelect }: StoreTimePickerProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-white">
-        <div className="sm:flex">
+        <div className="flex flex-col sm:flex-row">
           <Calendar
             mode="single"
             selected={selectedDate}
