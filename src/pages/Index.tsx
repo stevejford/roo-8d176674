@@ -92,7 +92,7 @@ const Index = () => {
         />
       </div>
       
-      <div className="pt-16">
+      <div>
         <div className="relative flex">
           <MainContent
             categories={categories || []}

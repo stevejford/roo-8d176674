@@ -30,9 +30,9 @@ export const MainContent = ({
     : categories;
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <div className="px-4 mx-auto xl:mr-[400px]">
-        <div className="space-y-12">
+        <div className="space-y-12 pt-16">
           {displayCategories.map((category) => (
             <CategorySection
               key={category.id}
