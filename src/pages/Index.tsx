@@ -8,6 +8,8 @@ import { OrderSidebar } from '@/components/OrderSidebar';
 import { useCategories } from '@/hooks/useCategories';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/components/admin/products/types';
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { OrderLocation } from '@/components/OrderLocation';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const Index = () => {
   const { categories } = useCategories();
   const { products } = useProducts();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [showLocationSheet, setShowLocationSheet] = useState(true);
 
   const [selectedProduct, setSelectedProduct] = useState<{
     title: string;
@@ -45,7 +48,7 @@ const Index = () => {
     price: number;
     category_id?: string;
   }) => {
-    console.log('Selected product:', product); // Debug log
+    setShowLocationSheet(false);
     setSelectedProduct(product);
   };
 
@@ -72,9 +75,18 @@ const Index = () => {
         />
       </div>
 
+      <Sheet open={showLocationSheet} onOpenChange={setShowLocationSheet}>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+          <div className="mt-6">
+            <OrderLocation mode="delivery" />
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <OrderSidebar
         selectedProduct={selectedProduct}
         onClose={() => setSelectedProduct(null)}
+        onAfterClose={() => setShowLocationSheet(true)}
       />
 
       <AppFooter 

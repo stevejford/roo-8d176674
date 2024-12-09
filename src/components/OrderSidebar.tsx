@@ -15,9 +15,10 @@ interface OrderSidebarProps {
     category_id?: string;
   } | null;
   onClose: () => void;
+  onAfterClose?: () => void;  // New prop for after close callback
 }
 
-export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) => {
+export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSidebarProps) => {
   const isMobile = useIsMobile();
   const [isClosing, setIsClosing] = useState(false);
 
@@ -26,6 +27,10 @@ export const OrderSidebar = ({ selectedProduct, onClose }: OrderSidebarProps) =>
     setTimeout(() => {
       setIsClosing(false);
       onClose();
+      // Call onAfterClose after the animation completes
+      setTimeout(() => {
+        onAfterClose?.();
+      }, 100);
     }, 300);
   };
 
