@@ -50,7 +50,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   }
 
   return (
-    <div className="fixed top-0 right-0 w-[400px] h-screen bg-white border-l border-gray-200 p-4 z-50">
+    <div className="fixed top-0 right-[400px] w-[400px] h-screen bg-white border-l border-gray-200 p-4 z-50">
       <h2 className="text-2xl font-semibold mb-6">Order</h2>
       {content}
     </div>
