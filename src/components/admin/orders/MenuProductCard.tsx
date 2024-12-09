@@ -5,19 +5,26 @@ import { Button } from "@/components/ui/button";
 import type { Database } from '@/integrations/supabase/types';
 import type { PricingConfig } from '@/types/pricing';
 
-type Product = Database['public']['Tables']['products']['Row'];
-type ProductPricing = Database['public']['Tables']['product_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
-};
-type CategoryPricing = Database['public']['Tables']['category_pricing']['Row'] & {
-  pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+type Product = Database['public']['Tables']['products']['Row'] & {
+  product_pricing?: Array<{
+    config: any;
+    is_override: boolean;
+    pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+  }>;
 };
 
 interface MenuProductCardProps {
   product: Product;
   categoryId: string;
-  productPricing?: ProductPricing;
-  categoryPricing?: CategoryPricing;
+  productPricing?: {
+    config: any;
+    is_override: boolean;
+    pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+  };
+  categoryPricing?: {
+    config: any;
+    pricing_strategies: Database['public']['Tables']['pricing_strategies']['Row'];
+  };
   onSelect: (product: Product) => void;
 }
 
@@ -30,10 +37,11 @@ export const MenuProductCard = ({
 }: MenuProductCardProps) => {
   const [quantity, setQuantity] = useState(0);
   
-  // Calculate the correct price based on pricing hierarchy
   const calculatePrice = () => {
     console.log('Calculating price for:', product.title);
     console.log('Product base price:', product.price);
+    console.log('Product pricing override:', productPricing);
+    console.log('Category pricing:', categoryPricing);
     
     // First check for product-specific pricing override
     if (productPricing?.is_override) {
@@ -67,7 +75,7 @@ export const MenuProductCard = ({
     if (increment && newQuantity === 1) {
       const productWithPrice = {
         ...product,
-        price: price // Ensure we pass the calculated price
+        price // Ensure we pass the calculated price
       };
       console.log('Selecting product with calculated price:', productWithPrice);
       onSelect(productWithPrice);

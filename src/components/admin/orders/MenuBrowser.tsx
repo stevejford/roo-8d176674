@@ -31,7 +31,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   const { data: products } = useQuery({
     queryKey: ['products-with-pricing'],
     queryFn: async () => {
-      console.log('Fetching products with complete pricing information');
+      console.log('Fetching products with pricing information');
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -55,6 +55,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   const { data: categoryPricing } = useQuery({
     queryKey: ['category-pricing'],
     queryFn: async () => {
+      console.log('Fetching category pricing');
       const { data, error } = await supabase
         .from('category_pricing')
         .select(`
@@ -71,7 +72,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   });
 
   const handleProductSelect = (product: any) => {
-    console.log('Selected product:', product);
+    console.log('Selected product with pricing:', product);
     onSelect(product);
     onClose();
   };
@@ -104,18 +105,26 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
 
           <ScrollArea className="flex-1 px-1">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-              {filteredProducts?.map((product) => (
-                <MenuProductCard
-                  key={product.id}
-                  product={product}
-                  categoryId={product.category_id || ''}
-                  productPricing={product.product_pricing?.[0]}
-                  categoryPricing={categoryPricing?.find(
-                    cp => cp.category_id === product.category_id
-                  )}
-                  onSelect={handleProductSelect}
-                />
-              ))}
+              {filteredProducts?.map((product) => {
+                console.log('Rendering product:', product.title, 'with price:', product.price);
+                console.log('Product pricing:', product.product_pricing?.[0]);
+                console.log('Category pricing:', categoryPricing?.find(
+                  cp => cp.category_id === product.category_id
+                ));
+                
+                return (
+                  <MenuProductCard
+                    key={product.id}
+                    product={product}
+                    categoryId={product.category_id || ''}
+                    productPricing={product.product_pricing?.[0]}
+                    categoryPricing={categoryPricing?.find(
+                      cp => cp.category_id === product.category_id
+                    )}
+                    onSelect={handleProductSelect}
+                  />
+                );
+              })}
             </div>
           </ScrollArea>
         </Tabs>
