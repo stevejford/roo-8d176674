@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useCartStore } from '@/stores/useCartStore';
 import { useVoucherValidation } from '@/hooks/useVoucherValidation';
-import { supabase } from '@/integrations/supabase/client';
 import { useOrderValidation } from '@/hooks/useOrderValidation';
+import { supabase } from "@/integrations/supabase/client";
 import type { Voucher } from '@/hooks/useVoucherValidation';
 
 interface OrderContextType {
@@ -59,6 +59,16 @@ export const OrderStateProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   const handleCheckout = async () => {
+    if (selectedTime === "Wednesday - Reopen") {
+      toast({
+        title: "Pickup Time Required",
+        description: "Please select a pickup time before proceeding to checkout.",
+        variant: "destructive"
+      });
+      setShowTimeModal(true);
+      return;
+    }
+
     if (!validateOrder(selectedTime)) {
       return;
     }
@@ -99,33 +109,6 @@ export const OrderStateProvider = ({ children }: { children: React.ReactNode }) 
       setIsProcessing(false);
     }
   };
-
-  useEffect(() => {
-    const paymentStatus = searchParams.get('payment_status');
-    if (paymentStatus === 'success') {
-      setSuccessOrderDetails({
-        items: items,
-        total: calculateTotal(),
-        pickupTime: selectedTime
-      });
-      setShowSuccessDialog(true);
-      toast({
-        title: "Payment Successful",
-        description: "Thank you for your order!",
-        variant: "default"
-      });
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    } else if (paymentStatus === 'cancelled') {
-      toast({
-        title: "Payment Cancelled",
-        description: "Your payment was cancelled.",
-        variant: "destructive"
-      });
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [searchParams, toast, items, selectedTime]);
 
   const value = {
     selectedTime,
