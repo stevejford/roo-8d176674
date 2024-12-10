@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderContent } from "./order/OrderContent";
 import { OrderSuccessDialog } from "./order/OrderSuccessDialog";
 import { OrderStateProvider, useOrderState } from "./order/OrderStateProvider";
+import { useCartStore } from "@/stores/useCartStore";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -19,6 +20,7 @@ const OrderLocationContent = ({ mode }: { mode: 'pickup' | 'delivery' }) => {
   const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
   const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
   const { toast } = useToast();
+  const { items } = useCartStore();
   const {
     selectedTime,
     showTimeModal,
@@ -84,7 +86,7 @@ const OrderLocationContent = ({ mode }: { mode: 'pickup' | 'delivery' }) => {
         isStoreCurrentlyOpen={isStoreCurrentlyOpen}
         isCheckingStoreHours={isCheckingStoreHours}
         isProcessing={isProcessing}
-        itemCount={0}
+        itemCount={items.length}
         total={calculateTotal()}
         validVoucher={validVoucher}
         calculateTotal={calculateTotal}
