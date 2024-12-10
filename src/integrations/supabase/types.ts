@@ -486,6 +486,7 @@ export type Database = {
           id: string
           service_timings: Json | null
           store_name: string
+          stripe_secret_key: string | null
           updated_at: string | null
         }
         Insert: {
@@ -495,6 +496,7 @@ export type Database = {
           id?: string
           service_timings?: Json | null
           store_name: string
+          stripe_secret_key?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -504,6 +506,7 @@ export type Database = {
           id?: string
           service_timings?: Json | null
           store_name?: string
+          stripe_secret_key?: string | null
           updated_at?: string | null
         }
         Relationships: []
