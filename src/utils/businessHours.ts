@@ -101,9 +101,21 @@ export const isStoreOpen = async () => {
   const currentDay = format(now, 'EEEE');
   const currentTime = format(now, 'HH:mm');
   
+  console.log('Current time check:', {
+    now,
+    currentHour,
+    currentDay,
+    currentTime
+  });
+
   // Get today's schedule
   const todaySchedule = hours[currentDay];
-  if (!todaySchedule) return false;
+  if (!todaySchedule) {
+    console.log('No schedule found for today');
+    return false;
+  }
+
+  console.log('Today\'s schedule:', todaySchedule);
 
   // If it's after midnight and before store opening time, allow pre-orders
   if (currentHour >= 0) {
@@ -111,13 +123,28 @@ export const isStoreOpen = async () => {
     const openingTime = new Date(now);
     openingTime.setHours(openHour, openMinute, 0);
     
+    console.log('Pre-order time check:', {
+      currentHour,
+      openingTime,
+      isBeforeOpening: isBefore(now, openingTime)
+    });
+    
     if (isBefore(now, openingTime)) {
+      console.log('Pre-orders allowed: It\'s after midnight and before opening time');
       return true;
     }
   }
 
   // During regular hours, check if we're within opening hours
-  return currentTime >= todaySchedule.open && currentTime <= todaySchedule.close;
+  const isWithinHours = currentTime >= todaySchedule.open && currentTime <= todaySchedule.close;
+  console.log('Regular hours check:', {
+    currentTime,
+    openTime: todaySchedule.open,
+    closeTime: todaySchedule.close,
+    isWithinHours
+  });
+
+  return isWithinHours;
 };
 
 export const getStoreSettings = async () => {
