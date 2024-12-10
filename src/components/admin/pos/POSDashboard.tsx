@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { OrderCard } from './components/OrderCard';
@@ -89,20 +88,22 @@ export const POSDashboard = () => {
 
   if (isMenuOpen) {
     return (
-      <POSMenuBrowser 
-        orderId={selectedOrderId}
-        onOrderComplete={() => {
-          setIsMenuOpen(false);
-          setSelectedOrderId(null);
-          refetch();
-        }}
-      />
+      <div className="h-full w-full">
+        <POSMenuBrowser 
+          orderId={selectedOrderId}
+          onOrderComplete={() => {
+            setIsMenuOpen(false);
+            setSelectedOrderId(null);
+            refetch();
+          }}
+        />
+      </div>
     );
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] p-6 bg-gray-50">
-      <div className="flex justify-between items-center mb-6">
+    <div className="h-[calc(100vh-4rem)] w-full">
+      <div className="flex justify-between items-center mb-6 px-6 pt-6">
         <h2 className="text-2xl font-bold">Active Orders</h2>
         <Button 
           onClick={handleStartNewOrder} 
@@ -114,18 +115,20 @@ export const POSDashboard = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-max overflow-y-auto max-h-[calc(100vh-12rem)]">
-        {orders?.map((order) => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            onAddItems={() => {
-              setSelectedOrderId(order.id);
-              setIsMenuOpen(true);
-            }}
-            onDelete={(orderId) => setOrderToDelete(orderId)}
-          />
-        ))}
+      <div className="px-6 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-max overflow-y-auto max-h-[calc(100vh-12rem)]">
+          {orders?.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              onAddItems={() => {
+                setSelectedOrderId(order.id);
+                setIsMenuOpen(true);
+              }}
+              onDelete={(orderId) => setOrderToDelete(orderId)}
+            />
+          ))}
+        </div>
       </div>
 
       <AlertDialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>

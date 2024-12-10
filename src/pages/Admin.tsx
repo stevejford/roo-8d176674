@@ -20,7 +20,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 const Dashboard = () => (
-  <div className="space-y-6">
+  <div className="space-y-6 p-8">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>
         <CardHeader>
@@ -118,7 +118,7 @@ const Admin = () => {
             <div className="flex items-center p-4 border-b lg:hidden">
               <SidebarTrigger />
             </div>
-            <div className="p-8">
+            <div className="h-[calc(100vh-4rem)]">
               <Routes>
                 <Route index element={<Dashboard />} />
                 <Route path="pos/*" element={<POSDashboard />} />
