@@ -35,7 +35,9 @@ export const WaiterOrderCard = ({
           paid_amount: order.total_amount,
           status: 'completed' as OrderStatus
         })
-        .eq('id', order.id);
+        .eq('id', order.id)
+        .select()
+        .maybeSingle();
 
       if (error) throw error;
 
@@ -64,7 +66,9 @@ export const WaiterOrderCard = ({
           status: 'preparing' as OrderStatus,
           order_taken_at: new Date().toISOString()
         })
-        .eq('id', order.id);
+        .eq('id', order.id)
+        .select()
+        .maybeSingle();
 
       if (error) throw error;
 
@@ -85,13 +89,16 @@ export const WaiterOrderCard = ({
   const handleDeleteOrder = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
+      console.log('Attempting to delete order:', order.id);
       const { error } = await supabase
         .from('orders')
         .update({ 
           deleted_at: new Date().toISOString(),
           status: 'cancelled' as OrderStatus
         })
-        .eq('id', order.id);
+        .eq('id', order.id)
+        .select()
+        .maybeSingle();
 
       if (error) {
         console.error('Update error:', error);
