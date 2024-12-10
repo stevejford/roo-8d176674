@@ -6,6 +6,7 @@ import { ComplementaryItems } from "../ComplementaryItems";
 import { OrderTotals } from "./OrderTotals";
 import { CheckoutButton } from "./CheckoutButton";
 import { PickupTimeModal } from "../PickupTimeModal";
+import { TrustInfo } from "./TrustInfo";
 import type { Voucher } from "@/hooks/useVoucherValidation";
 
 interface OrderContentProps {
@@ -79,6 +80,7 @@ export const OrderContent = ({
           total={total}
           onCheckout={onCheckout}
         />
+        <TrustInfo />
       </div>
 
       <PickupTimeModal
