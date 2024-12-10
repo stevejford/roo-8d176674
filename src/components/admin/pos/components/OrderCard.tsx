@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { OrderActions } from "./OrderActions";
@@ -19,18 +20,42 @@ export const OrderCard = ({
   onPrintReceipt,
   onDelete
 }: OrderCardProps) => {
+  const [isEditing, setIsEditing] = useState(!order.customer_name);
+  const [customerName, setCustomerName] = useState(order.customer_name || '');
+
   const calculateTotal = (orderItems: any[]) => {
     return orderItems?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
   };
 
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (customerName.trim()) {
+        await onUpdateCustomerName(order.id, customerName.trim());
+        setIsEditing(false);
+      }
+    }
+  };
+
   return (
     <Card key={order.id} className="p-4 space-y-4">
-      <Input
-        placeholder="Customer Name"
-        value={order.customer_name || ''}
-        onChange={(e) => onUpdateCustomerName(order.id, e.target.value)}
-        className="w-full"
-      />
+      {isEditing ? (
+        <Input
+          placeholder="Customer Name"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full"
+          autoFocus
+        />
+      ) : (
+        <div 
+          className="cursor-pointer py-2"
+          onClick={() => setIsEditing(true)}
+        >
+          {customerName || 'Click to add customer name'}
+        </div>
+      )}
 
       <div>
         <p className="text-sm text-gray-500 mb-2">Order Items:</p>
