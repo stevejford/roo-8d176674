@@ -3,6 +3,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { OrderCardContent } from './waiter/OrderCardContent';
+import { Button } from "@/components/ui/button";
+import { Plus, UtensilsCrossed, Trash2 } from "lucide-react";
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -35,9 +37,7 @@ export const WaiterOrderCard = ({
           paid_amount: order.total_amount,
           status: 'completed' as OrderStatus
         })
-        .eq('id', order.id)
-        .select()
-        .maybeSingle();
+        .eq('id', order.id);
 
       if (error) throw error;
 
@@ -66,9 +66,7 @@ export const WaiterOrderCard = ({
           status: 'preparing' as OrderStatus,
           order_taken_at: new Date().toISOString()
         })
-        .eq('id', order.id)
-        .select()
-        .maybeSingle();
+        .eq('id', order.id);
 
       if (error) throw error;
 
@@ -96,9 +94,7 @@ export const WaiterOrderCard = ({
           deleted_at: new Date().toISOString(),
           status: 'cancelled' as OrderStatus
         })
-        .eq('id', order.id)
-        .select()
-        .maybeSingle();
+        .eq('id', order.id);
 
       if (error) {
         console.error('Update error:', error);
