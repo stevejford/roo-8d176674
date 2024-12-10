@@ -64,8 +64,8 @@ export const CheckoutButton = ({
         </>
       ) : isPreOrder ? (
         <>
-          <Clock className="w-4 h-4 mr-2" />
-          Pre-order ${total.toFixed(2)}
+          <Clock className="w-4 h-4" />
+          <span>Pre-order ${total.toFixed(2)}</span>
         </>
       ) : (
         <>
