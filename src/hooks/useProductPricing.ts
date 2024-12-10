@@ -48,7 +48,7 @@ export const useProductPricing = (products: any[] | null) => {
           `)
           .in('product_id', productIds);
 
-        if (pricingError) {
+        if (pricingError && pricingError.code !== 'PGRST116') {
           console.error('Error fetching product pricing:', pricingError);
           return {};
         }
