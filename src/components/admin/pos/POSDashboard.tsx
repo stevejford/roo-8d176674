@@ -116,16 +116,20 @@ export const POSDashboard = () => {
   }
 
   return (
-    <div className="p-6 space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="h-[calc(100vh-4rem)] p-6">
+      <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold tracking-tight">Active Orders</h2>
-        <Button onClick={handleStartNewOrder} className="bg-emerald-600 hover:bg-emerald-700">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button 
+          onClick={handleStartNewOrder} 
+          size="lg"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+        >
+          <Plus className="w-5 h-5" />
           New Order
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max overflow-y-auto max-h-[calc(100vh-12rem)]">
         {orders?.map((order) => (
           <OrderCard
             key={order.id}

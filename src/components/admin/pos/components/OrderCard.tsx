@@ -38,7 +38,7 @@ export const OrderCard = ({
   };
 
   return (
-    <Card key={order.id} className="p-4 space-y-4">
+    <Card className="p-6 space-y-6 h-fit">
       {isEditing ? (
         <Input
           placeholder="Customer Name"
@@ -50,16 +50,16 @@ export const OrderCard = ({
         />
       ) : (
         <div 
-          className="cursor-pointer py-2"
+          className="cursor-pointer py-2 text-lg font-medium"
           onClick={() => setIsEditing(true)}
         >
           {customerName || 'Click to add customer name'}
         </div>
       )}
 
-      <div>
-        <p className="text-sm text-gray-500 mb-2">Order Items:</p>
-        <div className="space-y-1">
+      <div className="space-y-4">
+        <p className="text-sm text-gray-500">Order Items:</p>
+        <div className="space-y-2">
           {order.order_items?.map((item: any) => (
             <div key={item.id} className="flex justify-between text-sm">
               <span>{item.quantity}x {item.product?.title}</span>
@@ -69,7 +69,7 @@ export const OrderCard = ({
         </div>
       </div>
 
-      <div className="flex justify-between items-center font-medium">
+      <div className="flex justify-between items-center text-lg font-semibold border-t pt-4">
         <span>Total</span>
         <span>${calculateTotal(order.order_items).toFixed(2)}</span>
       </div>
