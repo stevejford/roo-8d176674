@@ -92,8 +92,7 @@ export const WaiterOrderCard = ({
           deleted_at: new Date().toISOString(),
           status: 'cancelled' as OrderStatus
         })
-        .eq('id', order.id)
-        .select();
+        .eq('id', order.id);
 
       if (error) throw error;
 
