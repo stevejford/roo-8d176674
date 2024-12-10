@@ -45,7 +45,6 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   const { data: products } = useQuery({
     queryKey: ['products-with-pricing'],
     queryFn: async () => {
-      console.log('Fetching products with pricing information');
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -59,7 +58,6 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
         .order('position');
       
       if (error) throw error;
-      console.log('Fetched products with pricing:', data);
       return data as unknown as Product[];
     },
   });
@@ -67,7 +65,6 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   const { data: categoryPricing } = useQuery({
     queryKey: ['category-pricing'],
     queryFn: async () => {
-      console.log('Fetching category pricing');
       const { data, error } = await supabase
         .from('category_pricing')
         .select(`
@@ -76,7 +73,6 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
         `);
       
       if (error) throw error;
-      console.log('Fetched category pricing:', data);
       return data;
     },
   });
@@ -87,32 +83,34 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] p-0 gap-0">
-        <Tabs defaultValue={selectedCategory || 'all'} className="w-full h-full flex flex-col">
+      <DialogContent className="max-w-full w-full h-screen max-h-screen p-0 m-0 rounded-none">
+        <div className="flex flex-col h-full">
           <div className="p-4 border-b">
-            <TabsList className="w-full h-auto flex-wrap gap-2">
-              <TabsTrigger 
-                value="all"
-                onClick={() => setSelectedCategory(null)}
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
-                All Items
-              </TabsTrigger>
-              {categories?.map((category) => (
-                <TabsTrigger
-                  key={category.id}
-                  value={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
+            <ScrollArea className="w-full" orientation="horizontal">
+              <div className="flex space-x-2 pb-2">
+                <TabsTrigger 
+                  value="all"
+                  onClick={() => setSelectedCategory(null)}
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
-                  {category.title}
+                  All Items
                 </TabsTrigger>
-              ))}
-            </TabsList>
+                {categories?.map((category) => (
+                  <TabsTrigger
+                    key={category.id}
+                    value={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    {category.title}
+                  </TabsTrigger>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
 
           <ScrollArea className="flex-1 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
               {filteredProducts?.map((product) => (
                 <MenuProductCard
                   key={product.id}
@@ -127,7 +125,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
               ))}
             </div>
           </ScrollArea>
-        </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   );
