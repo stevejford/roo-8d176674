@@ -38,7 +38,7 @@ export const StoreSettingsForm = () => {
       
       return {
         ...data,
-        bill_splitting_config: data.bill_splitting_config as unknown as StoreSettings['bill_splitting_config']
+        bill_splitting_config: data.bill_splitting_config as StoreSettings['bill_splitting_config']
       } as StoreSettings;
     },
   });
