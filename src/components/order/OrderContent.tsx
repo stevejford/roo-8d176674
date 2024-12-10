@@ -45,8 +45,6 @@ export const OrderContent = ({
   onCloseTimeModal,
   onScheduleTime,
 }: OrderContentProps) => {
-  const currentTotal = calculateTotal();
-
   return (
     <div className="h-full flex flex-col bg-white">
       <div className="flex-1 overflow-auto">
@@ -78,7 +76,7 @@ export const OrderContent = ({
           isCheckingStoreHours={isCheckingStoreHours}
           isProcessing={isProcessing}
           itemCount={itemCount}
-          total={currentTotal}
+          total={total}
           onCheckout={onCheckout}
         />
       </div>

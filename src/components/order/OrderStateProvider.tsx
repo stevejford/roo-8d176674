@@ -5,6 +5,7 @@ import { useCartStore } from '@/stores/useCartStore';
 import { useVoucherValidation } from '@/hooks/useVoucherValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrderValidation } from '@/hooks/useOrderValidation';
+import type { Voucher } from '@/hooks/useVoucherValidation';
 
 interface OrderContextType {
   selectedTime: string;
@@ -17,6 +18,8 @@ interface OrderContextType {
   setSuccessOrderDetails: (details: any) => void;
   handleCheckout: () => Promise<void>;
   calculateTotal: () => number;
+  isProcessing: boolean;
+  validVoucher: Voucher | null;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -135,6 +138,8 @@ export const OrderStateProvider = ({ children }: { children: React.ReactNode }) 
     setSuccessOrderDetails,
     handleCheckout,
     calculateTotal,
+    isProcessing,
+    validVoucher,
   };
 
   return (
