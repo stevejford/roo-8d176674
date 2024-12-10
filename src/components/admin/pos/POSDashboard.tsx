@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -116,16 +116,23 @@ export const POSDashboard = () => {
             onAddItems={handleAddItems}
             onSendToKitchen={sendToKitchen}
             onPrintReceipt={handlePrintReceipt}
-            onDelete={(orderId) => {
-              console.log('Delete button clicked for order:', orderId);
-              setOrderToDelete(orderId);
-            }}
+            onDelete={(orderId) => setOrderToDelete(orderId)}
           />
         ))}
       </div>
       
       <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DialogContent className="w-full max-w-none h-screen p-0">
+          <div className="absolute top-4 right-4 z-10">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setIsMenuOpen(false)}
+              className="bg-white hover:bg-gray-100 rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
           <POSMenuBrowser 
             orderId={selectedOrderId}
             onOrderComplete={() => {

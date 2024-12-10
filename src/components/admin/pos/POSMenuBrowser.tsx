@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, X } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface POSMenuBrowserProps {
@@ -100,7 +100,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      <div className="flex items-center justify-between p-4 bg-white border-b">
+      <div className="flex items-center justify-between p-4 bg-white border-b overflow-x-auto">
         <div className="flex gap-2 overflow-x-auto pb-2">
           <Button 
             variant={selectedCategory === null ? "default" : "outline"}
@@ -120,19 +120,9 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             </Button>
           ))}
         </div>
-        {onOrderComplete && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onOrderComplete}
-            className="ml-4"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
       </div>
 
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4 pr-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
