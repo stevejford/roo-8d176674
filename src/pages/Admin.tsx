@@ -16,7 +16,7 @@ import { MenuPage } from '@/components/admin/orders/MenuPage';
 import { TableGrid } from '@/components/admin/tables/TableGrid';
 import { WaiterDashboard } from '@/components/admin/waiter/WaiterDashboard';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 const Dashboard = () => (
@@ -115,6 +115,9 @@ const Admin = () => {
         <SidebarProvider defaultOpen>
           <AdminSidebar />
           <SidebarInset className="xl:pl-64">
+            <div className="flex items-center p-4 border-b lg:hidden">
+              <SidebarTrigger />
+            </div>
             <div className="p-8">
               <Routes>
                 <Route index element={<Dashboard />} />

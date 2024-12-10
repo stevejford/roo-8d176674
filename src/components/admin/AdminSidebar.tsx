@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, 
   Package, 
@@ -24,6 +24,8 @@ import {
 
 export function AdminSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Quick Add Order', href: '/admin/pos', icon: Plus },
@@ -48,12 +50,13 @@ export function AdminSidebar() {
       <SidebarContent>
         <SidebarMenu>
           {navigation.map((item) => {
-            const isActive = window.location.pathname === item.href;
+            const isActive = location.pathname === item.href;
             return (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton
                   isActive={isActive}
                   onClick={() => navigate(item.href)}
+                  tooltip={item.name}
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.name}</span>
