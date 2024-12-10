@@ -7,7 +7,7 @@ interface MenuBrowserDialogProps {
 
 export const MenuBrowserDialog = ({ onSelectItem }: MenuBrowserDialogProps) => {
   return (
-    <div className="h-screen">
+    <div className="fixed inset-0 bg-white">
       <MenuBrowser 
         onOrderComplete={() => onSelectItem}
         selectedTable={null}

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface POSMenuBrowserProps {
@@ -83,7 +83,6 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
         description: `Added ${quantity}x ${product.title} to order`,
       });
 
-      // Reset quantity for this product
       setQuantities(prev => ({ ...prev, [product.id]: 0 }));
 
       if (onOrderComplete) {
@@ -101,8 +100,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      {/* Category filters */}
-      <div className="p-4 bg-white border-b">
+      <div className="flex items-center justify-between p-4 bg-white border-b">
         <div className="flex gap-2 overflow-x-auto pb-2">
           <Button 
             variant={selectedCategory === null ? "default" : "outline"}
@@ -122,11 +120,20 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             </Button>
           ))}
         </div>
+        {onOrderComplete && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onOrderComplete}
+            className="ml-4"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
-      {/* Products Grid */}
       <ScrollArea className="flex-1 p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
@@ -134,33 +141,33 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 key={product.id}
                 className="overflow-hidden hover:bg-gray-50 transition-colors"
               >
-                <div className="relative pb-[60%]">
+                <div className="relative pb-[100%]">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-2">
-                  <h3 className="font-medium text-xs truncate">{product.title}</h3>
-                  <p className="text-xs text-gray-500">
+                <div className="p-3">
+                  <h3 className="font-medium text-sm truncate">{product.title}</h3>
+                  <p className="text-sm text-gray-500">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center justify-between mt-1 gap-1">
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center justify-between mt-2 gap-2">
+                    <div className="flex items-center gap-2">
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-5 w-5"
+                        className="h-7 w-7"
                         onClick={() => handleQuantityChange(product.id, -1)}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="text-xs w-4 text-center">{quantity}</span>
+                      <span className="text-sm w-4 text-center">{quantity}</span>
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-5 w-5"
+                        className="h-7 w-7"
                         onClick={() => handleQuantityChange(product.id, 1)}
                       >
                         <Plus className="h-3 w-3" />
@@ -168,7 +175,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                     </div>
                     <Button
                       size="sm"
-                      className="h-5 text-xs px-2"
+                      className="h-7 text-xs px-2"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
