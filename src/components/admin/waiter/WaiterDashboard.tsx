@@ -20,26 +20,39 @@ export const WaiterDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: tables, refetch } = useQuery({
+  const { data: tables = [], refetch } = useQuery({
     queryKey: ['tables'],
     queryFn: async () => {
+      console.log('Fetching tables...');
       // First, get all tables
       const { data: tablesData, error: tablesError } = await supabase
         .from('tables')
         .select('*');
       
-      if (tablesError) throw tablesError;
+      if (tablesError) {
+        console.error('Error fetching tables:', tablesError);
+        throw tablesError;
+      }
+
+      console.log('Tables data:', tablesData);
       
-      // Then, get active orders to determine table status and customer info
-      const { data: orders } = await supabase
+      // Then, get active orders to determine table status
+      const { data: orders, error: ordersError } = await supabase
         .from('orders')
         .select('*')
         .not('table_number', 'is', null)
         .in('status', ['pending', 'confirmed', 'preparing', 'ready', 'delivered'])
         .order('created_at', { ascending: false });
 
+      if (ordersError) {
+        console.error('Error fetching orders:', ordersError);
+        throw ordersError;
+      }
+
+      console.log('Orders data:', orders);
+
       // Transform the data to include customer information
-      return tablesData.map((table): Table => {
+      return tablesData?.map((table): Table => {
         const activeOrder = orders?.find(o => o.table_number === table.table_number);
         return {
           id: table.id,
@@ -49,8 +62,9 @@ export const WaiterDashboard = () => {
           order_id: activeOrder?.id,
           order_status: activeOrder?.status,
         };
-      });
-    }
+      }) || [];
+    },
+    initialData: [] // Provide empty array as initial data
   });
 
   const handleTableClick = (table: Table) => {
@@ -64,6 +78,8 @@ export const WaiterDashboard = () => {
     refetch();
   };
 
+  console.log('Rendering tables:', tables);
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -71,7 +87,7 @@ export const WaiterDashboard = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {tables?.map((table) => (
+        {Array.isArray(tables) && tables.map((table) => (
           <TableCard
             key={table.id}
             table={table}
