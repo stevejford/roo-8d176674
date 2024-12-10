@@ -90,7 +90,7 @@ export const WaiterOrderCard = ({
       const { error: itemsError } = await supabase
         .from('order_items')
         .delete()
-        .match({ order_id: order.id });
+        .eq('order_id', order.id);
 
       if (itemsError) {
         console.error('Error deleting order items:', itemsError);
@@ -101,7 +101,7 @@ export const WaiterOrderCard = ({
       const { error: orderError } = await supabase
         .from('orders')
         .delete()
-        .match({ id: order.id });
+        .eq('id', order.id);
 
       if (orderError) {
         console.error('Error deleting order:', orderError);
@@ -114,6 +114,7 @@ export const WaiterOrderCard = ({
       });
 
       setShowDeleteDialog(false);
+      // Notify parent component to update the UI
       onUpdateStatus(order.id, 'cancelled');
     } catch (error) {
       console.error('Deletion process failed:', error);

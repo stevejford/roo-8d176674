@@ -82,14 +82,13 @@ export const OrderManagement = ({
   }
 
   const handleOrderClick = (order: any) => {
-    console.log('Order clicked:', order);
     setSelectedOrder(order);
   };
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {orders?.map((order) => (
+        {orders?.filter(order => order.status !== 'cancelled').map((order) => (
           <div 
             key={order.id}
             onClick={() => handleOrderClick(order)}
@@ -97,7 +96,7 @@ export const OrderManagement = ({
           >
             <WaiterOrderCard
               order={order}
-              onUpdateStatus={(status: OrderStatus) => onUpdateStatus(order.id, status)}
+              onUpdateStatus={onUpdateStatus}
               statusColors={statusColors}
               isNew={newOrderIds.has(order.id)}
             />
