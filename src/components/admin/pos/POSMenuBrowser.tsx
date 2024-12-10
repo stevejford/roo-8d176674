@@ -101,7 +101,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
   return (
     <div className="h-full flex flex-col bg-gray-50">
       <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="flex items-center justify-between p-3">
+        <div className="flex items-center justify-between p-2 sm:p-3">
           <Button 
             variant="ghost" 
             size="sm"
@@ -112,13 +112,13 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             Back to Orders
           </Button>
         </div>
-        <ScrollArea className="pb-3">
-          <div className="flex gap-2 px-4">
+        <ScrollArea className="pb-2 sm:pb-3">
+          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4">
             <Button 
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
               size="sm"
-              className="shrink-0"
+              className="shrink-0 text-xs sm:text-sm"
             >
               All Items
             </Button>
@@ -128,7 +128,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category.id)}
                 size="sm"
-                className="shrink-0"
+                className="shrink-0 text-xs sm:text-sm"
               >
                 {category.title}
               </Button>
@@ -138,7 +138,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-0">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-0">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
@@ -153,34 +153,34 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-1">
-                  <h3 className="font-medium text-[10px] truncate">{product.title}</h3>
-                  <p className="text-[10px] text-gray-500 mb-1">
+                <div className="p-1 sm:p-2">
+                  <h3 className="font-medium text-[10px] sm:text-xs truncate">{product.title}</h3>
+                  <p className="text-[10px] sm:text-xs text-gray-500 mb-1">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center justify-between gap-0.5">
-                    <div className="flex items-center gap-0.5">
+                  <div className="flex items-center justify-between gap-0.5 sm:gap-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-4 w-4"
+                        className="h-4 w-4 sm:h-5 sm:w-5"
                         onClick={() => handleQuantityChange(product.id, -1)}
                       >
-                        <Minus className="h-2 w-2" />
+                        <Minus className="h-2 w-2 sm:h-3 sm:w-3" />
                       </Button>
-                      <span className="text-[10px] w-3 text-center">{quantity}</span>
+                      <span className="text-[10px] sm:text-xs w-3 sm:w-4 text-center">{quantity}</span>
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-4 w-4"
+                        className="h-4 w-4 sm:h-5 sm:w-5"
                         onClick={() => handleQuantityChange(product.id, 1)}
                       >
-                        <Plus className="h-2 w-2" />
+                        <Plus className="h-2 w-2 sm:h-3 sm:w-3" />
                       </Button>
                     </div>
                     <Button
                       size="sm"
-                      className="h-4 text-[10px] px-1"
+                      className="h-4 sm:h-5 text-[10px] sm:text-xs px-1 sm:px-1.5"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
