@@ -102,7 +102,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
 
   const handleProductSelect = (product: Product) => {
     onSelect(product);
-    onClose(); // Close the dialog after selection
+    onClose();
   };
 
   return (

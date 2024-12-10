@@ -44,7 +44,6 @@ export const MenuProductCard = ({
     console.log('Product pricing override:', productPricing);
     console.log('Category pricing:', categoryPricing);
     
-    // First check for product-specific pricing override
     if (productPricing?.is_override) {
       const config = productPricing.config as PricingConfig;
       const calculatedPrice = config.price || product.price || 0;
@@ -52,7 +51,6 @@ export const MenuProductCard = ({
       return calculatedPrice;
     }
 
-    // Then check for category pricing
     if (categoryPricing?.pricing_strategies) {
       const config = categoryPricing.config as PricingConfig;
       const calculatedPrice = config.price || product.price || 0;
@@ -60,7 +58,6 @@ export const MenuProductCard = ({
       return calculatedPrice;
     }
 
-    // Fallback to product's default price
     const defaultPrice = product.price || 0;
     console.log('Using default product price:', defaultPrice);
     return defaultPrice;
@@ -84,21 +81,18 @@ export const MenuProductCard = ({
   };
 
   return (
-    <Card className="p-4 flex flex-col gap-4">
+    <Card className="p-4 flex flex-col gap-2">
       <div className="flex items-start gap-4">
         {product.image_url && (
           <img 
             src={product.image_url} 
             alt={product.title}
-            className="w-20 h-20 rounded-md object-cover flex-shrink-0"
+            className="w-16 h-16 rounded-md object-cover flex-shrink-0"
           />
         )}
         <div className="flex-1 min-w-0">
           <h3 className="font-medium text-lg truncate">{product.title}</h3>
-          <p className="text-sm text-gray-500 mt-1">${price?.toFixed(2)}</p>
-          {product.description && (
-            <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description}</p>
-          )}
+          <p className="text-sm text-gray-500">${price?.toFixed(2)}</p>
         </div>
       </div>
       
