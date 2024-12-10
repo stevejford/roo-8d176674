@@ -20,6 +20,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 
 export function AdminSidebar() {
@@ -41,7 +42,7 @@ export function AdminSidebar() {
   ];
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-4 py-2">
           <span className="text-lg font-semibold">Admin Panel</span>
@@ -66,6 +67,7 @@ export function AdminSidebar() {
           })}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarRail />
     </Sidebar>
   );
 }
