@@ -103,7 +103,7 @@ export const POSDashboard = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] w-full">
+    <div className="h-full">
       <div className="flex justify-between items-center mb-6 px-6 pt-6">
         <h2 className="text-2xl font-bold">Active Orders</h2>
         <Button 
@@ -117,7 +117,7 @@ export const POSDashboard = () => {
       </div>
 
       <div className="px-6 pb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-max overflow-y-auto max-h-[calc(100vh-12rem)]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {orders?.map((order) => (
             <OrderCard
               key={order.id}
