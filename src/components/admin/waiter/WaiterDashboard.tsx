@@ -64,7 +64,7 @@ export const WaiterDashboard = () => {
         };
       }) || [];
     },
-    initialData: [] // Provide empty array as initial data
+    initialData: []
   });
 
   const handleTableClick = (table: Table) => {
@@ -81,19 +81,21 @@ export const WaiterDashboard = () => {
   console.log('Rendering tables:', tables);
 
   return (
-    <div className="space-y-8">
+    <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Tables</h2>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {Array.isArray(tables) && tables.map((table) => (
-          <TableCard
-            key={table.id}
-            table={table}
-            onClick={() => handleTableClick(table)}
-          />
-        ))}
+      <div className="border rounded-lg p-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {Array.isArray(tables) && tables.map((table) => (
+            <TableCard
+              key={table.id}
+              table={table}
+              onClick={() => handleTableClick(table)}
+            />
+          ))}
+        </div>
       </div>
 
       <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
