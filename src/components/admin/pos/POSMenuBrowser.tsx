@@ -3,10 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { PricingConfig } from '@/types/pricing';
 
 interface POSMenuBrowserProps {
@@ -27,27 +26,6 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
       if (error) throw error;
       return data;
     },
-  });
-
-  // Fetch category pricing data
-  const { data: categoryPricing } = useQuery({
-    queryKey: ['category-pricing', selectedCategory],
-    queryFn: async () => {
-      if (!selectedCategory) return null;
-      
-      const { data, error } = await supabase
-        .from('category_pricing')
-        .select(`
-          *,
-          pricing_strategies (*)
-        `)
-        .eq('category_id', selectedCategory)
-        .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
-    },
-    enabled: !!selectedCategory,
   });
 
   const { data: products } = useQuery({
@@ -79,71 +57,47 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
   });
 
   const calculatePrice = (product: any) => {
-    console.log('Calculating price for product:', product.title);
-    
-    // First check for product-specific pricing override
     const productPricing = product.product_pricing?.[0];
     if (productPricing?.is_override) {
-      console.log('Using product override pricing');
       const config = productPricing.config as PricingConfig;
-      
-      switch (productPricing.pricing_strategies?.type) {
-        case 'simple':
-          return config.price || product.price || 0;
-        case 'portion_based':
-          return config.portions?.[0]?.price || product.price || 0;
-        default:
-          return product.price || 0;
-      }
+      return config.price || product.price || 0;
     }
-
-    // Then check for category pricing
-    if (categoryPricing?.pricing_strategies) {
-      console.log('Using category pricing');
-      const config = categoryPricing.config as PricingConfig;
-      
-      switch (categoryPricing.pricing_strategies.type) {
-        case 'simple':
-          return config.price || product.price || 0;
-        case 'portion_based':
-          return config.portions?.[0]?.price || product.price || 0;
-        default:
-          return product.price || 0;
-      }
-    }
-
-    // Fallback to product's default price
-    console.log('Using default product price:', product.price);
     return product.price || 0;
   };
 
   return (
-    <DialogContent className="max-w-5xl h-[80vh]">
+    <DialogContent className="max-w-6xl h-[90vh]">
       <DialogHeader>
         <DialogTitle>Select Items</DialogTitle>
       </DialogHeader>
 
-      <Tabs defaultValue="all" className="flex-1 h-full">
-        <TabsList className="mb-4">
-          <TabsTrigger 
-            value="all"
-            onClick={() => setSelectedCategory(null)}
-          >
-            All Items
-          </TabsTrigger>
-          {categories?.map((category) => (
-            <TabsTrigger
-              key={category.id}
-              value={category.id}
-              onClick={() => setSelectedCategory(category.id)}
+      <div className="flex flex-col h-full">
+        {/* Categories */}
+        <ScrollArea className="w-full" orientation="horizontal">
+          <div className="flex gap-2 pb-4">
+            <Button 
+              variant={selectedCategory === null ? "default" : "outline"}
+              onClick={() => setSelectedCategory(null)}
+              className="shrink-0"
             >
-              {category.title}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+              All Items
+            </Button>
+            {categories?.map((category) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                onClick={() => setSelectedCategory(category.id)}
+                className="shrink-0"
+              >
+                {category.title}
+              </Button>
+            ))}
+          </div>
+        </ScrollArea>
 
-        <ScrollArea className="flex-1 h-[calc(80vh-10rem)]">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+        {/* Products Grid */}
+        <ScrollArea className="flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
             {products?.map((product) => {
               const price = calculatePrice(product);
               return (
@@ -153,29 +107,35 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                   onClick={() => onSelect({ ...product, price })}
                 >
                   {product.image_url && (
-                    <img
-                      src={product.image_url}
-                      alt={product.title}
-                      className="w-full h-32 object-cover rounded-md mb-3"
-                    />
+                    <div className="relative pb-[100%] mb-4">
+                      <img
+                        src={product.image_url}
+                        alt={product.title}
+                        className="absolute inset-0 w-full h-full object-cover rounded-md"
+                      />
+                      <Button 
+                        size="icon" 
+                        variant="secondary"
+                        className="absolute top-2 right-2 bg-white shadow-md hover:bg-gray-100"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium">{product.title}</h3>
                       <p className="text-sm text-gray-500">
                         ${price.toFixed(2)}
                       </p>
                     </div>
-                    <Button size="icon" variant="ghost">
-                      <Plus className="h-4 w-4" />
-                    </Button>
                   </div>
                 </Card>
               );
             })}
           </div>
         </ScrollArea>
-      </Tabs>
+      </div>
     </DialogContent>
   );
 };
