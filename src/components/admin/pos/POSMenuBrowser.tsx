@@ -101,7 +101,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
   return (
     <div className="h-full flex flex-col bg-gray-50">
       <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-3">
           <Button 
             variant="ghost" 
             size="sm"
@@ -112,7 +112,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             Back to Orders
           </Button>
         </div>
-        <ScrollArea className="pb-4">
+        <ScrollArea className="pb-3">
           <div className="flex gap-2 px-4">
             <Button 
               variant={selectedCategory === null ? "default" : "outline"}
@@ -137,8 +137,8 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
         </ScrollArea>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div className="flex-1 overflow-y-auto p-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
@@ -155,24 +155,24 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 </div>
                 <div className="p-2">
                   <h3 className="font-medium text-sm truncate">{product.title}</h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs text-gray-500 mb-1.5">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center justify-between mt-2 gap-1">
+                  <div className="flex items-center justify-between gap-1">
                     <div className="flex items-center gap-1">
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-6 w-6"
+                        className="h-5 w-5"
                         onClick={() => handleQuantityChange(product.id, -1)}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="text-sm w-4 text-center">{quantity}</span>
+                      <span className="text-xs w-4 text-center">{quantity}</span>
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-6 w-6"
+                        className="h-5 w-5"
                         onClick={() => handleQuantityChange(product.id, 1)}
                       >
                         <Plus className="h-3 w-3" />
@@ -180,7 +180,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                     </div>
                     <Button
                       size="sm"
-                      className="h-6 text-xs px-2"
+                      className="h-5 text-xs px-2"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
