@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { create } from 'zustand';
 
 export type VoucherDiscountType = 'percentage' | 'fixed';
 
@@ -9,20 +10,20 @@ export interface Voucher {
   discount_value: number;
 }
 
-interface VoucherResponse {
-  id: string;
-  code: string;
-  discount_type: string;
-  discount_value: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
+interface VoucherStore {
+  validVoucher: Voucher | null;
+  setVoucher: (voucher: Voucher | null) => void;
 }
+
+const useVoucherStore = create<VoucherStore>((set) => ({
+  validVoucher: null,
+  setVoucher: (voucher) => set({ validVoucher: voucher }),
+}));
 
 export const useVoucherValidation = () => {
   const [isValidating, setIsValidating] = useState(false);
-  const [validVoucher, setValidVoucher] = useState<Voucher | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { validVoucher, setVoucher } = useVoucherStore();
 
   const validateVoucher = async (code: string) => {
     if (!code) {
@@ -34,6 +35,7 @@ export const useVoucherValidation = () => {
     setError(null);
 
     try {
+      console.log('Validating voucher:', code);
       const { data: voucher, error: voucherError } = await supabase
         .from('vouchers')
         .select('*')
@@ -47,14 +49,14 @@ export const useVoucherValidation = () => {
 
       if (!voucher) {
         setError('Invalid voucher code');
-        setValidVoucher(null);
+        setVoucher(null);
         return null;
       }
 
       // Type guard to ensure discount_type is valid
       if (voucher.discount_type !== 'percentage' && voucher.discount_type !== 'fixed') {
         setError('Invalid voucher type');
-        setValidVoucher(null);
+        setVoucher(null);
         return null;
       }
 
@@ -65,12 +67,13 @@ export const useVoucherValidation = () => {
         discount_value: voucher.discount_value
       };
 
-      setValidVoucher(validatedVoucher);
+      console.log('Setting validated voucher:', validatedVoucher);
+      setVoucher(validatedVoucher);
       return validatedVoucher;
     } catch (err) {
       console.error('Error validating voucher:', err);
       setError('Error validating voucher');
-      setValidVoucher(null);
+      setVoucher(null);
       return null;
     } finally {
       setIsValidating(false);
@@ -78,7 +81,8 @@ export const useVoucherValidation = () => {
   };
 
   const clearVoucher = () => {
-    setValidVoucher(null);
+    console.log('Clearing voucher');
+    setVoucher(null);
     setError(null);
   };
 

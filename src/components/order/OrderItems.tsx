@@ -14,7 +14,9 @@ export const OrderItems = () => {
 
   const handleVoucherSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submitting voucher:', voucherCode);
     const result = await validateVoucher(voucherCode);
+    console.log('Voucher validation result:', result);
     if (result) {
       setShowVoucherInput(false);
       setVoucherCode('');
@@ -38,10 +40,10 @@ export const OrderItems = () => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-[#2D3648]">Items</h3>
-        {!showVoucherInput && !validVoucher && (
+        {!showVoucherInput && !validVoucher && items.length > 0 && (
           <button 
             onClick={() => setShowVoucherInput(true)}
-            className="text-red-500 text-sm font-medium flex items-center gap-1"
+            className="text-red-500 text-sm font-medium flex items-center gap-1 hover:text-red-600"
           >
             <Plus className="h-4 w-4" />
             Add Voucher
@@ -154,6 +156,13 @@ export const OrderItems = () => {
             </div>
           </div>
         ))}
+
+        {items.length === 0 && !showVoucherInput && (
+          <div className="text-center py-12 text-gray-500">
+            <p>Your cart is empty</p>
+            <p className="text-sm">Add items to get started</p>
+          </div>
+        )}
       </div>
     </div>
   );

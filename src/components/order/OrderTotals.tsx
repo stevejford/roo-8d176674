@@ -13,7 +13,7 @@ export const OrderTotals = ({ validVoucher, calculateTotal }: OrderTotalsProps) 
   const total = calculateTotal();
   const discount = subtotal - total;
 
-  if (!validVoucher) return null;
+  if (!validVoucher || items.length === 0) return null;
 
   return (
     <div className="mb-2 text-sm">
