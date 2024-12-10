@@ -3,20 +3,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { OrderHeader } from './waiter/OrderHeader';
 import { OrderItems } from './waiter/OrderItems';
 import { OrderActions } from './waiter/OrderActions';
+import { OrderTotal } from './waiter/OrderTotal';
+import { DeleteOrderDialog } from './waiter/DeleteOrderDialog';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { UtensilsCrossed, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -67,7 +59,7 @@ export const WaiterOrderCard = ({
         title: "Payment Processed",
         description: `Payment of $${total.toFixed(2)} processed successfully via ${method}`,
       });
-      onUpdateStatus(order.id, 'completed' as OrderStatus);
+      onUpdateStatus(order.id, 'completed');
     } catch (error) {
       toast({
         title: "Error",
@@ -79,7 +71,8 @@ export const WaiterOrderCard = ({
     }
   };
 
-  const handleSendToKitchen = async () => {
+  const handleSendToKitchen = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       const { error } = await supabase
         .from('orders')
@@ -95,7 +88,7 @@ export const WaiterOrderCard = ({
         title: "Order Sent to Kitchen",
         description: "The order has been sent to the kitchen for preparation",
       });
-      onUpdateStatus(order.id, 'preparing' as OrderStatus);
+      onUpdateStatus(order.id, 'preparing');
     } catch (error) {
       toast({
         title: "Error",
@@ -128,9 +121,9 @@ export const WaiterOrderCard = ({
         description: "The order has been successfully deleted",
       });
 
-      // Update status to trigger a refresh of the orders list
-      onUpdateStatus(order.id, 'cancelled' as OrderStatus);
+      // Close the dialog and update the parent component
       setShowDeleteDialog(false);
+      onUpdateStatus(order.id, 'cancelled');
     } catch (error) {
       console.error('Error deleting order:', error);
       toast({
@@ -141,10 +134,20 @@ export const WaiterOrderCard = ({
     }
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
     if (!showDeleteDialog) {
       navigate(`/admin/waiter/order/${order.id}`);
     }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDeleteDialog(true);
+  };
+
+  const handleAddItems = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate('/admin/waiter/menu');
   };
 
   return (
@@ -166,10 +169,7 @@ export const WaiterOrderCard = ({
               variant="ghost"
               size="icon"
               className="text-red-500 hover:text-red-600 hover:bg-red-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDeleteDialog(true);
-              }}
+              onClick={handleDeleteClick}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -177,69 +177,43 @@ export const WaiterOrderCard = ({
         </div>
         
         <OrderItems items={order.order_items} />
-        
-        <div className="border-t pt-4">
-          <div className="flex justify-between items-center mb-4">
-            <span className="font-semibold text-lg">Total</span>
-            <span className="font-bold text-xl">${calculateTotal().toFixed(2)}</span>
-          </div>
+        <OrderTotal total={calculateTotal()} />
 
-          <div className="flex flex-col gap-3">
-            {order.status === 'pending' && (
-              <>
-                <Button 
-                  variant="outline"
-                  className="w-full justify-center"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/admin/waiter/menu');
-                  }}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Items
-                </Button>
-                <Button 
-                  className="w-full justify-center bg-orange-500 hover:bg-orange-600"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSendToKitchen();
-                  }}
-                >
-                  <UtensilsCrossed className="w-4 h-4 mr-2" />
-                  Send to Kitchen
-                </Button>
-              </>
-            )}
-            
-            <OrderActions
-              status={order.status}
-              orderTotal={calculateTotal()}
-              isProcessingPayment={isProcessingPayment}
-              onPayment={handlePayment}
-            />
-          </div>
+        <div className="flex flex-col gap-3">
+          {order.status === 'pending' && (
+            <>
+              <Button 
+                variant="outline"
+                className="w-full justify-center"
+                onClick={handleAddItems}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Items
+              </Button>
+              <Button 
+                className="w-full justify-center bg-orange-500 hover:bg-orange-600"
+                onClick={handleSendToKitchen}
+              >
+                <UtensilsCrossed className="w-4 h-4 mr-2" />
+                Send to Kitchen
+              </Button>
+            </>
+          )}
+          
+          <OrderActions
+            status={order.status}
+            orderTotal={calculateTotal()}
+            isProcessingPayment={isProcessingPayment}
+            onPayment={handlePayment}
+          />
         </div>
       </div>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Order</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this order? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={handleDeleteOrder}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteOrderDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDeleteOrder}
+      />
     </div>
   );
 };

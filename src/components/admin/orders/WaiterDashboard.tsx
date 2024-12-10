@@ -22,7 +22,6 @@ export const WaiterDashboard = () => {
   const { orderId } = useParams();
   const queryClient = useQueryClient();
 
-  // Query for active orders
   const { data: orders, isLoading } = useQuery({
     queryKey: ['active-orders'],
     queryFn: async () => {
@@ -43,7 +42,6 @@ export const WaiterDashboard = () => {
     },
   });
 
-  // Set up real-time subscription for orders
   useEffect(() => {
     const orderChannel = supabase
       .channel('order-updates')
@@ -68,6 +66,15 @@ export const WaiterDashboard = () => {
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     console.log('Updating order status:', { orderId, newStatus });
     
+    if (newStatus === 'cancelled') {
+      // For cancelled status, we don't need to update the database
+      // as the order has already been deleted
+      queryClient.setQueryData(['active-orders'], (oldData: any) => {
+        return oldData?.filter((order: any) => order.id !== orderId) ?? [];
+      });
+      return;
+    }
+
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus })
@@ -83,13 +90,11 @@ export const WaiterDashboard = () => {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
-      {/* Tables Section */}
       <div>
         <h2 className="text-2xl font-bold mb-6">Tables</h2>
         <TableGrid />
       </div>
 
-      {/* Active Orders Section */}
       <div>
         <h2 className="text-2xl font-bold mb-6">Active Orders</h2>
         <OrderManagement
