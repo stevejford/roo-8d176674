@@ -21,26 +21,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Try to get the stripe key from Edge Function secrets first
-    let stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    // Get the stripe key from store_settings
+    const { data: settings, error: settingsError } = await supabaseClient
+      .from('store_settings')
+      .select('stripe_secret_key')
+      .single();
 
-    // If not found in Edge Function secrets, try to get it from store_settings
-    if (!stripeKey) {
-      const { data: settings, error: settingsError } = await supabaseClient
-        .from('store_settings')
-        .select('stripe_secret_key')
-        .single();
-
-      if (settingsError) throw settingsError;
-      stripeKey = settings?.stripe_secret_key;
-    }
-
-    if (!stripeKey) {
+    if (settingsError) throw settingsError;
+    if (!settings?.stripe_secret_key) {
       throw new Error('Stripe is not configured. Please set up your Stripe integration in the admin settings.');
     }
 
     console.log('Initializing Stripe...');
-    const stripe = new Stripe(stripeKey, {
+    const stripe = new Stripe(settings.stripe_secret_key, {
       apiVersion: '2023-10-16',
     })
 
