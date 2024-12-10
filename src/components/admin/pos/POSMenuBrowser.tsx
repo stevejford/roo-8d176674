@@ -146,16 +146,16 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 key={product.id}
                 className="overflow-hidden hover:bg-gray-50 transition-colors"
               >
-                <div className="aspect-square">
+                <div className="w-full h-16">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-2">
-                  <h3 className="font-medium text-sm truncate">{product.title}</h3>
-                  <p className="text-xs text-gray-500 mb-1.5">
+                <div className="p-1.5">
+                  <h3 className="font-medium text-xs truncate">{product.title}</h3>
+                  <p className="text-xs text-gray-500 mb-1">
                     ${product.price?.toFixed(2)}
                   </p>
                   <div className="flex items-center justify-between gap-1">
