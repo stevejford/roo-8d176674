@@ -144,7 +144,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             return (
               <Card 
                 key={product.id}
-                className="overflow-hidden hover:bg-gray-50 transition-colors"
+                className="overflow-hidden hover:bg-gray-50 transition-colors w-[120px]"
               >
                 <div className="aspect-square w-16">
                   <img
@@ -153,12 +153,12 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-1.5">
+                <div className="p-1">
                   <h3 className="font-medium text-xs truncate">{product.title}</h3>
                   <p className="text-xs text-gray-500 mb-1">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     <Button
                       size="icon"
                       variant="outline"
@@ -178,7 +178,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                     </Button>
                     <Button
                       size="sm"
-                      className="h-5 text-xs px-2 ml-auto"
+                      className="h-5 text-xs px-1.5"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
