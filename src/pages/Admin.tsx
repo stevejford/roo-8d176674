@@ -13,6 +13,7 @@ import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
 import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
 import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
 import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
+import { MenuPage } from '@/components/admin/orders/MenuPage';
 import {
   Card,
   CardHeader,
