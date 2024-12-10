@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -73,27 +73,30 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
 
       <div className="flex flex-col h-full">
         {/* Categories */}
-        <ScrollArea className="w-full" orientation="horizontal">
-          <div className="flex gap-2 pb-4">
-            <Button 
-              variant={selectedCategory === null ? "default" : "outline"}
-              onClick={() => setSelectedCategory(null)}
-              className="shrink-0"
-            >
-              All Items
-            </Button>
-            {categories?.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category.id)}
+        <div className="relative">
+          <ScrollArea className="w-full">
+            <div className="flex gap-2 pb-4">
+              <Button 
+                variant={selectedCategory === null ? "default" : "outline"}
+                onClick={() => setSelectedCategory(null)}
                 className="shrink-0"
               >
-                {category.title}
+                All Items
               </Button>
-            ))}
-          </div>
-        </ScrollArea>
+              {categories?.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="shrink-0"
+                >
+                  {category.title}
+                </Button>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
 
         {/* Products Grid */}
         <ScrollArea className="flex-1">
