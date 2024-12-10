@@ -6,7 +6,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 
-export const POSMenuBrowser = ({ onOrderComplete }: { onOrderComplete?: () => void }) => {
+interface POSMenuBrowserProps {
+  orderId?: string | null;
+  onOrderComplete?: () => void;
+}
+
+export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps) => {
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
 
@@ -50,8 +55,10 @@ export const POSMenuBrowser = ({ onOrderComplete }: { onOrderComplete?: () => vo
   };
 
   const handleAddToOrder = (product: any, quantity: number) => {
-    // Add the item to the current active order
-    // This will be implemented in the next iteration
+    // Here you would implement the logic to add items to an existing order
+    // or create a new order if orderId is null
+    console.log('Adding to order:', { orderId, product, quantity });
+    
     if (onOrderComplete) {
       onOrderComplete();
     }
