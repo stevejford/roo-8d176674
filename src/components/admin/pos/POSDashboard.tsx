@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { OrderCard } from './components/OrderCard';
-import { useOrderOperations } from '@/hooks/useOrderOperations';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,11 +18,10 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const POSDashboard = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const { toast } = useToast();
-  const { deleteOrder, updateCustomerName, sendToKitchen } = useOrderOperations();
 
   const { data: orders, refetch } = useQuery({
     queryKey: ['pos-orders'],
@@ -48,7 +45,13 @@ export const POSDashboard = () => {
 
   const handleDeleteOrder = async (orderId: string) => {
     try {
-      await deleteOrder(orderId);
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+
       toast({
         title: "Success",
         description: "Order deleted successfully",
@@ -97,51 +100,40 @@ export const POSDashboard = () => {
     setIsMenuOpen(true);
   };
 
+  if (isMenuOpen) {
+    return (
+      <POSMenuBrowser 
+        orderId={selectedOrderId}
+        onOrderComplete={() => {
+          setIsMenuOpen(false);
+          setSelectedOrderId(null);
+          refetch();
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="h-screen flex flex-col p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Active Orders</h2>
-        <Button onClick={handleStartNewOrder} className="bg-[#10B981]">
+    <div className="p-6 space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold tracking-tight">Active Orders</h2>
+        <Button onClick={handleStartNewOrder} className="bg-emerald-600 hover:bg-emerald-700">
           <Plus className="w-4 h-4 mr-2" />
           New Order
         </Button>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {orders?.map((order) => (
           <OrderCard
             key={order.id}
             order={order}
-            onUpdateCustomerName={updateCustomerName}
             onAddItems={handleAddItems}
-            onSendToKitchen={sendToKitchen}
             onPrintReceipt={handlePrintReceipt}
             onDelete={(orderId) => setOrderToDelete(orderId)}
           />
         ))}
       </div>
-      
-      <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DialogContent className="w-full max-w-none h-screen p-0">
-          <div className="absolute top-4 right-4 z-10">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setIsMenuOpen(false)}
-              className="bg-white hover:bg-gray-100 rounded-full"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <POSMenuBrowser 
-            orderId={selectedOrderId}
-            onOrderComplete={() => {
-              setIsMenuOpen(false);
-              refetch();
-            }} 
-          />
-        </DialogContent>
-      </Dialog>
 
       <AlertDialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>
         <AlertDialogContent>
@@ -156,7 +148,6 @@ export const POSDashboard = () => {
             <AlertDialogAction
               onClick={() => {
                 if (orderToDelete) {
-                  console.log('Confirming deletion of order:', orderToDelete);
                   handleDeleteOrder(orderToDelete);
                 }
               }}

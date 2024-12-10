@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface POSMenuBrowserProps {
   orderId?: string | null;
@@ -13,8 +13,8 @@ interface POSMenuBrowserProps {
 }
 
 export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps) => {
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
-  const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const { toast } = useToast();
 
   const { data: categories } = useQuery({
@@ -100,30 +100,45 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      <div className="flex items-center justify-between p-4 bg-white border-b overflow-x-auto">
-        <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
+        <div className="flex items-center justify-between p-4">
           <Button 
-            variant={selectedCategory === null ? "default" : "outline"}
-            onClick={() => setSelectedCategory(null)}
-            className="shrink-0"
+            variant="ghost" 
+            size="sm"
+            onClick={onOrderComplete}
+            className="mr-2"
           >
-            All Items
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Orders
           </Button>
-          {categories?.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category.id)}
+        </div>
+        <ScrollArea className="pb-4">
+          <div className="flex gap-2 px-4">
+            <Button 
+              variant={selectedCategory === null ? "default" : "outline"}
+              onClick={() => setSelectedCategory(null)}
+              size="sm"
               className="shrink-0"
             >
-              {category.title}
+              All Items
             </Button>
-          ))}
-        </div>
+            {categories?.map((category) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                onClick={() => setSelectedCategory(category.id)}
+                size="sm"
+                className="shrink-0"
+              >
+                {category.title}
+              </Button>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
 
-      <ScrollArea className="flex-1 p-4 pr-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
@@ -131,24 +146,24 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 key={product.id}
                 className="overflow-hidden hover:bg-gray-50 transition-colors"
               >
-                <div className="relative pb-[100%]">
+                <div className="aspect-square">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-3">
+                <div className="p-2">
                   <h3 className="font-medium text-sm truncate">{product.title}</h3>
                   <p className="text-sm text-gray-500">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center justify-between mt-2 gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between mt-2 gap-1">
+                    <div className="flex items-center gap-1">
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-7 w-7"
+                        className="h-6 w-6"
                         onClick={() => handleQuantityChange(product.id, -1)}
                       >
                         <Minus className="h-3 w-3" />
@@ -157,7 +172,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-7 w-7"
+                        className="h-6 w-6"
                         onClick={() => handleQuantityChange(product.id, 1)}
                       >
                         <Plus className="h-3 w-3" />
@@ -165,7 +180,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                     </div>
                     <Button
                       size="sm"
-                      className="h-7 text-xs px-2"
+                      className="h-6 text-xs px-2"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
@@ -177,7 +192,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             );
           })}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
