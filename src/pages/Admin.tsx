@@ -35,6 +35,16 @@ import {
   Plus,
   Menu,
 } from "lucide-react";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarTrigger,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
 
 const Dashboard = () => (
   <div className="space-y-6">
@@ -142,53 +152,50 @@ const Admin = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar isAdmin={isAdmin} onCategoryClick={() => {}} onSignOut={handleSignOut} />
       
-      <div className="flex pt-16">
-        {/* Sidebar */}
-        <div className="hidden md:flex w-64 flex-col bg-white border-r fixed h-[calc(100vh-4rem)] top-16">
-          <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <nav className="mt-5 flex-1 px-2 space-y-1">
-              {navigation.map((item) => {
-                const isActive = window.location.pathname === item.href;
-                return (
-                  <button
-                    key={item.name}
-                    onClick={() => navigate(item.href)}
-                    className={`${
-                      isActive
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full`}
-                  >
-                    <item.icon
-                      className={`${
-                        isActive ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500'
-                      } mr-3 flex-shrink-0 h-5 w-5`}
-                    />
-                    {item.name}
-                  </button>
-                );
-              })}
-            </nav>
+      <SidebarProvider defaultOpen>
+        <div className="flex pt-16">
+          <Sidebar>
+            <SidebarHeader className="flex items-center justify-between px-4">
+              <h2 className="text-lg font-semibold">Admin Panel</h2>
+              <SidebarTrigger />
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarMenu>
+                {navigation.map((item) => {
+                  const isActive = window.location.pathname === item.href;
+                  return (
+                    <SidebarMenuItem key={item.name}>
+                      <SidebarMenuButton
+                        onClick={() => navigate(item.href)}
+                        isActive={isActive}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.name}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarContent>
+          </Sidebar>
+
+          <div className="flex-1 p-8">
+            <Routes>
+              <Route index element={<Dashboard />} />
+              <Route path="pos/*" element={<POSDashboard />} />
+              <Route path="waiter/*" element={<WaiterDashboard />} />
+              <Route path="products/*" element={<Products />} />
+              <Route path="pricing/*" element={<PricingModelList />} />
+              <Route path="orders/*" element={<Orders />} />
+              <Route path="kitchen/*" element={<KitchenDashboard />} />
+              <Route path="tables/*" element={<TableGrid />} />
+              <Route path="users/*" element={<UsersManagement />} />
+              <Route path="analytics/*" element={<Analytics />} />
+              <Route path="settings/*" element={<SettingsPanel />} />
+            </Routes>
           </div>
         </div>
-
-        {/* Main content */}
-        <div className="flex-1 ml-64 p-8">
-          <Routes>
-            <Route index element={<Dashboard />} />
-            <Route path="pos/*" element={<POSDashboard />} />
-            <Route path="waiter/*" element={<WaiterDashboard />} />
-            <Route path="products/*" element={<Products />} />
-            <Route path="pricing/*" element={<PricingModelList />} />
-            <Route path="orders/*" element={<Orders />} />
-            <Route path="kitchen/*" element={<KitchenDashboard />} />
-            <Route path="tables/*" element={<TableGrid />} />
-            <Route path="users/*" element={<UsersManagement />} />
-            <Route path="analytics/*" element={<Analytics />} />
-            <Route path="settings/*" element={<SettingsPanel />} />
-          </Routes>
-        </div>
-      </div>
+      </SidebarProvider>
     </div>
   );
 };
