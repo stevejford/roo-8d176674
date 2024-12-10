@@ -11,12 +11,14 @@ type OrderStatus = Database['public']['Enums']['order_status'];
 interface WaiterOrderCardProps {
   order: any;
   onUpdateStatus: (orderId: string, status: OrderStatus) => void;
+  statusColors: Record<string, string>;
   isNew?: boolean;
 }
 
 export const WaiterOrderCard = ({ 
   order, 
-  onUpdateStatus, 
+  onUpdateStatus,
+  statusColors, 
   isNew = false 
 }: WaiterOrderCardProps) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -83,9 +85,10 @@ export const WaiterOrderCard = ({
   };
 
   const handleDeleteOrder = async () => {
+    console.log('Starting deletion process for order:', order.id);
     try {
       // First delete all order items
-      const { error: itemsError } = await supabase
+      const { error: itemsError, data: deletedItems } = await supabase
         .from('order_items')
         .delete()
         .eq('order_id', order.id);
@@ -94,9 +97,10 @@ export const WaiterOrderCard = ({
         console.error('Error deleting order items:', itemsError);
         throw itemsError;
       }
+      console.log('Successfully deleted order items:', deletedItems);
 
       // Then delete the order itself
-      const { error: orderError } = await supabase
+      const { error: orderError, data: deletedOrder } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
@@ -105,16 +109,14 @@ export const WaiterOrderCard = ({
         console.error('Error deleting order:', orderError);
         throw orderError;
       }
+      console.log('Successfully deleted order:', deletedOrder);
 
       toast({
         title: "Order Deleted",
         description: "The order has been successfully deleted",
       });
 
-      // Close the dialog and update the parent component
       setShowDeleteDialog(false);
-      // Instead of trying to update the status of a deleted order,
-      // we'll let the Supabase subscription handle the UI update
     } catch (error) {
       console.error('Deletion process failed:', error);
       toast({
@@ -151,6 +153,7 @@ export const WaiterOrderCard = ({
     >
       <OrderCardContent
         order={order}
+        statusColors={statusColors}
         onSendToKitchen={handleSendToKitchen}
         onAddItems={handleAddItems}
         onDeleteClick={handleDeleteClick}

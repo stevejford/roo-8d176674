@@ -7,6 +7,7 @@ import { Plus, UtensilsCrossed, Trash2 } from "lucide-react";
 
 interface OrderCardContentProps {
   order: any;
+  statusColors: Record<string, string>;
   onSendToKitchen: (e: React.MouseEvent) => void;
   onAddItems: (e: React.MouseEvent) => void;
   onDeleteClick: (e: React.MouseEvent) => void;
@@ -16,6 +17,7 @@ interface OrderCardContentProps {
 
 export const OrderCardContent = ({
   order,
+  statusColors,
   onSendToKitchen,
   onAddItems,
   onDeleteClick,
@@ -28,6 +30,7 @@ export const OrderCardContent = ({
         <OrderHeader 
           orderId={order.id}
           status={order.status}
+          statusColors={statusColors}
         />
         {order.status === 'pending' && (
           <Button
