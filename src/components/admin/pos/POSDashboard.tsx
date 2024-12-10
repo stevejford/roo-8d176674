@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Send, Printer, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { OrderCard } from './components/OrderCard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -84,10 +83,7 @@ export const POSDashboard = () => {
   const handleDeleteOrder = async (orderId: string) => {
     const { error } = await supabase
       .from('orders')
-      .update({ 
-        deleted_at: new Date().toISOString(),
-        status: 'cancelled'
-      })
+      .delete()
       .eq('id', orderId);
 
     if (error) {
@@ -107,7 +103,6 @@ export const POSDashboard = () => {
   };
 
   const handlePrintReceipt = (order: any) => {
-    // Implementation for printing receipt
     console.log('Printing receipt for order:', order);
     toast({
       title: "Print Receipt",
@@ -139,10 +134,6 @@ export const POSDashboard = () => {
     setIsMenuOpen(true);
   };
 
-  const calculateTotal = (orderItems: any[]) => {
-    return orderItems?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
-  };
-
   return (
     <div className="h-screen flex flex-col p-6">
       <div className="flex justify-between items-center mb-6">
@@ -155,67 +146,15 @@ export const POSDashboard = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {orders?.map((order) => (
-          <Card key={order.id} className="p-4 space-y-4">
-            <Input
-              placeholder="Customer Name"
-              value={order.customer_name || ''}
-              onChange={(e) => handleUpdateCustomerName(order.id, e.target.value)}
-              className="w-full"
-            />
-
-            <div>
-              <p className="text-sm text-gray-500 mb-2">Order Items:</p>
-              <div className="space-y-1">
-                {order.order_items?.map((item: any) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span>{item.quantity}x {item.product?.title}</span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center font-medium">
-              <span>Total</span>
-              <span>${calculateTotal(order.order_items).toFixed(2)}</span>
-            </div>
-
-            <div className="space-y-2">
-              <Button 
-                className="w-full bg-[#10B981]"
-                onClick={() => handleAddItems(order.id)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Items
-              </Button>
-
-              <Button 
-                className="w-full bg-[#10B981]"
-                onClick={() => handleSendToKitchen(order.id)}
-              >
-                <Send className="w-4 h-4 mr-2" />
-                Send to Kitchen
-              </Button>
-
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => handlePrintReceipt(order)}
-              >
-                <Printer className="w-4 h-4 mr-2" />
-                Print Receipt
-              </Button>
-
-              <Button 
-                variant="destructive"
-                className="w-full"
-                onClick={() => setOrderToDelete(order.id)}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Order
-              </Button>
-            </div>
-          </Card>
+          <OrderCard
+            key={order.id}
+            order={order}
+            onUpdateCustomerName={handleUpdateCustomerName}
+            onAddItems={handleAddItems}
+            onSendToKitchen={handleSendToKitchen}
+            onPrintReceipt={handlePrintReceipt}
+            onDelete={(orderId) => setOrderToDelete(orderId)}
+          />
         ))}
       </div>
       
@@ -236,7 +175,7 @@ export const POSDashboard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will delete the order. This action cannot be undone.
+              This action will permanently delete the order. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
