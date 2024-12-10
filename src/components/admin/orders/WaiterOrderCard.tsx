@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import { OrderHeader } from './waiter/OrderHeader';
-import { OrderItems } from './waiter/OrderItems';
-import { OrderActions } from './waiter/OrderActions';
-import { OrderTotal } from './waiter/OrderTotal';
-import { DeleteOrderDialog } from './waiter/DeleteOrderDialog';
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { UtensilsCrossed, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
+import { OrderCardContent } from './waiter/OrderCardContent';
+import { OrderDeleteDialog } from './waiter/OrderDeleteDialog';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -16,14 +11,12 @@ type OrderStatus = Database['public']['Enums']['order_status'];
 interface WaiterOrderCardProps {
   order: any;
   onUpdateStatus: (orderId: string, status: OrderStatus) => void;
-  statusColors: Record<string, string>;
   isNew?: boolean;
 }
 
 export const WaiterOrderCard = ({ 
   order, 
   onUpdateStatus, 
-  statusColors, 
   isNew = false 
 }: WaiterOrderCardProps) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -31,24 +24,15 @@ export const WaiterOrderCard = ({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const calculateTotal = () => {
-    return order.order_items?.reduce((acc: number, item: any) => {
-      const itemPrice = Number(item.price) || 0;
-      const quantity = Number(item.quantity) || 0;
-      return acc + (itemPrice * quantity);
-    }, 0) || 0;
-  };
-
   const handlePayment = async (method: 'cash' | 'card') => {
     setIsProcessingPayment(true);
     try {
-      const total = calculateTotal();
       const { error } = await supabase
         .from('orders')
         .update({
           payment_status: 'completed',
           payment_method: method,
-          paid_amount: total,
+          paid_amount: order.total_amount,
           status: 'completed' as OrderStatus
         })
         .eq('id', order.id);
@@ -57,7 +41,7 @@ export const WaiterOrderCard = ({
 
       toast({
         title: "Payment Processed",
-        description: `Payment of $${total.toFixed(2)} processed successfully via ${method}`,
+        description: `Payment of $${order.total_amount.toFixed(2)} processed successfully via ${method}`,
       });
       onUpdateStatus(order.id, 'completed');
     } catch (error) {
@@ -100,10 +84,8 @@ export const WaiterOrderCard = ({
 
   const handleDeleteOrder = async () => {
     try {
-      console.log('Starting deletion process for order:', order.id);
-      
       // First delete all order items
-      const { error: itemsError, data: deletedItems } = await supabase
+      const { error: itemsError } = await supabase
         .from('order_items')
         .delete()
         .eq('order_id', order.id);
@@ -112,10 +94,9 @@ export const WaiterOrderCard = ({
         console.error('Error deleting order items:', itemsError);
         throw itemsError;
       }
-      console.log('Successfully deleted order items:', deletedItems);
 
       // Then delete the order itself
-      const { error: orderError, data: deletedOrder } = await supabase
+      const { error: orderError } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
@@ -124,7 +105,6 @@ export const WaiterOrderCard = ({
         console.error('Error deleting order:', orderError);
         throw orderError;
       }
-      console.log('Successfully deleted order:', deletedOrder);
 
       toast({
         title: "Order Deleted",
@@ -133,7 +113,8 @@ export const WaiterOrderCard = ({
 
       // Close the dialog and update the parent component
       setShowDeleteDialog(false);
-      onUpdateStatus(order.id, 'cancelled');
+      // Instead of trying to update the status of a deleted order,
+      // we'll let the Supabase subscription handle the UI update
     } catch (error) {
       console.error('Deletion process failed:', error);
       toast({
@@ -144,7 +125,7 @@ export const WaiterOrderCard = ({
     }
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = () => {
     if (!showDeleteDialog) {
       navigate(`/admin/waiter/order/${order.id}`);
     }
@@ -168,59 +149,16 @@ export const WaiterOrderCard = ({
       }`}
       onClick={handleCardClick}
     >
-      <div className="relative">
-        <div className="flex justify-between items-start">
-          <OrderHeader 
-            orderId={order.id}
-            status={order.status}
-            statusColors={statusColors}
-          />
-          {order.status === 'pending' && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-red-500 hover:text-red-600 hover:bg-red-50"
-              onClick={handleDeleteClick}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        
-        <OrderItems items={order.order_items} />
-        <OrderTotal total={calculateTotal()} />
+      <OrderCardContent
+        order={order}
+        onSendToKitchen={handleSendToKitchen}
+        onAddItems={handleAddItems}
+        onDeleteClick={handleDeleteClick}
+        onPayment={handlePayment}
+        isProcessingPayment={isProcessingPayment}
+      />
 
-        <div className="flex flex-col gap-3">
-          {order.status === 'pending' && (
-            <>
-              <Button 
-                variant="outline"
-                className="w-full justify-center"
-                onClick={handleAddItems}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Items
-              </Button>
-              <Button 
-                className="w-full justify-center bg-orange-500 hover:bg-orange-600"
-                onClick={handleSendToKitchen}
-              >
-                <UtensilsCrossed className="w-4 h-4 mr-2" />
-                Send to Kitchen
-              </Button>
-            </>
-          )}
-          
-          <OrderActions
-            status={order.status}
-            orderTotal={calculateTotal()}
-            isProcessingPayment={isProcessingPayment}
-            onPayment={handlePayment}
-          />
-        </div>
-      </div>
-
-      <DeleteOrderDialog
+      <OrderDeleteDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDeleteOrder}
