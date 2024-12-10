@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList } from "lucide-react";
-import { WaiterOrderCard } from './WaiterOrderCard';
 import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
 import {
   Dialog,
@@ -28,38 +27,7 @@ export const OrderManagement = ({
   onUpdateStatus,
   statusColors 
 }: OrderManagementProps) => {
-  const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-
-  useEffect(() => {
-    const timeouts = new Map();
-
-    orders?.forEach(order => {
-      if (newOrderIds.has(order.id)) {
-        const timeout = setTimeout(() => {
-          setNewOrderIds(prev => {
-            const updated = new Set(prev);
-            updated.delete(order.id);
-            return updated;
-          });
-        }, 3000);
-        timeouts.set(order.id, timeout);
-      }
-    });
-
-    return () => {
-      timeouts.forEach(timeout => clearTimeout(timeout));
-    };
-  }, [orders, newOrderIds]);
-
-  useEffect(() => {
-    if (orders?.length) {
-      const lastOrder = orders[0];
-      if (lastOrder && Date.now() - new Date(lastOrder.created_at).getTime() < 5000) {
-        setNewOrderIds(prev => new Set(prev).add(lastOrder.id));
-      }
-    }
-  }, [orders]);
 
   if (isLoading) {
     return (
@@ -81,25 +49,37 @@ export const OrderManagement = ({
     );
   }
 
-  const handleOrderClick = (order: any) => {
-    setSelectedOrder(order);
-  };
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {orders?.filter(order => order.status !== 'cancelled').map((order) => (
           <div 
             key={order.id}
-            onClick={() => handleOrderClick(order)}
-            className="cursor-pointer"
+            onClick={() => setSelectedOrder(order)}
+            className="cursor-pointer p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
           >
-            <WaiterOrderCard
-              order={order}
-              onUpdateStatus={onUpdateStatus}
-              statusColors={statusColors}
-              isNew={newOrderIds.has(order.id)}
-            />
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-semibold">Order #{order.id.slice(0, 8)}</h3>
+                <p className="text-sm text-gray-500">
+                  {format(new Date(order.created_at), 'HH:mm')}
+                </p>
+              </div>
+              <Badge 
+                variant="secondary"
+                className={statusColors[order.status]}
+              >
+                {order.status}
+              </Badge>
+            </div>
+            
+            <div className="space-y-2">
+              {order.order_items?.map((item: any) => (
+                <div key={item.id} className="text-sm">
+                  {item.quantity}x {item.product?.title}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -112,7 +92,6 @@ export const OrderManagement = ({
           
           {selectedOrder && (
             <div className="space-y-6">
-              {/* Order Info */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <div>
@@ -133,15 +112,8 @@ export const OrderManagement = ({
                     </Badge>
                   </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Created At</p>
-                  <p className="font-medium">
-                    {format(new Date(selectedOrder.created_at), 'MMM d, yyyy HH:mm')}
-                  </p>
-                </div>
               </div>
 
-              {/* Order Items */}
               <div>
                 <h3 className="font-semibold mb-2">Order Items</h3>
                 <div className="space-y-2">
@@ -162,7 +134,6 @@ export const OrderManagement = ({
                 </div>
               </div>
 
-              {/* Total */}
               <div className="flex justify-between items-center pt-4 border-t">
                 <p className="font-semibold">Total Amount</p>
                 <p className="font-semibold">${selectedOrder.total_amount}</p>

@@ -13,6 +13,7 @@ import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm
 import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
 import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
 import { MenuPage } from '@/components/admin/orders/MenuPage';
+import { TableGrid } from '@/components/admin/tables/TableGrid';
 import {
   Card,
   CardHeader,
@@ -128,6 +129,7 @@ const Admin = () => {
     { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Kitchen', href: '/admin/kitchen', icon: Utensils },
+    { name: 'Tables', href: '/admin/tables', icon: ClipboardList },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart },
     { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
@@ -176,6 +178,7 @@ const Admin = () => {
             <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />
             <Route path="kitchen/*" element={<KitchenDashboard />} />
+            <Route path="tables/*" element={<TableGrid />} />
             <Route path="users/*" element={<UsersManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
             <Route path="settings/*" element={<SettingsPanel />} />
