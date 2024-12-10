@@ -41,11 +41,11 @@ export const PricingModelList = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="p-8">Loading...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="p-8 space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Pricing Models</h2>
         <Button onClick={handleAdd}>
@@ -53,41 +53,43 @@ export const PricingModelList = () => {
         </Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {pricingModels?.map((model) => (
-            <TableRow key={model.id}>
-              <TableCell>{model.name}</TableCell>
-              <TableCell className="capitalize">{model.type.replace('_', ' ')}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(model)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive"
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {pricingModels?.map((model) => (
+              <TableRow key={model.id}>
+                <TableCell>{model.name}</TableCell>
+                <TableCell className="capitalize">{model.type.replace('_', ' ')}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(model)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <PricingModelDialog
         open={isDialogOpen}
