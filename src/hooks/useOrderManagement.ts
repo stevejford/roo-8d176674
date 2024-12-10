@@ -18,9 +18,7 @@ export const useOrderManagement = () => {
 
       if (error) throw error;
 
-      // Invalidate and refetch
       await queryClient.invalidateQueries({ queryKey: ['active-orders'] });
-      
       return { error: null };
     } catch (error: any) {
       console.error('Order update error:', error);
@@ -29,27 +27,32 @@ export const useOrderManagement = () => {
   };
 
   const deleteOrder = async (orderId: string) => {
-    console.log('Attempting to delete order:', orderId);
-    
     try {
+      // Instead of deleting, we mark as cancelled and set deleted_at
       const { error } = await supabase
         .from('orders')
         .update({
-          deleted_at: new Date().toISOString(),
-          status: 'cancelled' as OrderStatus
+          status: 'cancelled' as OrderStatus,
+          deleted_at: new Date().toISOString()
         })
         .eq('id', orderId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Deletion process failed:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete the order. Please try again.",
+          variant: "destructive",
+        });
+        return { error };
+      }
 
       toast({
         title: "Order Deleted",
         description: "The order has been successfully deleted",
       });
 
-      // Invalidate and refetch
       await queryClient.invalidateQueries({ queryKey: ['active-orders'] });
-      
       return { error: null };
     } catch (error: any) {
       console.error('Order deletion error:', error);
@@ -64,10 +67,10 @@ export const useOrderManagement = () => {
 
   const completeOrder = async (orderId: string, amount: number) => {
     return updateOrderStatus(orderId, {
+      status: 'completed' as OrderStatus,
       payment_status: 'completed',
       payment_method: 'cash',
-      paid_amount: amount,
-      status: 'completed' as OrderStatus
+      paid_amount: amount
     });
   };
 
