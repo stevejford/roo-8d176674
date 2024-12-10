@@ -100,21 +100,31 @@ export const WaiterOrderCard = ({
 
   const handleDeleteOrder = async () => {
     try {
+      console.log('Starting deletion process for order:', order.id);
+      
       // First delete all order items
-      const { error: itemsError } = await supabase
+      const { error: itemsError, data: deletedItems } = await supabase
         .from('order_items')
         .delete()
         .eq('order_id', order.id);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Error deleting order items:', itemsError);
+        throw itemsError;
+      }
+      console.log('Successfully deleted order items:', deletedItems);
 
       // Then delete the order itself
-      const { error: orderError } = await supabase
+      const { error: orderError, data: deletedOrder } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error('Error deleting order:', orderError);
+        throw orderError;
+      }
+      console.log('Successfully deleted order:', deletedOrder);
 
       toast({
         title: "Order Deleted",
@@ -125,10 +135,10 @@ export const WaiterOrderCard = ({
       setShowDeleteDialog(false);
       onUpdateStatus(order.id, 'cancelled');
     } catch (error) {
-      console.error('Error deleting order:', error);
+      console.error('Deletion process failed:', error);
       toast({
         title: "Error",
-        description: "Failed to delete the order",
+        description: "Failed to delete the order. Please try again.",
         variant: "destructive",
       });
     }
@@ -141,6 +151,7 @@ export const WaiterOrderCard = ({
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setShowDeleteDialog(true);
   };
@@ -151,13 +162,13 @@ export const WaiterOrderCard = ({
   };
 
   return (
-    <div className={`border rounded-lg p-6 bg-white shadow-sm space-y-6 transition-all duration-300 ${
-      isNew ? 'ring-2 ring-blue-500 animate-pulse' : ''
-    }`}>
-      <div 
-        className="relative cursor-pointer" 
-        onClick={handleCardClick}
-      >
+    <div 
+      className={`border rounded-lg p-6 bg-white shadow-sm space-y-6 transition-all duration-300 ${
+        isNew ? 'ring-2 ring-blue-500 animate-pulse' : ''
+      }`}
+      onClick={handleCardClick}
+    >
+      <div className="relative">
         <div className="flex justify-between items-start">
           <OrderHeader 
             orderId={order.id}

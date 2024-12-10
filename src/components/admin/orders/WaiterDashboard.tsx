@@ -64,8 +64,6 @@ export const WaiterDashboard = () => {
   }, [queryClient]);
 
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
-    console.log('Updating order status:', { orderId, newStatus });
-    
     if (newStatus === 'cancelled') {
       // For cancelled status, we don't need to update the database
       // as the order has already been deleted
