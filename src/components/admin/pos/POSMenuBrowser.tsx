@@ -138,7 +138,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-0">
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-0">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
@@ -154,8 +154,8 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                   />
                 </div>
                 <div className="p-1">
-                  <h3 className="font-medium text-xs truncate">{product.title}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
+                  <h3 className="font-medium text-[10px] truncate">{product.title}</h3>
+                  <p className="text-[10px] text-gray-500 mb-1">
                     ${product.price?.toFixed(2)}
                   </p>
                   <div className="flex items-center justify-between gap-0.5">
@@ -163,24 +163,24 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-5 w-5"
+                        className="h-4 w-4"
                         onClick={() => handleQuantityChange(product.id, -1)}
                       >
-                        <Minus className="h-3 w-3" />
+                        <Minus className="h-2 w-2" />
                       </Button>
-                      <span className="text-xs w-4 text-center">{quantity}</span>
+                      <span className="text-[10px] w-3 text-center">{quantity}</span>
                       <Button
                         size="icon"
                         variant="outline"
-                        className="h-5 w-5"
+                        className="h-4 w-4"
                         onClick={() => handleQuantityChange(product.id, 1)}
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-2 w-2" />
                       </Button>
                     </div>
                     <Button
                       size="sm"
-                      className="h-5 text-xs px-1.5"
+                      className="h-4 text-[10px] px-1"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
