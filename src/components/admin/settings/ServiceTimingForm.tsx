@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceTimingFormData, StoreSettingsResponse } from "./types";
 import { ServiceTimingFormFields } from "./ServiceTimingFormFields";
+import { Json } from "@/integrations/supabase/types";
 
 const DEFAULT_TIMINGS: ServiceTimingFormData = {
   take_order_minutes: 5,
@@ -33,10 +34,10 @@ export const ServiceTimingForm = () => {
 
       if (error) throw error;
       
-      // Convert the JSON service_timings to our expected type
+      // Convert the JSON service_timings to our expected type with proper type casting
       const typedData: StoreSettingsResponse = {
         ...data,
-        service_timings: data.service_timings as ServiceTimingFormData
+        service_timings: (data.service_timings as unknown) as ServiceTimingFormData
       };
       
       return typedData;
@@ -52,7 +53,7 @@ export const ServiceTimingForm = () => {
       const { error } = await supabase
         .from('store_settings')
         .update({ 
-          service_timings: data as unknown as Json 
+          service_timings: data as unknown as Json
         })
         .eq('id', settings?.id);
 
