@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { MenuProductCard } from './MenuProductCard';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MenuProductCard } from './MenuProductCard';
 import type { Database } from '@/integrations/supabase/types';
 
 type Tables = Database['public']['Tables'];
@@ -80,12 +80,6 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
       return data;
     },
   });
-
-  const handleProductSelect = (product: Product) => {
-    console.log('Selected product with pricing:', product);
-    onSelect(product);
-    onClose();
-  };
 
   const filteredProducts = selectedCategory
     ? products?.filter(p => p.category_id === selectedCategory)
