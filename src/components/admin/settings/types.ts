@@ -1,3 +1,5 @@
+import { Json } from "@/integrations/supabase/types";
+
 export interface ServiceTimingFormData {
   take_order_minutes: number;
   check_table_minutes: number;
@@ -14,4 +16,6 @@ export interface StoreSettingsResponse {
   service_timings: ServiceTimingFormData;
   store_name: string;
   address: string;
+  created_at?: string;
+  updated_at?: string;
 }

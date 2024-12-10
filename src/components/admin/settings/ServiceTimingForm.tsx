@@ -32,7 +32,14 @@ export const ServiceTimingForm = () => {
         .single();
 
       if (error) throw error;
-      return data as StoreSettingsResponse;
+      
+      // Convert the JSON service_timings to our expected type
+      const typedData: StoreSettingsResponse = {
+        ...data,
+        service_timings: data.service_timings as ServiceTimingFormData
+      };
+      
+      return typedData;
     },
   });
 
@@ -44,7 +51,9 @@ export const ServiceTimingForm = () => {
     mutationFn: async (data: ServiceTimingFormData) => {
       const { error } = await supabase
         .from('store_settings')
-        .update({ service_timings: data })
+        .update({ 
+          service_timings: data as unknown as Json 
+        })
         .eq('id', settings?.id);
 
       if (error) throw error;
