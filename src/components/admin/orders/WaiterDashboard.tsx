@@ -65,10 +65,12 @@ export const WaiterDashboard = () => {
     };
   }, [queryClient]);
 
-  const handleUpdateStatus = async (orderId: string, status: OrderStatus) => {
+  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
+    console.log('Updating order status:', { orderId, newStatus });
+    
     const { error } = await supabase
       .from('orders')
-      .update({ status })
+      .update({ status: newStatus })
       .eq('id', orderId);
 
     if (error) {
