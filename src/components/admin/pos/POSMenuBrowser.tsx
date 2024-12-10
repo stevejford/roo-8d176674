@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 
 interface POSMenuBrowserProps {
-  onSelect: (product: any) => void;
+  onSelect: (product: any, quantity: number) => void;
 }
 
 export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
@@ -32,17 +32,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
     queryFn: async () => {
       let query = supabase
         .from('products')
-        .select(`
-          id, 
-          title, 
-          price, 
-          image_url, 
-          category_id,
-          product_pricing (
-            *,
-            pricing_strategies (*)
-          )
-        `)
+        .select('*')
         .eq('active', true);
 
       if (selectedCategory) {
@@ -55,15 +45,6 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
     },
   });
 
-  const calculatePrice = (product: any) => {
-    const productPricing = product.product_pricing?.[0];
-    if (productPricing?.is_override) {
-      const config = productPricing.config;
-      return config.price || product.price || 0;
-    }
-    return product.price || 0;
-  };
-
   const handleQuantityChange = (productId: string, delta: number) => {
     setQuantities(prev => {
       const current = prev[productId] || 0;
@@ -74,9 +55,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
 
   const handleAddToOrder = (product: any) => {
     const quantity = quantities[product.id] || 1;
-    for (let i = 0; i < quantity; i++) {
-      onSelect(product);
-    }
+    onSelect(product, quantity);
     setQuantities(prev => ({ ...prev, [product.id]: 0 }));
   };
 
@@ -109,7 +88,6 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
       <ScrollArea className="flex-1 p-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
           {products?.map((product) => {
-            const price = calculatePrice(product);
             const quantity = quantities[product.id] || 0;
             return (
               <Card 
@@ -126,7 +104,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                 <div className="p-1.5">
                   <h3 className="font-medium text-xs truncate">{product.title}</h3>
                   <p className="text-xs text-gray-500">
-                    ${price.toFixed(2)}
+                    ${product.price?.toFixed(2)}
                   </p>
                   <div className="flex items-center justify-between mt-1 gap-1">
                     <div className="flex items-center gap-1">
@@ -158,6 +136,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                       size="sm"
                       className="h-5 text-xs px-2"
                       onClick={() => handleAddToOrder(product)}
+                      disabled={quantity === 0}
                     >
                       Add
                     </Button>
