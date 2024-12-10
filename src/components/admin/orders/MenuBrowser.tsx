@@ -29,22 +29,28 @@ interface MenuBrowserProps {
 export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const { data: categories } = useQuery({
+  const { data: categories, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
+      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('position');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+      console.log('Categories fetched:', data);
       return data;
     },
   });
 
-  const { data: products } = useQuery({
+  const { data: products, error: productsError } = useQuery({
     queryKey: ['products-with-pricing'],
     queryFn: async () => {
+      console.log('Fetching products...');
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -57,14 +63,19 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
         .eq('active', true)
         .order('position');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+      }
+      console.log('Products fetched:', data);
       return data as unknown as Product[];
     },
   });
 
-  const { data: categoryPricing } = useQuery({
+  const { data: categoryPricing, error: pricingError } = useQuery({
     queryKey: ['category-pricing'],
     queryFn: async () => {
+      console.log('Fetching category pricing...');
       const { data, error } = await supabase
         .from('category_pricing')
         .select(`
@@ -72,10 +83,18 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
           pricing_strategies (*)
         `);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching category pricing:', error);
+        throw error;
+      }
+      console.log('Category pricing fetched:', data);
       return data;
     },
   });
+
+  if (categoriesError || productsError || pricingError) {
+    console.error('Errors:', { categoriesError, productsError, pricingError });
+  }
 
   const filteredProducts = selectedCategory
     ? products?.filter(p => p.category_id === selectedCategory)
