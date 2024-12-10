@@ -158,24 +158,26 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                   <p className="text-xs text-gray-500 mb-1">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center gap-0.5">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-5 w-5"
-                      onClick={() => handleQuantityChange(product.id, -1)}
-                    >
-                      <Minus className="h-3 w-3" />
-                    </Button>
-                    <span className="text-xs w-4 text-center">{quantity}</span>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-5 w-5"
-                      onClick={() => handleQuantityChange(product.id, 1)}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
+                  <div className="flex items-center justify-between gap-0.5">
+                    <div className="flex items-center gap-0.5">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-5 w-5"
+                        onClick={() => handleQuantityChange(product.id, -1)}
+                      >
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <span className="text-xs w-4 text-center">{quantity}</span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-5 w-5"
+                        onClick={() => handleQuantityChange(product.id, 1)}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
                     <Button
                       size="sm"
                       className="h-5 text-xs px-1.5"
