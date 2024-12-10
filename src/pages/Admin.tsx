@@ -1,4 +1,4 @@
-import React from 'react';
+import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from '@/components/Navbar';
 import { useAuth } from '@/components/AuthProvider';
 import { useNavigate, Routes, Route } from 'react-router-dom';
@@ -20,7 +20,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 const Dashboard = () => (
-  <div className="p-6">
+  <div className="p-8">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>
         <CardHeader>
@@ -54,13 +54,13 @@ const Dashboard = () => (
 );
 
 const Products = () => (
-  <div className="p-6">
+  <div className="p-8">
     <ProductList />
   </div>
 );
 
 const Orders = () => (
-  <div className="p-6">
+  <div className="p-8">
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
     </div>
@@ -69,17 +69,17 @@ const Orders = () => (
 );
 
 const UsersManagement = () => (
-  <div className="p-6">
+  <div className="p-8">
     <UserManagement />
   </div>
 );
 
 const Analytics = () => (
-  <div className="p-6">Analytics dashboard coming soon</div>
+  <div className="p-8">Analytics dashboard coming soon</div>
 );
 
 const SettingsPanel = () => (
-  <div className="p-6">
+  <div className="p-8">
     <div className="space-y-8">
       <div>
         <SettingsSectionHeader
