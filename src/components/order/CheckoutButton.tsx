@@ -45,23 +45,27 @@ export const CheckoutButton = ({
     );
   }
 
+  const isPreOrder = !isStoreCurrentlyOpen;
+
   return (
     <button
       className={`w-full ${
-        isStoreCurrentlyOpen ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-500'
+        isPreOrder 
+          ? 'bg-[#F97316] hover:bg-[#F97316]/90' 
+          : 'bg-emerald-600 hover:bg-emerald-700'
       } text-white py-4 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors`}
       onClick={handleClick}
-      disabled={!isStoreCurrentlyOpen || itemCount === 0 || isProcessing}
+      disabled={itemCount === 0 || isProcessing}
     >
       {isProcessing ? (
         <>
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           Processing...
         </>
-      ) : !isStoreCurrentlyOpen ? (
+      ) : isPreOrder ? (
         <>
           <Clock className="w-4 h-4 mr-2" />
-          Pre-order Available at 12am
+          Pre-order ${total.toFixed(2)}
         </>
       ) : (
         <>
