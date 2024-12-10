@@ -97,6 +97,13 @@ export const isStoreOpen = async () => {
   if (!hours) return false;
 
   const now = new Date();
+  const currentHour = now.getHours();
+  
+  // Allow pre-orders after midnight (12 AM) until 3 AM
+  if (currentHour >= 0 && currentHour < 3) {
+    return true;
+  }
+
   const currentDay = format(now, 'EEEE');
   const currentTime = format(now, 'HH:mm');
   
