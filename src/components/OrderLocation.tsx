@@ -106,7 +106,7 @@ const OrderLocationContent = ({ mode }: { mode: 'pickup' | 'delivery' }) => {
 export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocationProps) => {
   const isMobile = useIsMobile();
 
-  const content = (
+  const wrappedContent = (
     <OrderStateProvider>
       <OrderLocationContent mode={mode} />
     </OrderStateProvider>
@@ -116,7 +116,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
     return (
       <Sheet open={isOpen} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="w-full sm:w-[400px] p-0">
-          {content}
+          {wrappedContent}
         </SheetContent>
       </Sheet>
     );
@@ -124,7 +124,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
 
   return (
     <div className="fixed top-0 right-0 w-[400px] h-screen bg-white border-l border-gray-200 z-40">
-      {content}
+      {wrappedContent}
     </div>
   );
 };
