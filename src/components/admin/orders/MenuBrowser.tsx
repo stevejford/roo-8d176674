@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { MenuProductCard } from './MenuProductCard';
+import { X } from "lucide-react";
 import type { Database } from '@/integrations/supabase/types';
 
 type Tables = Database['public']['Tables'];
@@ -32,17 +33,12 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   const { data: categories, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('position');
       
-      if (error) {
-        console.error('Error fetching categories:', error);
-        throw error;
-      }
-      console.log('Categories fetched:', data);
+      if (error) throw error;
       return data;
     },
   });
@@ -50,7 +46,6 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   const { data: products, error: productsError } = useQuery({
     queryKey: ['products-with-pricing'],
     queryFn: async () => {
-      console.log('Fetching products...');
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -63,11 +58,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
         .eq('active', true)
         .order('position');
       
-      if (error) {
-        console.error('Error fetching products:', error);
-        throw error;
-      }
-      console.log('Products fetched:', data);
+      if (error) throw error;
       return data as unknown as Product[];
     },
   });
@@ -75,7 +66,6 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
   const { data: categoryPricing, error: pricingError } = useQuery({
     queryKey: ['category-pricing'],
     queryFn: async () => {
-      console.log('Fetching category pricing...');
       const { data, error } = await supabase
         .from('category_pricing')
         .select(`
@@ -83,11 +73,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
           pricing_strategies (*)
         `);
       
-      if (error) {
-        console.error('Error fetching category pricing:', error);
-        throw error;
-      }
-      console.log('Category pricing fetched:', data);
+      if (error) throw error;
       return data;
     },
   });
@@ -109,7 +95,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-full w-full h-[90vh] max-h-[90vh] p-0 m-0">
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b bg-white sticky top-0 z-10">
+          <div className="p-4 border-b bg-white sticky top-0 z-10 flex items-center justify-between">
             <ScrollArea className="w-full">
               <div className="flex space-x-2 pb-2">
                 <Button 
@@ -131,6 +117,14 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
                 ))}
               </div>
             </ScrollArea>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={onClose}
+              className="ml-2"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4">

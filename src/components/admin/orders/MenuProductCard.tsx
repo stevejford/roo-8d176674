@@ -39,32 +39,23 @@ export const MenuProductCard = ({
   const [quantity, setQuantity] = useState(0);
   
   const calculatePrice = () => {
-    console.log('Calculating price for:', product.title);
-    console.log('Product base price:', product.price);
-    console.log('Product pricing override:', productPricing);
-    console.log('Category pricing:', categoryPricing);
-    
     if (productPricing?.is_override) {
       const config = productPricing.config as PricingConfig;
       const calculatedPrice = config.price || product.price || 0;
-      console.log('Using product override price:', calculatedPrice);
       return calculatedPrice;
     }
 
     if (categoryPricing?.pricing_strategies) {
       const config = categoryPricing.config as PricingConfig;
       const calculatedPrice = config.price || product.price || 0;
-      console.log('Using category price:', calculatedPrice);
       return calculatedPrice;
     }
 
     const defaultPrice = product.price || 0;
-    console.log('Using default product price:', defaultPrice);
     return defaultPrice;
   };
 
   const price = calculatePrice();
-  console.log('Final calculated price:', price);
 
   const handleQuantityChange = (increment: boolean) => {
     const newQuantity = increment ? quantity + 1 : Math.max(0, quantity - 1);
@@ -75,14 +66,13 @@ export const MenuProductCard = ({
         ...product,
         price
       };
-      console.log('Selecting product with calculated price:', productWithPrice);
       onSelect(productWithPrice);
     }
   };
 
   return (
-    <Card className="p-4 flex flex-col gap-2">
-      <div className="flex items-start gap-4">
+    <Card className="p-2 flex flex-col gap-2">
+      <div className="flex items-start gap-2">
         {product.image_url && (
           <img 
             src={product.image_url} 
@@ -91,27 +81,29 @@ export const MenuProductCard = ({
           />
         )}
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-lg truncate">{product.title}</h3>
+          <h3 className="font-medium text-sm truncate">{product.title}</h3>
           <p className="text-sm text-gray-500">${price?.toFixed(2)}</p>
         </div>
       </div>
       
-      <div className="flex items-center justify-end gap-3 mt-auto">
+      <div className="flex items-center justify-end gap-2 mt-auto">
         <Button 
           variant="outline" 
           size="icon"
           onClick={() => handleQuantityChange(false)}
           disabled={quantity === 0}
+          className="h-8 w-8"
         >
           <Minus className="h-4 w-4" />
         </Button>
         
-        <span className="w-8 text-center font-medium">{quantity}</span>
+        <span className="w-8 text-center font-medium text-sm">{quantity}</span>
         
         <Button 
           variant="outline" 
           size="icon"
           onClick={() => handleQuantityChange(true)}
+          className="h-8 w-8"
         >
           <Plus className="h-4 w-4" />
         </Button>
