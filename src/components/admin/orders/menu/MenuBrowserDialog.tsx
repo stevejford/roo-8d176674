@@ -9,8 +9,6 @@ export const MenuBrowserDialog = ({ onSelectItem }: MenuBrowserDialogProps) => {
   return (
     <div className="h-screen">
       <MenuBrowser 
-        isOpen={true} 
-        onClose={() => {}} 
         onSelect={onSelectItem}
       />
     </div>

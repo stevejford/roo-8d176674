@@ -103,6 +103,7 @@ export const MenuBrowser = ({ onOrderComplete, selectedTable }: MenuBrowserProps
                   <MenuProductCard
                     key={product.id}
                     product={product}
+                    categoryId={category.id}
                     onSelect={() => handleProductSelect(product)}
                   />
                 ))}
