@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface POSMenuBrowserProps {
@@ -13,6 +13,7 @@ interface POSMenuBrowserProps {
 
 export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+  const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -64,22 +65,37 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
     return product.price || 0;
   };
 
+  const handleQuantityChange = (productId: string, delta: number) => {
+    setQuantities(prev => {
+      const current = prev[productId] || 0;
+      const newQuantity = Math.max(0, current + delta);
+      return { ...prev, [productId]: newQuantity };
+    });
+  };
+
+  const handleAddToOrder = (product: any) => {
+    const quantity = quantities[product.id] || 1;
+    for (let i = 0; i < quantity; i++) {
+      onSelect(product);
+    }
+    setQuantities(prev => ({ ...prev, [product.id]: 0 }));
+  };
+
   return (
     <DialogContent className="max-w-6xl max-h-[90vh] p-0">
-      <DialogHeader className="p-4 pb-0">
+      <DialogHeader className="p-3">
         <DialogTitle>Select Items</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col h-full">
         {/* Categories */}
-        <div className="relative px-4">
+        <div className="relative px-3">
           <ScrollArea className="w-full">
-            <div className="flex gap-2 pb-4">
+            <div className="flex gap-1.5 pb-3">
               <Button 
                 variant={selectedCategory === null ? "default" : "outline"}
                 onClick={() => setSelectedCategory(null)}
-                className="shrink-0"
-                size="sm"
+                className="shrink-0 h-8 px-3 text-sm"
               >
                 All Items
               </Button>
@@ -88,8 +104,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                   key={category.id}
                   variant={selectedCategory === category.id ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category.id)}
-                  className="shrink-0"
-                  size="sm"
+                  className="shrink-0 h-8 px-3 text-sm"
                 >
                   {category.title}
                 </Button>
@@ -100,35 +115,62 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
         </div>
 
         {/* Products Grid */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        <ScrollArea className="flex-1 p-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
             {products?.map((product) => {
               const price = calculatePrice(product);
+              const quantity = quantities[product.id] || 0;
               return (
                 <Card 
                   key={product.id}
                   className="overflow-hidden cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => onSelect({ ...product, price })}
                 >
-                  <div className="relative pb-[100%]">
+                  <div className="relative pb-[80%]">
                     <img
                       src={product.image_url || '/placeholder.svg'}
                       alt={product.title}
                       className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <Button 
-                      size="icon" 
-                      variant="secondary"
-                      className="absolute top-2 right-2 h-7 w-7 bg-white shadow-md hover:bg-gray-100"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
                   </div>
                   <div className="p-2">
-                    <h3 className="font-medium text-sm truncate">{product.title}</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-medium text-xs truncate">{product.title}</h3>
+                    <p className="text-xs text-gray-500">
                       ${price.toFixed(2)}
                     </p>
+                    <div className="flex items-center justify-between mt-1 gap-1">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuantityChange(product.id, -1);
+                          }}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="text-xs w-4 text-center">{quantity}</span>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuantityChange(product.id, 1);
+                          }}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="h-6 text-xs px-2"
+                        onClick={() => handleAddToOrder(product)}
+                      >
+                        Add
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               );
