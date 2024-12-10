@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { OrderCard } from './components/OrderCard';
+import { POSMenuBrowser } from './POSMenuBrowser';
 import {
   AlertDialog,
   AlertDialogAction,
