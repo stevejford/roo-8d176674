@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { MenuProductCard } from './MenuProductCard';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -86,24 +86,24 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
       <DialogContent className="max-w-full w-full h-screen max-h-screen p-0 m-0 rounded-none">
         <div className="flex flex-col h-full">
           <div className="p-4 border-b">
-            <ScrollArea className="w-full" orientation="horizontal">
+            <ScrollArea className="w-full">
               <div className="flex space-x-2 pb-2">
-                <TabsTrigger 
-                  value="all"
+                <Button 
+                  variant={selectedCategory === null ? "default" : "outline"}
                   onClick={() => setSelectedCategory(null)}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="shrink-0"
                 >
                   All Items
-                </TabsTrigger>
+                </Button>
                 {categories?.map((category) => (
-                  <TabsTrigger
+                  <Button
                     key={category.id}
-                    value={category.id}
+                    variant={selectedCategory === category.id ? "default" : "outline"}
                     onClick={() => setSelectedCategory(category.id)}
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    className="shrink-0"
                   >
                     {category.title}
-                  </TabsTrigger>
+                  </Button>
                 ))}
               </div>
             </ScrollArea>
