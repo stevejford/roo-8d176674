@@ -8,6 +8,7 @@ import { StoreHoursForm } from './StoreHoursForm';
 import { BillSplittingForm } from './BillSplittingForm';
 import { StripeConfigForm } from './StripeConfigForm';
 import { SettingsSectionHeader } from './SettingsSectionHeader';
+import { StoreSettingsResponse } from './types';
 
 interface StoreSettings {
   id: string;
@@ -34,7 +35,11 @@ export const StoreSettingsForm = () => {
         .single();
 
       if (error) throw error;
-      return data as StoreSettings;
+      
+      return {
+        ...data,
+        bill_splitting_config: data.bill_splitting_config as unknown as StoreSettings['bill_splitting_config']
+      } as StoreSettings;
     },
   });
 
