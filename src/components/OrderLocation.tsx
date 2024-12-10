@@ -10,7 +10,7 @@ import { OrderItems } from "./order/OrderItems";
 import { useCartStore } from "@/stores/useCartStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Clock } from "lucide-react";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -26,31 +26,48 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
   const { items, clearCart } = useCartStore();
   const { toast } = useToast();
 
   useEffect(() => {
     const loadStoreData = async () => {
-      const settings = await getStoreSettings();
-      if (settings) {
-        setStoreAddress(settings.address);
-        setStoreName(settings.store_name);
-      }
+      setIsCheckingStoreHours(true);
+      try {
+        const settings = await getStoreSettings();
+        if (settings) {
+          setStoreAddress(settings.address);
+          setStoreName(settings.store_name);
+        }
 
-      const storeOpen = await isStoreOpen();
-      setIsStoreCurrentlyOpen(storeOpen);
+        const storeOpen = await isStoreOpen();
+        setIsStoreCurrentlyOpen(storeOpen);
+      } catch (error) {
+        console.error('Error loading store data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to check store hours. Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsCheckingStoreHours(false);
+      }
     };
 
     loadStoreData();
     
     // Check store status every minute
     const interval = setInterval(async () => {
-      const storeOpen = await isStoreOpen();
-      setIsStoreCurrentlyOpen(storeOpen);
+      try {
+        const storeOpen = await isStoreOpen();
+        setIsStoreCurrentlyOpen(storeOpen);
+      } catch (error) {
+        console.error('Error checking store hours:', error);
+      }
     }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [toast]);
 
   const handleScheduleTime = (date: string, time: string) => {
     setSelectedTime(`${date} at ${time}`);
@@ -62,6 +79,15 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   };
 
   const handleCheckout = async () => {
+    if (!isStoreCurrentlyOpen) {
+      toast({
+        title: "Store Closed",
+        description: "Sorry, we are currently closed. Please try again during business hours.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsProcessing(true);
 
@@ -119,29 +145,40 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
       </div>
 
       <div className="mt-auto p-6">
-        <button
-          className={`w-full ${
-            isStoreCurrentlyOpen ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-500'
-          } text-white py-4 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors`}
-          disabled={!isStoreCurrentlyOpen || items.length === 0 || isProcessing}
-          onClick={handleCheckout}
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <span>
-                {isStoreCurrentlyOpen 
-                  ? `Pay ${calculateTotal().toFixed(2)} $` 
-                  : 'Store Closed'}
-              </span>
-              {isStoreCurrentlyOpen && <span className="ml-1">→</span>}
-            </>
-          )}
-        </button>
+        {isCheckingStoreHours ? (
+          <button
+            className="w-full bg-gray-400 text-white py-4 rounded-lg font-medium flex items-center justify-center"
+            disabled
+          >
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Checking store hours...
+          </button>
+        ) : (
+          <button
+            className={`w-full ${
+              isStoreCurrentlyOpen ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-500'
+            } text-white py-4 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors`}
+            disabled={!isStoreCurrentlyOpen || items.length === 0 || isProcessing}
+            onClick={handleCheckout}
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : !isStoreCurrentlyOpen ? (
+              <>
+                <Clock className="w-4 h-4 mr-2" />
+                Store Closed
+              </>
+            ) : (
+              <>
+                <span>Pay ${calculateTotal().toFixed(2)}</span>
+                <span className="ml-1">→</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       <PickupTimeModal
