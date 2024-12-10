@@ -146,7 +146,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 key={product.id}
                 className="overflow-hidden hover:bg-gray-50 transition-colors"
               >
-                <div className="w-16 h-16">
+                <div className="aspect-square w-16">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
@@ -158,29 +158,27 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                   <p className="text-xs text-gray-500 mb-1">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center justify-between gap-1">
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-5 w-5"
-                        onClick={() => handleQuantityChange(product.id, -1)}
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="text-xs w-4 text-center">{quantity}</span>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-5 w-5"
-                        onClick={() => handleQuantityChange(product.id, 1)}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-5 w-5"
+                      onClick={() => handleQuantityChange(product.id, -1)}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <span className="text-xs w-4 text-center">{quantity}</span>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-5 w-5"
+                      onClick={() => handleQuantityChange(product.id, 1)}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
                     <Button
                       size="sm"
-                      className="h-5 text-xs px-2"
+                      className="h-5 text-xs px-2 ml-auto"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
