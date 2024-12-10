@@ -75,17 +75,21 @@ export const WaiterDashboard = () => {
       return;
     }
 
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('id', orderId);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
 
-    if (error) {
+      if (error) {
+        console.error('Error updating order status:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['active-orders'] });
+    } catch (error) {
       console.error('Error updating order status:', error);
-      return;
     }
-
-    queryClient.invalidateQueries({ queryKey: ['active-orders'] });
   };
 
   return (
