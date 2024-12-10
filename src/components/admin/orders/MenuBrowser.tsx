@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MenuProductCard } from './MenuProductCard';
@@ -91,60 +90,64 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
     onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-full w-full h-[90vh] max-h-[90vh] p-0 m-0">
-        <div className="flex flex-col h-full">
-          <div className="p-4 border-b bg-white sticky top-0 z-10 flex items-center justify-between">
-            <ScrollArea className="w-full">
-              <div className="flex space-x-2 pb-2">
-                <Button 
-                  variant={selectedCategory === null ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(null)}
-                  className="shrink-0"
-                >
-                  All Items
-                </Button>
-                {categories?.map((category) => (
-                  <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className="shrink-0"
-                  >
-                    {category.title}
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
+    <div className="fixed inset-0 bg-white z-50">
+      <div className="h-screen flex flex-col">
+        <div className="sticky top-0 z-10 bg-white border-b">
+          <div className="flex items-center justify-between p-4">
+            <h1 className="text-xl font-semibold">Add Items</h1>
             <Button 
               variant="ghost" 
-              size="icon"
+              size="icon" 
               onClick={onClose}
-              className="ml-2"
+              className="hover:bg-gray-100"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
-
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-              {filteredProducts?.map((product) => (
-                <MenuProductCard
-                  key={product.id}
-                  product={product}
-                  categoryId={product.category_id || ''}
-                  productPricing={product.product_pricing?.[0]}
-                  categoryPricing={categoryPricing?.find(
-                    cp => cp.category_id === product.category_id
-                  )}
-                  onSelect={handleProductSelect}
-                />
+          
+          <ScrollArea className="pb-4">
+            <div className="flex gap-2 px-4">
+              <Button 
+                variant={selectedCategory === null ? "default" : "outline"}
+                onClick={() => setSelectedCategory(null)}
+                className="shrink-0"
+              >
+                All Items
+              </Button>
+              {categories?.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="shrink-0"
+                >
+                  {category.title}
+                </Button>
               ))}
             </div>
+          </ScrollArea>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 p-4">
+            {filteredProducts?.map((product) => (
+              <MenuProductCard
+                key={product.id}
+                product={product}
+                categoryId={product.category_id || ''}
+                productPricing={product.product_pricing?.[0]}
+                categoryPricing={categoryPricing?.find(
+                  cp => cp.category_id === product.category_id
+                )}
+                onSelect={handleProductSelect}
+              />
+            ))}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };

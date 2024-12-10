@@ -77,59 +77,61 @@ export const MenuPage = () => {
     : products;
 
   const handleProductSelect = (product: Product) => {
-    navigate(-1); // Go back to the previous page
+    navigate(-1);
   };
 
   return (
-    <div className="h-screen w-screen bg-white">
-      <div className="sticky top-0 z-10 bg-white border-b">
-        <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-semibold">Add Items</h1>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(-1)}
-            className="hover:bg-gray-100"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="flex gap-2 p-4 overflow-x-auto">
-          <Button 
-            variant={selectedCategory === null ? "default" : "outline"}
-            onClick={() => setSelectedCategory(null)}
-            className="shrink-0"
-          >
-            All Items
-          </Button>
-          {categories?.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category.id)}
+    <div className="fixed inset-0 bg-white">
+      <div className="h-screen flex flex-col">
+        <div className="sticky top-0 z-10 bg-white border-b">
+          <div className="flex items-center justify-between p-4">
+            <h1 className="text-xl font-semibold">Add Items</h1>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate(-1)}
+              className="hover:bg-gray-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="flex gap-2 px-4 pb-4 overflow-x-auto">
+            <Button 
+              variant={selectedCategory === null ? "default" : "outline"}
+              onClick={() => setSelectedCategory(null)}
               className="shrink-0"
             >
-              {category.title}
+              All Items
             </Button>
-          ))}
+            {categories?.map((category) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                onClick={() => setSelectedCategory(category.id)}
+                className="shrink-0"
+              >
+                {category.title}
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="h-[calc(100vh-132px)] overflow-y-auto p-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-          {filteredProducts?.map((product) => (
-            <MenuProductCard
-              key={product.id}
-              product={product}
-              categoryId={product.category_id || ''}
-              productPricing={product.product_pricing?.[0]}
-              categoryPricing={categoryPricing?.find(
-                cp => cp.category_id === product.category_id
-              )}
-              onSelect={handleProductSelect}
-            />
-          ))}
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 p-4">
+            {filteredProducts?.map((product) => (
+              <MenuProductCard
+                key={product.id}
+                product={product}
+                categoryId={product.category_id || ''}
+                productPricing={product.product_pricing?.[0]}
+                categoryPricing={categoryPricing?.find(
+                  cp => cp.category_id === product.category_id
+                )}
+                onSelect={handleProductSelect}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
