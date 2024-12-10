@@ -6,7 +6,6 @@ import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { OrderCard } from './components/OrderCard';
-import { useOrderOperations } from '@/hooks/useOrderOperations';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +22,6 @@ export const POSDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const { toast } = useToast();
-  const { updateCustomerName, sendToKitchen } = useOrderOperations();
 
   const { data: orders, refetch } = useQuery({
     queryKey: ['pos-orders'],
@@ -70,14 +68,6 @@ export const POSDashboard = () => {
     }
   };
 
-  const handlePrintReceipt = (order: any) => {
-    console.log('Printing receipt for order:', order);
-    toast({
-      title: "Print Receipt",
-      description: "Receipt printing functionality will be implemented soon",
-    });
-  };
-
   const handleStartNewOrder = async () => {
     const { data, error } = await supabase
       .from('orders')
@@ -97,11 +87,6 @@ export const POSDashboard = () => {
     }
   };
 
-  const handleAddItems = (orderId: string) => {
-    setSelectedOrderId(orderId);
-    setIsMenuOpen(true);
-  };
-
   if (isMenuOpen) {
     return (
       <POSMenuBrowser 
@@ -116,9 +101,9 @@ export const POSDashboard = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold tracking-tight">Active Orders</h2>
+    <div className="h-[calc(100vh-4rem)] p-6 bg-gray-50">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Active Orders</h2>
         <Button 
           onClick={handleStartNewOrder} 
           size="lg"
@@ -129,16 +114,16 @@ export const POSDashboard = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max overflow-y-auto max-h-[calc(100vh-12rem)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-max overflow-y-auto max-h-[calc(100vh-12rem)]">
         {orders?.map((order) => (
           <OrderCard
             key={order.id}
             order={order}
-            onAddItems={handleAddItems}
-            onPrintReceipt={handlePrintReceipt}
+            onAddItems={() => {
+              setSelectedOrderId(order.id);
+              setIsMenuOpen(true);
+            }}
             onDelete={(orderId) => setOrderToDelete(orderId)}
-            onUpdateCustomerName={updateCustomerName}
-            onSendToKitchen={sendToKitchen}
           />
         ))}
       </div>
