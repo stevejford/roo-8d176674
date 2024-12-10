@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import Stripe from 'https://esm.sh/stripe@14.21.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,18 +15,39 @@ serve(async (req) => {
   try {
     const { items, customer_email } = await req.json()
 
-    // Get the store's Stripe key from Edge Function secrets
-    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    // Create Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Try to get the stripe key from Edge Function secrets first
+    let stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+
+    // If not found in Edge Function secrets, try to get it from store_settings
+    if (!stripeKey) {
+      const { data: settings, error: settingsError } = await supabaseClient
+        .from('store_settings')
+        .select('stripe_secret_key')
+        .single();
+
+      if (settingsError) throw settingsError;
+      stripeKey = settings?.stripe_secret_key;
+    }
+
     if (!stripeKey) {
       throw new Error('Stripe is not configured. Please set up your Stripe integration in the admin settings.');
     }
 
+    console.log('Initializing Stripe...');
     const stripe = new Stripe(stripeKey, {
       apiVersion: '2023-10-16',
     })
 
+    console.log('Creating line items...');
     // Create line items for the checkout session
     const lineItems = await Promise.all(items.map(async (item: any) => {
+      console.log('Processing item:', item.title);
       // Create a product for each item
       const product = await stripe.products.create({
         name: item.title,
@@ -46,6 +68,7 @@ serve(async (req) => {
       }
     }))
 
+    console.log('Creating checkout session...');
     // Create the checkout session
     const session = await stripe.checkout.sessions.create({
       customer_email,
@@ -55,6 +78,7 @@ serve(async (req) => {
       cancel_url: `${req.headers.get('origin')}/cancel`,
     })
 
+    console.log('Checkout session created:', session.id);
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
