@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-type VoucherDiscountType = 'percentage' | 'fixed';
+export type VoucherDiscountType = 'percentage' | 'fixed';
 
-interface Voucher {
+export interface Voucher {
   code: string;
   discount_type: VoucherDiscountType;
   discount_value: number;
