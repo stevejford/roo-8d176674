@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrderManagement } from '@/hooks/useOrderManagement';
 import { OrderCardContent } from './waiter/OrderCardContent';
