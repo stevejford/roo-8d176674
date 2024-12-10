@@ -97,7 +97,8 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
       if (checkoutError) throw checkoutError;
 
       if (checkoutData?.url) {
-        window.location.href = checkoutData.url;
+        // Open Stripe Checkout in a new window
+        window.open(checkoutData.url, '_blank');
         clearCart();
       } else {
         throw new Error('No checkout URL received');
