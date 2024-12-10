@@ -106,19 +106,18 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             variant="ghost" 
             size="sm"
             onClick={onOrderComplete}
-            className="mr-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Orders
           </Button>
         </div>
         <ScrollArea className="pb-2 sm:pb-3">
-          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4">
+          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4 pb-2">
             <Button 
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
               size="sm"
-              className="shrink-0 text-xs sm:text-sm"
+              className="shrink-0 text-xs sm:text-sm whitespace-nowrap"
             >
               All Items
             </Button>
@@ -128,7 +127,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category.id)}
                 size="sm"
-                className="shrink-0 text-xs sm:text-sm"
+                className="shrink-0 text-xs sm:text-sm whitespace-nowrap"
               >
                 {category.title}
               </Button>
@@ -137,23 +136,23 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
         </ScrollArea>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-0">
+      <div className="flex-1 overflow-y-auto p-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
               <Card 
                 key={product.id}
-                className="overflow-hidden hover:bg-gray-50 transition-colors rounded-none border-0"
+                className="overflow-hidden hover:bg-gray-50 transition-colors"
               >
-                <div className="aspect-square flex items-center justify-center">
+                <div className="aspect-square">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-1 sm:p-2">
+                <div className="p-2">
                   <h3 className="font-medium text-[10px] sm:text-xs truncate">{product.title}</h3>
                   <p className="text-[10px] sm:text-xs text-gray-500 mb-1">
                     ${product.price?.toFixed(2)}
