@@ -5,8 +5,18 @@ import { OrderItems } from './waiter/OrderItems';
 import { OrderActions } from './waiter/OrderActions';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { UtensilsCrossed, Plus } from "lucide-react";
+import { UtensilsCrossed, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface WaiterOrderCardProps {
   order: any;
@@ -22,6 +32,7 @@ export const WaiterOrderCard = ({
   isNew = false 
 }: WaiterOrderCardProps) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -94,15 +105,62 @@ export const WaiterOrderCard = ({
     }
   };
 
+  const handleDeleteOrder = async () => {
+    try {
+      // First delete all order items
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', order.id);
+
+      if (itemsError) throw itemsError;
+
+      // Then delete the order itself
+      const { error: orderError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', order.id);
+
+      if (orderError) throw orderError;
+
+      toast({
+        title: "Order Deleted",
+        description: "The order has been successfully deleted",
+      });
+
+      // Update status to trigger a refresh of the orders list
+      onUpdateStatus(order.id, 'cancelled');
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the order",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className={`border rounded-lg p-6 bg-white shadow-sm space-y-6 transition-all duration-300 ${
       isNew ? 'ring-2 ring-blue-500 animate-pulse' : ''
     }`}>
-      <OrderHeader 
-        orderId={order.id}
-        status={order.status}
-        statusColors={statusColors}
-      />
+      <div className="flex justify-between items-start">
+        <OrderHeader 
+          orderId={order.id}
+          status={order.status}
+          statusColors={statusColors}
+        />
+        {order.status === 'pending' && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
       
       <OrderItems items={order.order_items} />
       
@@ -141,6 +199,26 @@ export const WaiterOrderCard = ({
           />
         </div>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this order? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600"
+              onClick={handleDeleteOrder}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
