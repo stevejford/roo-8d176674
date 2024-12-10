@@ -86,26 +86,19 @@ export const WaiterOrderCard = ({
 
   const handleDeleteOrder = async () => {
     try {
-      // First delete all order items
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .delete()
-        .eq('order_id', order.id);
-
-      if (itemsError) {
-        console.error('Error deleting order items:', itemsError);
-        throw itemsError;
-      }
-
-      // Then delete the order itself
-      const { error: orderError } = await supabase
+      console.log('Starting soft deletion for order:', order.id);
+      
+      const { error: updateError } = await supabase
         .from('orders')
-        .delete()
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          status: 'cancelled' as OrderStatus
+        })
         .eq('id', order.id);
 
-      if (orderError) {
-        console.error('Error deleting order:', orderError);
-        throw orderError;
+      if (updateError) {
+        console.error('Error soft deleting order:', updateError);
+        throw updateError;
       }
 
       toast({
@@ -114,7 +107,6 @@ export const WaiterOrderCard = ({
       });
 
       setShowDeleteDialog(false);
-      // Notify parent component to update the UI
       onUpdateStatus(order.id, 'cancelled');
     } catch (error) {
       console.error('Deletion process failed:', error);

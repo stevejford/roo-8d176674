@@ -182,6 +182,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           customer_name: string | null
+          deleted_at: string | null
           dessert_cleared_at: string | null
           dessert_ordered_at: string | null
           dessert_served_at: string | null
@@ -212,6 +213,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           customer_name?: string | null
+          deleted_at?: string | null
           dessert_cleared_at?: string | null
           dessert_ordered_at?: string | null
           dessert_served_at?: string | null
@@ -242,6 +244,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           customer_name?: string | null
+          deleted_at?: string | null
           dessert_cleared_at?: string | null
           dessert_ordered_at?: string | null
           dessert_served_at?: string | null
