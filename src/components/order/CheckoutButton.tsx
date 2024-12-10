@@ -34,6 +34,8 @@ export const CheckoutButton = ({
     onCheckout();
   };
 
+  const displayTotal = total.toFixed(2);
+
   if (isCheckingStoreHours) {
     return (
       <button
@@ -64,11 +66,11 @@ export const CheckoutButton = ({
       ) : isPreOrder ? (
         <>
           <Clock className="w-4 h-4" />
-          <span>Pre-order ${total.toFixed(2)}</span>
+          <span>Pre-order ${displayTotal}</span>
         </>
       ) : (
         <>
-          <span>Pay ${total.toFixed(2)}</span>
+          <span>Pay ${displayTotal}</span>
           <span className="ml-1">→</span>
         </>
       )}
