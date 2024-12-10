@@ -1,8 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from 'react-router-dom';
-import { DollarSign, CreditCard, Banknote, Plus } from "lucide-react";
+import { CreditCard, Banknote } from "lucide-react";
 
 interface OrderActionsProps {
   status: string;
@@ -17,10 +16,8 @@ export const OrderActions = ({
   isProcessingPayment,
   onPayment
 }: OrderActionsProps) => {
-  const navigate = useNavigate();
-
   return (
-    <div className="flex gap-3">
+    <>
       {status === 'delivered' && (
         <Dialog>
           <DialogContent>
@@ -35,7 +32,7 @@ export const OrderActions = ({
                 <Button
                   onClick={() => onPayment('card')}
                   disabled={isProcessingPayment}
-                  className="flex-1"
+                  className="flex-1 justify-center"
                 >
                   <CreditCard className="w-5 h-5 mr-2" />
                   Card Payment
@@ -43,7 +40,7 @@ export const OrderActions = ({
                 <Button
                   onClick={() => onPayment('cash')}
                   disabled={isProcessingPayment}
-                  className="flex-1"
+                  className="flex-1 justify-center"
                 >
                   <Banknote className="w-5 h-5 mr-2" />
                   Cash Payment
@@ -53,16 +50,6 @@ export const OrderActions = ({
           </DialogContent>
         </Dialog>
       )}
-
-      <Button 
-        variant="outline" 
-        size="sm"
-        className="flex items-center gap-2"
-        onClick={() => navigate('/admin/waiter/menu')}
-      >
-        <Plus className="w-4 h-4" />
-        Add Items
-      </Button>
-    </div>
+    </>
   );
 };

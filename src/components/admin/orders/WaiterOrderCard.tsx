@@ -5,7 +5,8 @@ import { OrderItems } from './waiter/OrderItems';
 import { OrderActions } from './waiter/OrderActions';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { UtensilsCrossed } from "lucide-react";
+import { UtensilsCrossed, Plus } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 interface WaiterOrderCardProps {
   order: any;
@@ -22,6 +23,7 @@ export const WaiterOrderCard = ({
 }: WaiterOrderCardProps) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const calculateTotal = () => {
     console.log('Calculating total for order items:', order.order_items);
@@ -110,15 +112,25 @@ export const WaiterOrderCard = ({
           <span className="font-bold text-xl">${calculateTotal().toFixed(2)}</span>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3">
           {order.status === 'pending' && (
-            <Button 
-              className="flex-1 bg-orange-500 hover:bg-orange-600"
-              onClick={handleSendToKitchen}
-            >
-              <UtensilsCrossed className="w-4 h-4 mr-2" />
-              Send to Kitchen
-            </Button>
+            <>
+              <Button 
+                variant="outline"
+                className="w-full justify-center"
+                onClick={() => navigate('/admin/waiter/menu')}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Items
+              </Button>
+              <Button 
+                className="w-full justify-center bg-orange-500 hover:bg-orange-600"
+                onClick={handleSendToKitchen}
+              >
+                <UtensilsCrossed className="w-4 h-4 mr-2" />
+                Send to Kitchen
+              </Button>
+            </>
           )}
           
           <OrderActions
