@@ -51,14 +51,14 @@ serve(async (req) => {
       throw new Error('Invalid Stripe secret key format');
     }
 
-    // Store the key in Supabase secrets
-    const { error: secretError } = await supabaseClient.functions.setSecret(
-      'STRIPE_SECRET_KEY',
-      stripeKey
-    );
+    // Store the key in Supabase config table
+    const { error: configError } = await supabaseClient
+      .from('store_settings')
+      .update({ stripe_secret_key: stripeKey })
+      .eq('id', 1);  // Assuming there's only one settings record
 
-    if (secretError) {
-      console.error('Failed to update secret:', secretError);
+    if (configError) {
+      console.error('Failed to update config:', configError);
       throw new Error('Failed to update Stripe key');
     }
 
