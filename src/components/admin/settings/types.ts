@@ -11,6 +11,13 @@ export interface ServiceTimingFormData {
   clear_dessert_minutes: number;
 }
 
+export interface BillSplittingConfig {
+  enabled: boolean;
+  max_splits: number;
+  min_amount_per_split: number;
+  allow_uneven_splits: boolean;
+}
+
 export interface StoreSettingsResponse {
   id: string;
   service_timings: ServiceTimingFormData;
@@ -18,4 +25,5 @@ export interface StoreSettingsResponse {
   address: string;
   created_at?: string;
   updated_at?: string;
+  bill_splitting_config: BillSplittingConfig;
 }

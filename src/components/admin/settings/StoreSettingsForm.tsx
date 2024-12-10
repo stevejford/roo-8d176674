@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { BusinessInfoForm } from "./BusinessInfoForm";
 import { ServiceTimingForm } from "./ServiceTimingForm";
+import { BillSplittingForm } from "./BillSplittingForm";
 import { SettingsSectionHeader } from "./SettingsSectionHeader";
 import { Separator } from "@/components/ui/separator";
+import { BillSplittingConfig } from "./types";
 
 interface StoreSettingsFormData {
   store_name: string;
@@ -29,7 +31,7 @@ export const StoreSettingsForm = () => {
     },
   });
 
-  const mutation = useMutation({
+  const businessInfoMutation = useMutation({
     mutationFn: async (data: StoreSettingsFormData) => {
       const { error } = await supabase
         .from('store_settings')
@@ -57,6 +59,34 @@ export const StoreSettingsForm = () => {
     },
   });
 
+  const billSplittingMutation = useMutation({
+    mutationFn: async (data: BillSplittingConfig) => {
+      const { error } = await supabase
+        .from('store_settings')
+        .update({ 
+          bill_splitting_config: data 
+        })
+        .eq('id', settings?.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['store-settings'] });
+      toast({
+        title: "Settings updated",
+        description: "Bill splitting settings have been successfully updated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update bill splitting settings.",
+        variant: "destructive",
+      });
+      console.error('Error updating bill splitting settings:', error);
+    },
+  });
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -73,7 +103,7 @@ export const StoreSettingsForm = () => {
             store_name: settings?.store_name || '',
             address: settings?.address || '',
           }}
-          onSubmit={mutation.mutate}
+          onSubmit={businessInfoMutation.mutate}
         />
       </div>
 
@@ -85,6 +115,24 @@ export const StoreSettingsForm = () => {
           description="Configure timing thresholds for various service alerts and notifications."
         />
         <ServiceTimingForm />
+      </div>
+
+      <Separator />
+
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <SettingsSectionHeader
+          title="Bill Splitting Settings"
+          description="Configure how customers can split their bills."
+        />
+        <BillSplittingForm
+          defaultValues={settings?.bill_splitting_config || {
+            enabled: true,
+            max_splits: 4,
+            min_amount_per_split: 5.00,
+            allow_uneven_splits: true,
+          }}
+          onSubmit={billSplittingMutation.mutate}
+        />
       </div>
     </div>
   );

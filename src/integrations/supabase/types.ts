@@ -481,6 +481,7 @@ export type Database = {
       store_settings: {
         Row: {
           address: string
+          bill_splitting_config: Json | null
           created_at: string | null
           id: string
           service_timings: Json | null
@@ -489,6 +490,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          bill_splitting_config?: Json | null
           created_at?: string | null
           id?: string
           service_timings?: Json | null
@@ -497,6 +499,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          bill_splitting_config?: Json | null
           created_at?: string | null
           id?: string
           service_timings?: Json | null
