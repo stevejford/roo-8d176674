@@ -124,8 +124,8 @@ export const POSDashboard = () => {
         ))}
       </div>
       
-      <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen} className="w-full max-w-none">
-        <DialogContent className="max-w-none h-screen p-0">
+      <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <DialogContent className="w-full max-w-none h-screen p-0">
           <POSMenuBrowser 
             orderId={selectedOrderId}
             onOrderComplete={() => {
