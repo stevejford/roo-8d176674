@@ -67,8 +67,8 @@ serve(async (req) => {
       customer_email,
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/success`,
-      cancel_url: `${req.headers.get('origin')}/cancel`,
+      success_url: `${req.headers.get('origin')}/?payment_status=success`,
+      cancel_url: `${req.headers.get('origin')}/?payment_status=cancelled`,
     })
 
     console.log('Checkout session created:', session.id);

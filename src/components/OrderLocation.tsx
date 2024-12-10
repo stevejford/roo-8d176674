@@ -11,6 +11,7 @@ import { CheckoutButton } from "./order/CheckoutButton";
 import { useCartStore } from "@/stores/useCartStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "react-router-dom";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -29,6 +30,31 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
   const { items, clearCart } = useCartStore();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Check for payment status in URL
+    const paymentStatus = searchParams.get('payment_status');
+    if (paymentStatus === 'success') {
+      toast({
+        title: "Payment Successful",
+        description: "Thank you for your order!",
+        variant: "default"
+      });
+      // Remove the payment_status from URL without refreshing the page
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    } else if (paymentStatus === 'cancelled') {
+      toast({
+        title: "Payment Cancelled",
+        description: "Your payment was cancelled.",
+        variant: "destructive"
+      });
+      // Remove the payment_status from URL without refreshing the page
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams, toast]);
 
   useEffect(() => {
     const loadStoreData = async () => {
