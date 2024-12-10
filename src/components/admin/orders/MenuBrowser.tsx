@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { MenuProductCard } from './MenuProductCard';
+import { MenuCard } from '@/components/MenuCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -100,11 +100,13 @@ export const MenuBrowser = ({ onOrderComplete, selectedTable }: MenuBrowserProps
               <h3 className="text-xl font-semibold">{category.title}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {category.products?.map((product) => (
-                  <MenuProductCard
+                  <MenuCard
                     key={product.id}
-                    product={product}
-                    categoryId={category.id}
-                    onSelect={() => handleProductSelect(product)}
+                    title={product.title}
+                    price={product.price}
+                    description={product.description || ''}
+                    image={product.image_url || ''}
+                    onClick={() => handleProductSelect(product)}
                   />
                 ))}
               </div>
