@@ -6,6 +6,7 @@ import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { OrderCard } from './components/OrderCard';
+import { useOrderOperations } from '@/hooks/useOrderOperations';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,7 @@ export const POSDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const { toast } = useToast();
+  const { updateCustomerName, sendToKitchen } = useOrderOperations();
 
   const { data: orders, refetch } = useQuery({
     queryKey: ['pos-orders'],
@@ -131,6 +133,8 @@ export const POSDashboard = () => {
             onAddItems={handleAddItems}
             onPrintReceipt={handlePrintReceipt}
             onDelete={(orderId) => setOrderToDelete(orderId)}
+            onUpdateCustomerName={updateCustomerName}
+            onSendToKitchen={sendToKitchen}
           />
         ))}
       </div>
