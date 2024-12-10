@@ -20,7 +20,7 @@ export const WaiterDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: tables, refetch } = useQuery({
+  const { data: tables = [], refetch } = useQuery({
     queryKey: ['tables'],
     queryFn: async () => {
       // First, get all tables
