@@ -101,7 +101,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
   return (
     <div className="h-full flex flex-col bg-gray-50">
       <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="flex items-center justify-between p-2 sm:p-3">
+        <div className="flex items-center p-2 sm:p-3">
           <Button 
             variant="ghost" 
             size="sm"
@@ -112,7 +112,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
           </Button>
         </div>
         <ScrollArea className="pb-2 sm:pb-3">
-          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4 pb-2">
+          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4 pb-2 overflow-x-auto">
             <Button 
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
@@ -137,15 +137,15 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2 max-w-[calc(100vw-16px)]">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
               <Card 
                 key={product.id}
-                className="overflow-hidden hover:bg-gray-50 transition-colors"
+                className="overflow-hidden hover:bg-gray-50 transition-colors w-full"
               >
-                <div className="aspect-square">
+                <div className="aspect-square w-full">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
