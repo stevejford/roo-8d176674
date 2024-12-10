@@ -14,6 +14,7 @@ import { StoreHoursForm } from '@/components/admin/settings/StoreHoursForm';
 import { SettingsSectionHeader } from '@/components/admin/settings/SettingsSectionHeader';
 import { MenuPage } from '@/components/admin/orders/MenuPage';
 import { TableGrid } from '@/components/admin/tables/TableGrid';
+import { WaiterDashboard } from '@/components/admin/waiter/WaiterDashboard';
 import {
   Card,
   CardHeader,
@@ -176,7 +177,7 @@ const Admin = () => {
           <Routes>
             <Route index element={<Dashboard />} />
             <Route path="pos/*" element={<POSDashboard />} />
-            <Route path="waiter/*" element={<div>Waiter interface coming soon</div>} />
+            <Route path="waiter/*" element={<WaiterDashboard />} />
             <Route path="products/*" element={<Products />} />
             <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />

@@ -1,153 +1,116 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { MenuProductCard } from './MenuProductCard';
-import { X } from "lucide-react";
-import type { Database } from '@/integrations/supabase/types';
-
-type Tables = Database['public']['Tables'];
-type PricingStrategy = Tables['pricing_strategies']['Row'];
-type ProductPricingRow = Tables['product_pricing']['Row'];
-type ProductRow = Tables['products']['Row'];
-
-interface ProductPricing extends Omit<ProductPricingRow, 'pricing_strategies'> {
-  pricing_strategies: PricingStrategy;
-}
-
-interface Product extends Omit<ProductRow, 'product_pricing'> {
-  product_pricing?: ProductPricing[];
-}
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/components/ui/use-toast';
 
 interface MenuBrowserProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSelect: (product: Product) => void;
+  onOrderComplete?: () => void;
+  selectedTable?: any;
 }
 
-export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  const { data: categories, error: categoriesError } = useQuery({
+export const MenuBrowser = ({ onOrderComplete, selectedTable }: MenuBrowserProps) => {
+  const { toast } = useToast();
+  
+  const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('categories')
-        .select('*')
+        .select('*, products(*)')
         .order('position');
       
       if (error) throw error;
       return data;
-    },
+    }
   });
 
-  const { data: products, error: productsError } = useQuery({
-    queryKey: ['products-with-pricing'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select(`
-          *,
-          product_pricing (
-            *,
-            pricing_strategies (*)
-          )
-        `)
-        .eq('active', true)
-        .order('position');
-      
-      if (error) throw error;
-      return data as unknown as Product[];
-    },
-  });
+  const handleProductSelect = async (product: any) => {
+    if (!selectedTable) {
+      toast({
+        title: "No table selected",
+        description: "Please select a table first.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  const { data: categoryPricing, error: pricingError } = useQuery({
-    queryKey: ['category-pricing'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('category_pricing')
-        .select(`
-          *,
-          pricing_strategies (*)
-        `);
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+    try {
+      // Create a new order for the table
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          table_number: selectedTable.table_number,
+          status: 'pending',
+        })
+        .select()
+        .single();
 
-  if (categoriesError || productsError || pricingError) {
-    console.error('Errors:', { categoriesError, productsError, pricingError });
-  }
+      if (orderError) throw orderError;
 
-  const filteredProducts = selectedCategory
-    ? products?.filter(p => p.category_id === selectedCategory)
-    : products;
+      // Add the product to the order
+      const { error: itemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          product_id: product.id,
+          price: product.price,
+          quantity: 1
+        });
 
-  const handleProductSelect = (product: Product) => {
-    onSelect(product);
-    onClose();
+      if (itemError) throw itemError;
+
+      // Update table status
+      const { error: tableError } = await supabase
+        .from('tables')
+        .update({ status: 'occupied' })
+        .eq('id', selectedTable.id);
+
+      if (tableError) throw tableError;
+
+      toast({
+        title: "Order created",
+        description: `Order created for table ${selectedTable.table_number}`,
+      });
+
+      if (onOrderComplete) {
+        onOrderComplete();
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create order",
+        variant: "destructive"
+      });
+    }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-white z-50">
-      <div className="h-screen flex flex-col">
-        <div className="sticky top-0 z-10 bg-white border-b">
-          <div className="flex items-center justify-between p-4">
-            <h1 className="text-xl font-semibold">Add Items</h1>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onClose}
-              className="hover:bg-gray-100"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <ScrollArea className="pb-4">
-            <div className="flex gap-2 px-4">
-              <Button 
-                variant={selectedCategory === null ? "default" : "outline"}
-                onClick={() => setSelectedCategory(null)}
-                className="shrink-0"
-              >
-                All Items
-              </Button>
-              {categories?.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className="shrink-0"
-                >
-                  {category.title}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 p-4">
-            {filteredProducts?.map((product) => (
-              <MenuProductCard
-                key={product.id}
-                product={product}
-                categoryId={product.category_id || ''}
-                productPricing={product.product_pricing?.[0]}
-                categoryPricing={categoryPricing?.find(
-                  cp => cp.category_id === product.category_id
-                )}
-                onSelect={handleProductSelect}
-              />
-            ))}
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold tracking-tight">Menu</h2>
       </div>
+
+      <ScrollArea className="h-[600px]">
+        <div className="space-y-8">
+          {categories?.map((category) => (
+            <div key={category.id} className="space-y-4">
+              <h3 className="text-xl font-semibold">{category.title}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {category.products?.map((product) => (
+                  <MenuProductCard
+                    key={product.id}
+                    product={product}
+                    onSelect={() => handleProductSelect(product)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 };
