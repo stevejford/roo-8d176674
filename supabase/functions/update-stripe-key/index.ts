@@ -51,14 +51,38 @@ serve(async (req) => {
       throw new Error('Invalid Stripe secret key format');
     }
 
-    // Store the key in Supabase config table
-    const { error: configError } = await supabaseClient
+    // First, get the existing store settings record or create one if it doesn't exist
+    const { data: existingSettings, error: fetchError } = await supabaseClient
       .from('store_settings')
-      .update({ stripe_secret_key: stripeKey })
-      .eq('id', 1);  // Assuming there's only one settings record
+      .select('id')
+      .limit(1)
+      .single();
 
-    if (configError) {
-      console.error('Failed to update config:', configError);
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      console.error('Failed to fetch store settings:', fetchError);
+      throw new Error('Failed to fetch store settings');
+    }
+
+    let updateResult;
+    if (existingSettings) {
+      // Update existing record
+      updateResult = await supabaseClient
+        .from('store_settings')
+        .update({ stripe_secret_key: stripeKey })
+        .eq('id', existingSettings.id);
+    } else {
+      // Create new record with default values
+      updateResult = await supabaseClient
+        .from('store_settings')
+        .insert({
+          store_name: 'Default Store Name',
+          address: 'Default Address',
+          stripe_secret_key: stripeKey
+        });
+    }
+
+    if (updateResult.error) {
+      console.error('Failed to update config:', updateResult.error);
       throw new Error('Failed to update Stripe key');
     }
 
