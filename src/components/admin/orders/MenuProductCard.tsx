@@ -39,23 +39,55 @@ export const MenuProductCard = ({
   const [quantity, setQuantity] = useState(0);
   
   const calculatePrice = () => {
+    console.log('Calculating price for:', product.title);
+    console.log('Product pricing:', productPricing);
+    console.log('Category pricing:', categoryPricing);
+    
+    // First check for product-specific pricing override
     if (productPricing?.is_override) {
+      const strategy = productPricing.pricing_strategies;
       const config = productPricing.config as PricingConfig;
-      const calculatedPrice = config.price || product.price || 0;
-      return calculatedPrice;
+
+      switch (strategy?.type) {
+        case 'simple':
+          return config.price || product.price || 0;
+        case 'size_based':
+          return config.sizes?.[0]?.price || product.price || 0;
+        case 'portion_based':
+          return config.portions?.[0]?.price || product.price || 0;
+        case 'selection_based':
+          return config.options?.[0]?.price || product.price || 0;
+        case 'volume_based':
+          return config.volumes?.[0]?.price || product.price || 0;
+        default:
+          return product.price || 0;
+      }
     }
 
+    // Use category pricing if available
     if (categoryPricing?.pricing_strategies) {
+      const strategy = categoryPricing.pricing_strategies;
       const config = categoryPricing.config as PricingConfig;
-      const calculatedPrice = config.price || product.price || 0;
-      return calculatedPrice;
+
+      switch (strategy.type) {
+        case 'simple':
+          return config.price || product.price || 0;
+        case 'size_based':
+          return config.sizes?.[0]?.price || product.price || 0;
+        case 'portion_based':
+          return config.portions?.[0]?.price || product.price || 0;
+        case 'selection_based':
+          return config.options?.[0]?.price || product.price || 0;
+        case 'volume_based':
+          return config.volumes?.[0]?.price || product.price || 0;
+        default:
+          return product.price || 0;
+      }
     }
 
-    const defaultPrice = product.price || 0;
-    return defaultPrice;
+    // Fallback to product's default price
+    return product.price || 0;
   };
-
-  const price = calculatePrice();
 
   const handleQuantityChange = (increment: boolean) => {
     const newQuantity = increment ? quantity + 1 : Math.max(0, quantity - 1);
@@ -64,11 +96,14 @@ export const MenuProductCard = ({
     if (increment && newQuantity === 1) {
       const productWithPrice = {
         ...product,
-        price
+        price: calculatePrice()
       };
       onSelect(productWithPrice);
     }
   };
+
+  const price = calculatePrice();
+  console.log('Final calculated price:', price);
 
   return (
     <Card className="p-2 flex flex-col gap-2">
@@ -82,7 +117,7 @@ export const MenuProductCard = ({
         )}
         <div className="flex-1 min-w-0">
           <h3 className="font-medium text-sm truncate">{product.title}</h3>
-          <p className="text-sm text-gray-500">${price?.toFixed(2)}</p>
+          <p className="text-sm text-gray-500">${price.toFixed(2)}</p>
         </div>
       </div>
       
