@@ -137,14 +137,14 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
         </ScrollArea>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-1">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-0.5">
+      <div className="flex-1 overflow-y-auto p-0">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-0">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
               <Card 
                 key={product.id}
-                className="overflow-hidden hover:bg-gray-50 transition-colors w-[120px]"
+                className="overflow-hidden hover:bg-gray-50 transition-colors w-[120px] rounded-none border-0"
               >
                 <div className="w-[120px] h-[120px] flex items-center justify-center">
                   <img
