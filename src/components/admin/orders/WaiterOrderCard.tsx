@@ -3,7 +3,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { OrderCardContent } from './waiter/OrderCardContent';
-import { OrderDeleteDialog } from './waiter/OrderDeleteDialog';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
@@ -22,7 +21,6 @@ export const WaiterOrderCard = ({
   isNew = false 
 }: WaiterOrderCardProps) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -84,7 +82,8 @@ export const WaiterOrderCard = ({
     }
   };
 
-  const handleDeleteOrder = async () => {
+  const handleDeleteOrder = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       const { error } = await supabase
         .from('orders')
@@ -104,7 +103,6 @@ export const WaiterOrderCard = ({
         description: "The order has been successfully deleted",
       });
 
-      setShowDeleteDialog(false);
       onUpdateStatus(order.id, 'cancelled');
     } catch (error: any) {
       console.error('Deletion process failed:', error);
@@ -117,15 +115,7 @@ export const WaiterOrderCard = ({
   };
 
   const handleCardClick = () => {
-    if (!showDeleteDialog) {
-      navigate(`/admin/waiter/order/${order.id}`);
-    }
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowDeleteDialog(true);
+    navigate(`/admin/waiter/order/${order.id}`);
   };
 
   const handleAddItems = (e: React.MouseEvent) => {
@@ -145,15 +135,9 @@ export const WaiterOrderCard = ({
         statusColors={statusColors}
         onSendToKitchen={handleSendToKitchen}
         onAddItems={handleAddItems}
-        onDeleteClick={handleDeleteClick}
+        onDeleteClick={handleDeleteOrder}
         onPayment={handlePayment}
         isProcessingPayment={isProcessingPayment}
-      />
-
-      <OrderDeleteDialog
-        isOpen={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={handleDeleteOrder}
       />
     </div>
   );
