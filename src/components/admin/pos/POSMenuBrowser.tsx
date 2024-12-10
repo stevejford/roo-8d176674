@@ -146,7 +146,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 key={product.id}
                 className="overflow-hidden hover:bg-gray-50 transition-colors w-[120px]"
               >
-                <div className="aspect-square w-16">
+                <div className="w-[120px] h-[120px] flex items-center justify-center">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
