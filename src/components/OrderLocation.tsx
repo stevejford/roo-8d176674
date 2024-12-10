@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ComplementaryItems } from "./ComplementaryItems";
-import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
-import { PickupTimeModal } from "./PickupTimeModal";
-import { OrderHeader } from "./order/OrderHeader";
-import { LocationInfo } from "./order/LocationInfo";
-import { OrderItems } from "./order/OrderItems";
-import { CheckoutButton } from "./order/CheckoutButton";
 import { useCartStore } from "@/stores/useCartStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
 import { useVoucherValidation } from "@/hooks/useVoucherValidation";
+import { OrderContent } from "./order/OrderContent";
+import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -62,14 +57,15 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
             price: item.price,
             quantity: item.quantity,
           })),
-          voucher: validVoucher // Pass voucher information to the checkout function
+          voucher: validVoucher
         }
       });
 
       if (checkoutError) throw checkoutError;
 
       if (checkoutData?.url) {
-        window.location.href = checkoutData.url;
+        // Open Stripe checkout in a new tab
+        window.open(checkoutData.url, '_blank');
         clearCart();
       } else {
         throw new Error('No checkout URL received');
@@ -155,59 +151,24 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   };
 
   const content = (
-    <div className="h-full flex flex-col bg-white">
-      <div className="flex-1 overflow-auto">
-        <div className="p-6 space-y-6">
-          <OrderHeader mode={mode} setMode={() => {}} />
-          
-          <LocationInfo 
-            storeName={storeName}
-            storeAddress={storeAddress}
-            selectedTime={selectedTime}
-            onTimeChange={() => setShowTimeModal(true)}
-          />
-
-          <OrderItems />
-
-          <div className="pt-4">
-            <ComplementaryItems />
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-auto p-6">
-        {validVoucher && (
-          <div className="mb-2 text-sm">
-            <div className="flex justify-between text-gray-600">
-              <span>Subtotal:</span>
-              <span>${items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-green-600 font-medium">
-              <span>Discount ({validVoucher.discount_type === 'percentage' ? `${validVoucher.discount_value}%` : `$${validVoucher.discount_value}`}):</span>
-              <span>-${(items.reduce((sum, item) => sum + (item.price * item.quantity), 0) - calculateTotal()).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-semibold mt-1 text-base border-t pt-1">
-              <span>Total:</span>
-              <span>${calculateTotal().toFixed(2)}</span>
-            </div>
-          </div>
-        )}
-        <CheckoutButton
-          isStoreCurrentlyOpen={isStoreCurrentlyOpen}
-          isCheckingStoreHours={isCheckingStoreHours}
-          isProcessing={isProcessing}
-          itemCount={items.length}
-          total={calculateTotal()}
-          onCheckout={handleCheckout}
-        />
-      </div>
-
-      <PickupTimeModal
-        isOpen={showTimeModal}
-        onClose={() => setShowTimeModal(false)}
-        onSchedule={handleScheduleTime}
-      />
-    </div>
+    <OrderContent
+      mode={mode}
+      storeName={storeName}
+      storeAddress={storeAddress}
+      selectedTime={selectedTime}
+      isStoreCurrentlyOpen={isStoreCurrentlyOpen}
+      isCheckingStoreHours={isCheckingStoreHours}
+      isProcessing={isProcessing}
+      itemCount={items.length}
+      total={calculateTotal()}
+      validVoucher={validVoucher}
+      calculateTotal={calculateTotal}
+      onTimeChange={() => setShowTimeModal(true)}
+      onCheckout={handleCheckout}
+      showTimeModal={showTimeModal}
+      onCloseTimeModal={() => setShowTimeModal(false)}
+      onScheduleTime={handleScheduleTime}
+    />
   );
 
   if (isMobile) {
