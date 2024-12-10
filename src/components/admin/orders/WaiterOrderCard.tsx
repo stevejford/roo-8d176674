@@ -94,7 +94,10 @@ export const WaiterOrderCard = ({
         })
         .eq('id', order.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
 
       toast({
         title: "Order Deleted",
