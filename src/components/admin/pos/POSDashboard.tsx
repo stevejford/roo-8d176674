@@ -7,6 +7,7 @@ import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { OrderCard } from './components/OrderCard';
+import { useOrderOperations } from '@/hooks/useOrderOperations';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ export const POSDashboard = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const { toast } = useToast();
+  const { deleteOrder, updateCustomerName, sendToKitchen } = useOrderOperations();
 
   const { data: orders, refetch } = useQuery({
     queryKey: ['pos-orders'],
@@ -37,7 +39,6 @@ export const POSDashboard = () => {
           )
         `)
         .eq('status', 'pending')
-        .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -45,69 +46,22 @@ export const POSDashboard = () => {
     },
   });
 
-  const handleUpdateCustomerName = async (orderId: string, name: string) => {
-    const { error } = await supabase
-      .from('orders')
-      .update({ customer_name: name })
-      .eq('id', orderId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update customer name",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleSendToKitchen = async (orderId: string) => {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: 'preparing' })
-      .eq('id', orderId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send order to kitchen",
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "Order sent to kitchen",
-      });
-      refetch();
-    }
-  };
-
   const handleDeleteOrder = async (orderId: string) => {
-    console.log('Attempting to delete order:', orderId);
-    
-    // Soft delete by setting deleted_at timestamp
-    const { error: orderError } = await supabase
-      .from('orders')
-      .update({ 
-        deleted_at: new Date().toISOString(),
-        status: 'cancelled'
-      })
-      .eq('id', orderId);
-
-    if (orderError) {
-      console.error('Error deleting order:', orderError);
-      toast({
-        title: "Error",
-        description: "Failed to delete order",
-        variant: "destructive"
-      });
-    } else {
-      console.log('Order successfully deleted:', orderId);
+    try {
+      await deleteOrder(orderId);
       toast({
         title: "Success",
         description: "Order deleted successfully",
       });
       setOrderToDelete(null);
       refetch();
+    } catch (error: any) {
+      console.error('Error deleting order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete order",
+        variant: "destructive"
+      });
     }
   };
 
@@ -158,9 +112,9 @@ export const POSDashboard = () => {
           <OrderCard
             key={order.id}
             order={order}
-            onUpdateCustomerName={handleUpdateCustomerName}
+            onUpdateCustomerName={updateCustomerName}
             onAddItems={handleAddItems}
-            onSendToKitchen={handleSendToKitchen}
+            onSendToKitchen={sendToKitchen}
             onPrintReceipt={handlePrintReceipt}
             onDelete={(orderId) => {
               console.log('Delete button clicked for order:', orderId);
@@ -187,7 +141,7 @@ export const POSDashboard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will delete the order. This action cannot be undone.
+              This action will permanently delete the order and its items. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
