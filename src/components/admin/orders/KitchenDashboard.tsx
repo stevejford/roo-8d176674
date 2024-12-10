@@ -99,14 +99,16 @@ export const KitchenDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="p-8 space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Kitchen Orders</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <KitchenOrderSkeleton />
-          <KitchenOrderSkeleton />
-          <KitchenOrderSkeleton />
+        <div className="border rounded-lg p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <KitchenOrderSkeleton />
+            <KitchenOrderSkeleton />
+            <KitchenOrderSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -114,29 +116,38 @@ export const KitchenDashboard = () => {
 
   if (!orders?.length) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4 text-gray-500">
-        <UtensilsCrossed className="w-12 h-12" />
-        <h3 className="text-xl font-semibold">No Orders to Prepare</h3>
-        <p>When new orders come in, they will appear here.</p>
+      <div className="p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Kitchen Orders</h2>
+        </div>
+        <div className="border rounded-lg p-6">
+          <div className="flex flex-col items-center justify-center h-64 space-y-4 text-gray-500">
+            <UtensilsCrossed className="w-12 h-12" />
+            <h3 className="text-xl font-semibold">No Orders to Prepare</h3>
+            <p>When new orders come in, they will appear here.</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="p-8 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Kitchen Orders</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {orders?.map((order) => (
-          <KitchenOrderCard
-            key={order.id}
-            order={order}
-            onUpdateStatus={updateOrderStatus}
-            statusColors={statusColors}
-          />
-        ))}
+      <div className="border rounded-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {orders?.map((order) => (
+            <KitchenOrderCard
+              key={order.id}
+              order={order}
+              onUpdateStatus={updateOrderStatus}
+              statusColors={statusColors}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
