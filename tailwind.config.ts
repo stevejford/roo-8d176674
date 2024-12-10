@@ -18,6 +18,50 @@ export default {
       },
     },
     extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        'primary-title': '#2D3648',
+        primary: {
+          DEFAULT: "#10B981",
+          foreground: "#FFFFFF",
+        },
+        secondary: {
+          DEFAULT: "#6B7280",
+          foreground: "#FFFFFF",
+        },
+        destructive: {
+          DEFAULT: "#EF4444",
+          foreground: "#FFFFFF",
+        },
+        muted: {
+          DEFAULT: "#F3F4F6",
+          foreground: "#6B7280",
+        },
+        accent: {
+          DEFAULT: "#F9FAFB",
+          foreground: "#111827",
+        },
+        card: {
+          DEFAULT: "#FFFFFF",
+          foreground: "#111827",
+        },
+        'neutral-525': '#666666',
+        'neutral-200': '#CCCCCC',
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
+      },
       fontFamily: {
         inter: ['Inter', 'Arial', 'sans-serif'],
       },
@@ -60,40 +104,6 @@ export default {
       },
       boxShadow: {
         'cw-second': '0 2px 8px rgba(0, 0, 0, 0.08)',
-      },
-      colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        'primary-title': '#2D3648',
-        primary: {
-          DEFAULT: "#10B981",
-          foreground: "#FFFFFF",
-        },
-        secondary: {
-          DEFAULT: "#6B7280",
-          foreground: "#FFFFFF",
-        },
-        destructive: {
-          DEFAULT: "#EF4444",
-          foreground: "#FFFFFF",
-        },
-        muted: {
-          DEFAULT: "#F3F4F6",
-          foreground: "#6B7280",
-        },
-        accent: {
-          DEFAULT: "#F9FAFB",
-          foreground: "#111827",
-        },
-        card: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#111827",
-        },
-        'neutral-525': '#666666',
-        'neutral-200': '#CCCCCC',
       },
       strokeWidth: {
         '3': '3',
