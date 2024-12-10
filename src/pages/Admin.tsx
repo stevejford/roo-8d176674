@@ -20,7 +20,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 const Dashboard = () => (
-  <div className="space-y-6 p-8">
+  <div className="p-6">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>
         <CardHeader>
@@ -54,14 +54,14 @@ const Dashboard = () => (
 );
 
 const Products = () => (
-  <div className="space-y-6">
+  <div className="p-6">
     <ProductList />
   </div>
 );
 
 const Orders = () => (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
+  <div className="p-6">
+    <div className="flex justify-between items-center mb-6">
       <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
     </div>
     <OrderList />
@@ -69,31 +69,33 @@ const Orders = () => (
 );
 
 const UsersManagement = () => (
-  <div className="space-y-6">
+  <div className="p-6">
     <UserManagement />
   </div>
 );
 
 const Analytics = () => (
-  <div>Analytics dashboard coming soon</div>
+  <div className="p-6">Analytics dashboard coming soon</div>
 );
 
 const SettingsPanel = () => (
-  <div className="space-y-8">
-    <div>
-      <SettingsSectionHeader
-        title="Business Information"
-        description="Manage your restaurant's basic information and contact details"
-      />
-      <StoreSettingsForm />
-    </div>
-    
-    <div>
-      <SettingsSectionHeader
-        title="Operating Hours"
-        description="Set your restaurant's opening and closing hours for each day of the week"
-      />
-      <StoreHoursForm />
+  <div className="p-6">
+    <div className="space-y-8">
+      <div>
+        <SettingsSectionHeader
+          title="Business Information"
+          description="Manage your restaurant's basic information and contact details"
+        />
+        <StoreSettingsForm />
+      </div>
+      
+      <div>
+        <SettingsSectionHeader
+          title="Operating Hours"
+          description="Set your restaurant's opening and closing hours for each day of the week"
+        />
+        <StoreHoursForm />
+      </div>
     </div>
   </div>
 );
@@ -108,31 +110,29 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar isAdmin={isAdmin} onCategoryClick={() => {}} onSignOut={handleSignOut} />
       
       <div className="pt-16">
         <SidebarProvider defaultOpen>
           <AdminSidebar />
-          <SidebarInset className="xl:pl-64">
+          <SidebarInset>
             <div className="flex items-center p-4 border-b lg:hidden">
               <SidebarTrigger />
             </div>
-            <div className="h-[calc(100vh-4rem)]">
-              <Routes>
-                <Route index element={<Dashboard />} />
-                <Route path="pos/*" element={<POSDashboard />} />
-                <Route path="waiter/*" element={<WaiterDashboard />} />
-                <Route path="products/*" element={<Products />} />
-                <Route path="pricing/*" element={<PricingModelList />} />
-                <Route path="orders/*" element={<Orders />} />
-                <Route path="kitchen/*" element={<KitchenDashboard />} />
-                <Route path="tables/*" element={<TableGrid />} />
-                <Route path="users/*" element={<UsersManagement />} />
-                <Route path="analytics/*" element={<Analytics />} />
-                <Route path="settings/*" element={<SettingsPanel />} />
-              </Routes>
-            </div>
+            <Routes>
+              <Route index element={<Dashboard />} />
+              <Route path="pos/*" element={<POSDashboard />} />
+              <Route path="waiter/*" element={<WaiterDashboard />} />
+              <Route path="products/*" element={<Products />} />
+              <Route path="pricing/*" element={<PricingModelList />} />
+              <Route path="orders/*" element={<Orders />} />
+              <Route path="kitchen/*" element={<KitchenDashboard />} />
+              <Route path="tables/*" element={<TableGrid />} />
+              <Route path="users/*" element={<UsersManagement />} />
+              <Route path="analytics/*" element={<Analytics />} />
+              <Route path="settings/*" element={<SettingsPanel />} />
+            </Routes>
           </SidebarInset>
         </SidebarProvider>
       </div>

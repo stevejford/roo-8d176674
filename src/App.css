@@ -33,19 +33,3 @@
     animation: logo-spin infinite 20s linear;
   }
 }
-
-/* Layout styles */
-.main-content {
-  width: 100%;
-  min-height: 100vh;
-}
-
-.sidebar-content {
-  margin-left: var(--sidebar-width);
-}
-
-@media (max-width: 1024px) {
-  .sidebar-content {
-    margin-left: 0;
-  }
-}
