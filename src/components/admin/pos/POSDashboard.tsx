@@ -55,18 +55,8 @@ export const POSDashboard = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-100 p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Point of Sale</h1>
-        <Button onClick={() => setIsMenuOpen(true)} size="lg">
-          <Plus className="mr-2 h-5 w-5" />
-          Quick Add Item
-        </Button>
-      </div>
-
-      <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <POSMenuBrowser onSelect={handleAddItem} />
-      </Dialog>
+    <div className="h-screen">
+      <POSMenuBrowser onSelect={handleAddItem} />
     </div>
   );
 };

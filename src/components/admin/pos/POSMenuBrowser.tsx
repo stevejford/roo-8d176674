@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface POSMenuBrowserProps {
   onSelect: (product: any) => void;
@@ -82,102 +81,93 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
   };
 
   return (
-    <DialogContent className="max-w-6xl max-h-[90vh] p-0">
-      <DialogHeader className="p-3">
-        <DialogTitle>Select Items</DialogTitle>
-      </DialogHeader>
-
-      <div className="flex flex-col h-full">
-        {/* Categories */}
-        <div className="relative px-3">
-          <ScrollArea className="w-full">
-            <div className="flex gap-1.5 pb-3">
-              <Button 
-                variant={selectedCategory === null ? "default" : "outline"}
-                onClick={() => setSelectedCategory(null)}
-                className="shrink-0 h-8 px-3 text-sm"
-              >
-                All Items
-              </Button>
-              {categories?.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className="shrink-0 h-8 px-3 text-sm"
-                >
-                  {category.title}
-                </Button>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Header with category filters */}
+      <div className="p-4 bg-white border-b">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button 
+            variant={selectedCategory === null ? "default" : "outline"}
+            onClick={() => setSelectedCategory(null)}
+            className="shrink-0 h-8 px-3 text-sm"
+          >
+            All Items
+          </Button>
+          {categories?.map((category) => (
+            <Button
+              key={category.id}
+              variant={selectedCategory === category.id ? "default" : "outline"}
+              onClick={() => setSelectedCategory(category.id)}
+              className="shrink-0 h-8 px-3 text-sm"
+            >
+              {category.title}
+            </Button>
+          ))}
         </div>
+      </div>
 
-        {/* Products Grid */}
-        <ScrollArea className="flex-1 p-3">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {products?.map((product) => {
-              const price = calculatePrice(product);
-              const quantity = quantities[product.id] || 0;
-              return (
-                <Card 
-                  key={product.id}
-                  className="overflow-hidden cursor-pointer hover:bg-gray-50 transition-colors"
-                >
-                  <div className="relative pb-[80%]">
-                    <img
-                      src={product.image_url || '/placeholder.svg'}
-                      alt={product.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-2">
-                    <h3 className="font-medium text-xs truncate">{product.title}</h3>
-                    <p className="text-xs text-gray-500">
-                      ${price.toFixed(2)}
-                    </p>
-                    <div className="flex items-center justify-between mt-1 gap-1">
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-6 w-6"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleQuantityChange(product.id, -1);
-                          }}
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="text-xs w-4 text-center">{quantity}</span>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-6 w-6"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleQuantityChange(product.id, 1);
-                          }}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
+      {/* Products Grid */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+          {products?.map((product) => {
+            const price = calculatePrice(product);
+            const quantity = quantities[product.id] || 0;
+            return (
+              <Card 
+                key={product.id}
+                className="overflow-hidden hover:bg-gray-50 transition-colors"
+              >
+                <div className="relative pb-[60%]">
+                  <img
+                    src={product.image_url || '/placeholder.svg'}
+                    alt={product.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-1.5">
+                  <h3 className="font-medium text-xs truncate">{product.title}</h3>
+                  <p className="text-xs text-gray-500">
+                    ${price.toFixed(2)}
+                  </p>
+                  <div className="flex items-center justify-between mt-1 gap-1">
+                    <div className="flex items-center gap-1">
                       <Button
-                        size="sm"
-                        className="h-6 text-xs px-2"
-                        onClick={() => handleAddToOrder(product)}
+                        size="icon"
+                        variant="outline"
+                        className="h-5 w-5"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQuantityChange(product.id, -1);
+                        }}
                       >
-                        Add
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <span className="text-xs w-4 text-center">{quantity}</span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-5 w-5"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQuantityChange(product.id, 1);
+                        }}
+                      >
+                        <Plus className="h-3 w-3" />
                       </Button>
                     </div>
+                    <Button
+                      size="sm"
+                      className="h-5 text-xs px-2"
+                      onClick={() => handleAddToOrder(product)}
+                    >
+                      Add
+                    </Button>
                   </div>
-                </Card>
-              );
-            })}
-          </div>
-        </ScrollArea>
-      </div>
-    </DialogContent>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
   );
 };
