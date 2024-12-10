@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TableCard } from '@/components/TableCard';
+import { TableCard } from '@/components/admin/orders/TableCard';
 import { MenuBrowser } from '@/components/admin/orders/MenuBrowser';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
@@ -20,7 +20,7 @@ export const WaiterDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: tables = [], refetch } = useQuery<Table[]>({
+  const { data: tables, refetch } = useQuery({
     queryKey: ['tables'],
     queryFn: async () => {
       // First, get all tables
@@ -28,26 +28,15 @@ export const WaiterDashboard = () => {
         .from('tables')
         .select('*');
       
-      if (tablesError) {
-        console.error('Error fetching tables:', tablesError);
-        throw tablesError;
-      }
+      if (tablesError) throw tablesError;
       
-      if (!tablesData) {
-        return [];
-      }
-
       // Then, get active orders to determine table status and customer info
-      const { data: orders, error: ordersError } = await supabase
+      const { data: orders } = await supabase
         .from('orders')
         .select('*')
         .not('table_number', 'is', null)
         .in('status', ['pending', 'confirmed', 'preparing', 'ready', 'delivered'])
         .order('created_at', { ascending: false });
-
-      if (ordersError) {
-        console.error('Error fetching orders:', ordersError);
-      }
 
       // Transform the data to include customer information
       return tablesData.map((table): Table => {
@@ -61,8 +50,7 @@ export const WaiterDashboard = () => {
           order_status: activeOrder?.status,
         };
       });
-    },
-    initialData: [] // Provide initial empty array
+    }
   });
 
   const handleTableClick = (table: Table) => {
@@ -83,7 +71,7 @@ export const WaiterDashboard = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {Array.isArray(tables) && tables.map((table) => (
+        {tables?.map((table) => (
           <TableCard
             key={table.id}
             table={table}
