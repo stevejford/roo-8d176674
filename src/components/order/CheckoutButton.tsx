@@ -20,6 +20,7 @@ export const CheckoutButton = ({
   onCheckout
 }: CheckoutButtonProps) => {
   const { toast } = useToast();
+  const isPreOrder = !isStoreCurrentlyOpen;
 
   const handleClick = () => {
     if (!isStoreCurrentlyOpen) {
@@ -45,22 +46,20 @@ export const CheckoutButton = ({
     );
   }
 
-  const isPreOrder = !isStoreCurrentlyOpen;
-
   return (
     <button
       className={`w-full ${
         isPreOrder 
           ? 'bg-[#F97316] hover:bg-[#F97316]/90' 
           : 'bg-emerald-600 hover:bg-emerald-700'
-      } text-white py-4 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors`}
+      } text-white py-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
       onClick={handleClick}
       disabled={itemCount === 0 || isProcessing}
     >
       {isProcessing ? (
         <>
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          Processing...
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span>Processing...</span>
         </>
       ) : isPreOrder ? (
         <>
