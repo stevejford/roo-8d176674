@@ -35,8 +35,8 @@ export const ServiceTimingForm = () => {
       
       return {
         ...data,
-        service_timings: data.service_timings as ServiceTimingFormData,
-        bill_splitting_config: data.bill_splitting_config as StoreSettingsResponse['bill_splitting_config']
+        service_timings: data.service_timings as unknown as ServiceTimingFormData,
+        bill_splitting_config: data.bill_splitting_config as unknown as StoreSettingsResponse['bill_splitting_config']
       } as StoreSettingsResponse;
     },
   });
@@ -49,7 +49,9 @@ export const ServiceTimingForm = () => {
     mutationFn: async (data: ServiceTimingFormData) => {
       const { error } = await supabase
         .from('store_settings')
-        .update({ service_timings: data })
+        .update({ 
+          service_timings: data as unknown as any 
+        })
         .eq('id', settings?.id);
 
       if (error) throw error;

@@ -29,7 +29,7 @@ export const StoreSettingsForm = () => {
       if (error) throw error;
       return {
         ...data,
-        bill_splitting_config: data.bill_splitting_config as BillSplittingConfig
+        bill_splitting_config: data.bill_splitting_config as unknown as BillSplittingConfig
       };
     },
   });
@@ -67,7 +67,7 @@ export const StoreSettingsForm = () => {
       const { error } = await supabase
         .from('store_settings')
         .update({ 
-          bill_splitting_config: data as any // Type assertion needed due to Supabase's Json type
+          bill_splitting_config: data as unknown as any
         })
         .eq('id', settings?.id);
 
