@@ -2,16 +2,27 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Send, Printer } from "lucide-react";
+import { Plus, Send, Printer, Trash2 } from "lucide-react";
 import { POSMenuBrowser } from './POSMenuBrowser';
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const POSDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const { toast } = useToast();
 
   const { data: orders, refetch } = useQuery({
@@ -52,7 +63,7 @@ export const POSDashboard = () => {
   const handleSendToKitchen = async (orderId: string) => {
     const { error } = await supabase
       .from('orders')
-      .update({ status: 'in_progress' })
+      .update({ status: 'preparing' })
       .eq('id', orderId);
 
     if (error) {
@@ -66,6 +77,31 @@ export const POSDashboard = () => {
         title: "Success",
         description: "Order sent to kitchen",
       });
+      refetch();
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        deleted_at: new Date().toISOString(),
+        status: 'cancelled'
+      })
+      .eq('id', orderId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete order",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Order deleted successfully",
+      });
+      setOrderToDelete(null);
       refetch();
     }
   };
@@ -171,11 +207,12 @@ export const POSDashboard = () => {
               </Button>
 
               <Button 
-                variant="secondary"
+                variant="destructive"
                 className="w-full"
-                onClick={handleStartNewOrder}
+                onClick={() => setOrderToDelete(order.id)}
               >
-                Start New Order
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Order
               </Button>
             </div>
           </Card>
@@ -193,6 +230,26 @@ export const POSDashboard = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will delete the order. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => orderToDelete && handleDeleteOrder(orderToDelete)}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
