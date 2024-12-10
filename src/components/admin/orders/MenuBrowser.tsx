@@ -107,9 +107,9 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-full w-full h-screen max-h-screen p-0 m-0 rounded-none">
+      <DialogContent className="max-w-full w-full h-[90vh] max-h-[90vh] p-0 m-0">
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b">
+          <div className="p-4 border-b bg-white sticky top-0 z-10">
             <ScrollArea className="w-full">
               <div className="flex space-x-2 pb-2">
                 <Button 
@@ -133,7 +133,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
             </ScrollArea>
           </div>
 
-          <ScrollArea className="flex-1 p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
               {filteredProducts?.map((product) => (
                 <MenuProductCard
@@ -148,7 +148,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
                 />
               ))}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
