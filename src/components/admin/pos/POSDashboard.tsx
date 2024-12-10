@@ -37,6 +37,7 @@ export const POSDashboard = () => {
           )
         `)
         .eq('status', 'pending')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -83,26 +84,13 @@ export const POSDashboard = () => {
   const handleDeleteOrder = async (orderId: string) => {
     console.log('Attempting to delete order:', orderId);
     
-    // First, delete related order items
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .delete()
-      .eq('order_id', orderId);
-
-    if (itemsError) {
-      console.error('Error deleting order items:', itemsError);
-      toast({
-        title: "Error",
-        description: "Failed to delete order items",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Then delete the order itself
+    // Soft delete by setting deleted_at timestamp
     const { error: orderError } = await supabase
       .from('orders')
-      .delete()
+      .update({ 
+        deleted_at: new Date().toISOString(),
+        status: 'cancelled'
+      })
       .eq('id', orderId);
 
     if (orderError) {
@@ -199,7 +187,7 @@ export const POSDashboard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will permanently delete the order and all its items. This action cannot be undone.
+              This action will delete the order. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
