@@ -12,6 +12,15 @@ export const StripeConfigForm = () => {
   const { toast } = useToast();
 
   const handleSave = async () => {
+    if (!stripeKey) {
+      toast({
+        title: "Error",
+        description: "Please enter a Stripe key",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       const { error } = await supabase.functions.invoke('update-stripe-key', {

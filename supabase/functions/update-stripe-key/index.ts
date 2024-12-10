@@ -24,6 +24,7 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
     if (userError || !user) {
+      console.error('Authentication error:', userError);
       throw new Error('Unauthorized');
     }
 
@@ -35,6 +36,7 @@ serve(async (req) => {
       .single();
 
     if (profileError || profile?.role !== 'admin') {
+      console.error('Authorization error:', profileError);
       throw new Error('Unauthorized - Admin access required');
     }
 
@@ -61,6 +63,7 @@ serve(async (req) => {
     );
 
     if (!response.ok) {
+      console.error('Failed to update secret:', await response.text());
       throw new Error('Failed to update Stripe key');
     }
 
