@@ -18,6 +18,7 @@ import { WaiterDashboard } from '@/components/admin/waiter/WaiterDashboard';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { AnalyticsDashboard } from '@/components/admin/analytics/AnalyticsDashboard';
 
 const Dashboard = () => (
   <div className="p-8">
@@ -75,7 +76,7 @@ const UsersManagement = () => (
 );
 
 const Analytics = () => (
-  <div className="p-8">Analytics dashboard coming soon</div>
+  <AnalyticsDashboard />
 );
 
 const SettingsPanel = () => (
