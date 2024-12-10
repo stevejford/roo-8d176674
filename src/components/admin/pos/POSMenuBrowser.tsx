@@ -144,9 +144,9 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             return (
               <Card 
                 key={product.id}
-                className="overflow-hidden hover:bg-gray-50 transition-colors w-[120px] rounded-none border-0 m-0"
+                className="overflow-hidden hover:bg-gray-50 transition-colors rounded-none border-0"
               >
-                <div className="w-[120px] h-[120px] flex items-center justify-center">
+                <div className="aspect-square flex items-center justify-center">
                   <img
                     src={product.image_url || '/placeholder.svg'}
                     alt={product.title}
