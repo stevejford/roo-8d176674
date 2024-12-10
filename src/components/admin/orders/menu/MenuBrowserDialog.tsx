@@ -10,6 +10,7 @@ export const MenuBrowserDialog = ({ onSelectItem }: MenuBrowserDialogProps) => {
     <div className="h-screen">
       <MenuBrowser 
         onOrderComplete={() => onSelectItem}
+        selectedTable={null}
       />
     </div>
   );

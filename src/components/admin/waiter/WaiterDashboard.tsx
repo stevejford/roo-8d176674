@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TableCard } from '@/components/admin/orders/TableCard';
+import { TableCard } from '@/components/TableCard';
 import { MenuBrowser } from '@/components/admin/orders/MenuBrowser';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
