@@ -81,18 +81,39 @@ export const POSDashboard = () => {
   };
 
   const handleDeleteOrder = async (orderId: string) => {
-    const { error } = await supabase
+    console.log('Attempting to delete order:', orderId);
+    
+    // First, delete related order items
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .delete()
+      .eq('order_id', orderId);
+
+    if (itemsError) {
+      console.error('Error deleting order items:', itemsError);
+      toast({
+        title: "Error",
+        description: "Failed to delete order items",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Then delete the order itself
+    const { error: orderError } = await supabase
       .from('orders')
       .delete()
       .eq('id', orderId);
 
-    if (error) {
+    if (orderError) {
+      console.error('Error deleting order:', orderError);
       toast({
         title: "Error",
         description: "Failed to delete order",
         variant: "destructive"
       });
     } else {
+      console.log('Order successfully deleted:', orderId);
       toast({
         title: "Success",
         description: "Order deleted successfully",
@@ -153,7 +174,10 @@ export const POSDashboard = () => {
             onAddItems={handleAddItems}
             onSendToKitchen={handleSendToKitchen}
             onPrintReceipt={handlePrintReceipt}
-            onDelete={(orderId) => setOrderToDelete(orderId)}
+            onDelete={(orderId) => {
+              console.log('Delete button clicked for order:', orderId);
+              setOrderToDelete(orderId);
+            }}
           />
         ))}
       </div>
@@ -175,13 +199,18 @@ export const POSDashboard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will permanently delete the order. This action cannot be undone.
+              This action will permanently delete the order and all its items. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => orderToDelete && handleDeleteOrder(orderToDelete)}
+              onClick={() => {
+                if (orderToDelete) {
+                  console.log('Confirming deletion of order:', orderToDelete);
+                  handleDeleteOrder(orderToDelete);
+                }
+              }}
               className="bg-red-500 hover:bg-red-600"
             >
               Delete
