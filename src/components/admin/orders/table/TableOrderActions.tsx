@@ -21,8 +21,11 @@ export const TableOrderActions = ({ orderId, onAddItem }: TableOrderActionsProps
       >
         View Order Details
       </Button>
-      <Button onClick={() => navigate('/admin/waiter/menu')}>
-        <Plus className="mr-2 h-4 w-4" />
+      <Button 
+        onClick={() => navigate('/admin/waiter/menu')}
+        className="flex items-center gap-2"
+      >
+        <Plus className="h-4 w-4" />
         Add Items
       </Button>
     </div>

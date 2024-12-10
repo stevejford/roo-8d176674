@@ -1,5 +1,4 @@
 import React from 'react';
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MenuBrowser } from '../MenuBrowser';
 
 interface MenuBrowserDialogProps {
@@ -8,17 +7,12 @@ interface MenuBrowserDialogProps {
 
 export const MenuBrowserDialog = ({ onSelectItem }: MenuBrowserDialogProps) => {
   return (
-    <DialogContent className="max-w-[90vw] max-h-[90vh] w-[1200px] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle>Add Items to Order</DialogTitle>
-      </DialogHeader>
-      <div className="py-4">
-        <MenuBrowser 
-          isOpen={true} 
-          onClose={() => {}} 
-          onSelect={onSelectItem}
-        />
-      </div>
-    </DialogContent>
+    <div className="h-screen">
+      <MenuBrowser 
+        isOpen={true} 
+        onClose={() => {}} 
+        onSelect={onSelectItem}
+      />
+    </div>
   );
 };

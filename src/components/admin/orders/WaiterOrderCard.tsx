@@ -92,49 +92,6 @@ export const WaiterOrderCard = ({
     }
   };
 
-  const handleAddItem = async (product: any) => {
-    console.log('Adding product to order:', product);
-    try {
-      const { data: existingItems } = await supabase
-        .from('order_items')
-        .select('*')
-        .eq('order_id', order.id)
-        .eq('product_id', product.id);
-
-      if (existingItems && existingItems.length > 0) {
-        const existingItem = existingItems[0];
-        await supabase
-          .from('order_items')
-          .update({ 
-            quantity: existingItem.quantity + 1,
-            price: product.price // Ensure we use the passed price
-          })
-          .eq('id', existingItem.id);
-      } else {
-        await supabase
-          .from('order_items')
-          .insert({
-            order_id: order.id,
-            product_id: product.id,
-            quantity: 1,
-            price: product.price, // Ensure we use the passed price
-          });
-      }
-
-      toast({
-        title: "Success",
-        description: `Added ${product.title} to the order`,
-      });
-    } catch (error) {
-      console.error('Error adding item:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add item to order",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className={`border rounded-lg p-6 bg-white shadow-sm space-y-6 transition-all duration-300 ${
       isNew ? 'ring-2 ring-blue-500 animate-pulse' : ''
@@ -169,7 +126,6 @@ export const WaiterOrderCard = ({
             orderTotal={calculateTotal()}
             isProcessingPayment={isProcessingPayment}
             onPayment={handlePayment}
-            onAddItem={handleAddItem}
           />
         </div>
       </div>
