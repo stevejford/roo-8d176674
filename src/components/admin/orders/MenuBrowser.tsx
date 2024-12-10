@@ -93,48 +93,44 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
-        <Tabs defaultValue={selectedCategory || 'all'} className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger 
-              value="all"
-              onClick={() => setSelectedCategory(null)}
-            >
-              All Items
-            </TabsTrigger>
-            {categories?.map((category) => (
-              <TabsTrigger
-                key={category.id}
-                value={category.id}
-                onClick={() => setSelectedCategory(category.id)}
+      <DialogContent className="max-w-4xl h-[80vh] p-0 gap-0">
+        <Tabs defaultValue={selectedCategory || 'all'} className="w-full h-full flex flex-col">
+          <div className="p-4 border-b">
+            <TabsList className="w-full h-auto flex-wrap gap-2">
+              <TabsTrigger 
+                value="all"
+                onClick={() => setSelectedCategory(null)}
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
-                {category.title}
+                All Items
               </TabsTrigger>
-            ))}
-          </TabsList>
+              {categories?.map((category) => (
+                <TabsTrigger
+                  key={category.id}
+                  value={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  {category.title}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
-          <ScrollArea className="flex-1 px-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-              {filteredProducts?.map((product) => {
-                console.log('Rendering product:', product.title, 'with price:', product.price);
-                console.log('Product pricing:', product.product_pricing?.[0]);
-                console.log('Category pricing:', categoryPricing?.find(
-                  cp => cp.category_id === product.category_id
-                ));
-                
-                return (
-                  <MenuProductCard
-                    key={product.id}
-                    product={product}
-                    categoryId={product.category_id || ''}
-                    productPricing={product.product_pricing?.[0]}
-                    categoryPricing={categoryPricing?.find(
-                      cp => cp.category_id === product.category_id
-                    )}
-                    onSelect={handleProductSelect}
-                  />
-                );
-              })}
+          <ScrollArea className="flex-1 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredProducts?.map((product) => (
+                <MenuProductCard
+                  key={product.id}
+                  product={product}
+                  categoryId={product.category_id || ''}
+                  productPricing={product.product_pricing?.[0]}
+                  categoryPricing={categoryPricing?.find(
+                    cp => cp.category_id === product.category_id
+                  )}
+                  onSelect={onSelect}
+                />
+              ))}
             </div>
           </ScrollArea>
         </Tabs>

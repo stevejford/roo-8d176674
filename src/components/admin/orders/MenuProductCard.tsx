@@ -84,22 +84,25 @@ export const MenuProductCard = ({
   };
 
   return (
-    <Card className="p-4 flex justify-between items-center hover:bg-gray-50">
-      <div className="flex items-center space-x-4">
+    <Card className="p-4 flex flex-col gap-4">
+      <div className="flex items-start gap-4">
         {product.image_url && (
           <img 
             src={product.image_url} 
             alt={product.title}
-            className="w-16 h-16 rounded-md object-cover"
+            className="w-20 h-20 rounded-md object-cover flex-shrink-0"
           />
         )}
-        <div>
-          <h3 className="font-medium">{product.title}</h3>
-          <p className="text-sm text-gray-500">${price?.toFixed(2)}</p>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-lg truncate">{product.title}</h3>
+          <p className="text-sm text-gray-500 mt-1">${price?.toFixed(2)}</p>
+          {product.description && (
+            <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description}</p>
+          )}
         </div>
       </div>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3 mt-auto">
         <Button 
           variant="outline" 
           size="icon"
