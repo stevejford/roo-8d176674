@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface POSMenuBrowserProps {
   orderId?: string | null;
@@ -14,6 +15,7 @@ interface POSMenuBrowserProps {
 export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps) => {
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
+  const { toast } = useToast();
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -54,13 +56,46 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
     });
   };
 
-  const handleAddToOrder = (product: any, quantity: number) => {
-    // Here you would implement the logic to add items to an existing order
-    // or create a new order if orderId is null
-    console.log('Adding to order:', { orderId, product, quantity });
-    
-    if (onOrderComplete) {
-      onOrderComplete();
+  const handleAddToOrder = async (product: any, quantity: number) => {
+    if (!orderId) {
+      toast({
+        title: "Error",
+        description: "No order selected",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: orderId,
+          product_id: product.id,
+          quantity: quantity,
+          price: product.price
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Added ${quantity}x ${product.title} to order`,
+      });
+
+      // Reset quantity for this product
+      setQuantities(prev => ({ ...prev, [product.id]: 0 }));
+
+      if (onOrderComplete) {
+        onOrderComplete();
+      }
+    } catch (error) {
+      console.error('Error adding items to order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add items to order",
+        variant: "destructive"
+      });
     }
   };
 
@@ -90,7 +125,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
       </div>
 
       {/* Products Grid */}
-      <div className="flex-1 overflow-auto p-4">
+      <ScrollArea className="flex-1 p-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
@@ -145,7 +180,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             );
           })}
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 };

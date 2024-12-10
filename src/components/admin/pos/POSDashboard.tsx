@@ -1,39 +1,195 @@
 import React, { useState } from 'react';
-import { POSMenuBrowser } from './POSMenuBrowser';
-import { OrderDashboard } from './components/OrderDashboard';
+import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Send, Printer } from "lucide-react";
+import { POSMenuBrowser } from './POSMenuBrowser';
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 export const POSDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const { data: orders, refetch } = useQuery({
+    queryKey: ['pos-orders'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *,
+            product:products (*)
+          )
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleUpdateCustomerName = async (orderId: string, name: string) => {
+    const { error } = await supabase
+      .from('orders')
+      .update({ customer_name: name })
+      .eq('id', orderId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update customer name",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSendToKitchen = async (orderId: string) => {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: 'in_progress' })
+      .eq('id', orderId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send order to kitchen",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Order sent to kitchen",
+      });
+      refetch();
+    }
+  };
+
+  const handlePrintReceipt = (order: any) => {
+    // Implementation for printing receipt
+    console.log('Printing receipt for order:', order);
+    toast({
+      title: "Print Receipt",
+      description: "Receipt printing functionality will be implemented soon",
+    });
+  };
+
+  const handleStartNewOrder = async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert({ status: 'pending' })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create new order",
+        variant: "destructive"
+      });
+    } else {
+      setSelectedOrderId(data.id);
+      setIsMenuOpen(true);
+    }
+  };
+
+  const handleAddItems = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setIsMenuOpen(true);
+  };
+
+  const calculateTotal = (orderItems: any[]) => {
+    return orderItems?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+  };
 
   return (
     <div className="h-screen flex flex-col p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Active Orders</h2>
-        <Button onClick={() => {
-          setSelectedOrderId(null);
-          setIsMenuOpen(true);
-        }} className="bg-[#10B981]">
+        <Button onClick={handleStartNewOrder} className="bg-[#10B981]">
           <Plus className="w-4 h-4 mr-2" />
           New Order
         </Button>
       </div>
       
-      <OrderDashboard 
-        onAddItems={(orderId) => {
-          setSelectedOrderId(orderId);
-          setIsMenuOpen(true);
-        }}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {orders?.map((order) => (
+          <Card key={order.id} className="p-4 space-y-4">
+            <Input
+              placeholder="Customer Name"
+              value={order.customer_name || ''}
+              onChange={(e) => handleUpdateCustomerName(order.id, e.target.value)}
+              className="w-full"
+            />
+
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Order Items:</p>
+              <div className="space-y-1">
+                {order.order_items?.map((item: any) => (
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <span>{item.quantity}x {item.product?.title}</span>
+                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center font-medium">
+              <span>Total</span>
+              <span>${calculateTotal(order.order_items).toFixed(2)}</span>
+            </div>
+
+            <div className="space-y-2">
+              <Button 
+                className="w-full bg-[#10B981]"
+                onClick={() => handleAddItems(order.id)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Items
+              </Button>
+
+              <Button 
+                className="w-full bg-[#10B981]"
+                onClick={() => handleSendToKitchen(order.id)}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Send to Kitchen
+              </Button>
+
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handlePrintReceipt(order)}
+              >
+                <Printer className="w-4 h-4 mr-2" />
+                Print Receipt
+              </Button>
+
+              <Button 
+                variant="secondary"
+                className="w-full"
+                onClick={handleStartNewOrder}
+              >
+                Start New Order
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
       
       <Dialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DialogContent className="max-w-7xl h-[90vh]">
           <POSMenuBrowser 
             orderId={selectedOrderId}
-            onOrderComplete={() => setIsMenuOpen(false)} 
+            onOrderComplete={() => {
+              setIsMenuOpen(false);
+              refetch();
+            }} 
           />
         </DialogContent>
       </Dialog>
