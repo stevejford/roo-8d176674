@@ -32,6 +32,7 @@ import {
   Utensils,
   ClipboardList,
   Plus,
+  Menu,
 } from "lucide-react";
 
 const Dashboard = () => (
@@ -125,6 +126,7 @@ const Admin = () => {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Quick Add Order', href: '/admin/pos', icon: Plus },
+    { name: 'Waiter View', href: '/admin/waiter', icon: Menu },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
@@ -174,6 +176,7 @@ const Admin = () => {
           <Routes>
             <Route index element={<Dashboard />} />
             <Route path="pos/*" element={<POSDashboard />} />
+            <Route path="waiter/*" element={<div>Waiter interface coming soon</div>} />
             <Route path="products/*" element={<Products />} />
             <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />
