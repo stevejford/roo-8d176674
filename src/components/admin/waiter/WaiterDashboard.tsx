@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
-import { TableCard } from '@/components/TableCard';
+import { TableCard } from '@/components/admin/orders/TableCard';
 import { MenuBrowser } from '@/components/admin/orders/MenuBrowser';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+interface Table {
+  id: string;
+  table_number: string;
+  status: 'available' | 'occupied' | 'reserved';
+  customer_name?: string;
+  order_id?: string;
+  order_status?: string;
+}
+
 export const WaiterDashboard = () => {
-  const [selectedTable, setSelectedTable] = useState<any>(null);
+  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
 
@@ -19,11 +28,16 @@ export const WaiterDashboard = () => {
         .select('*');
       
       if (error) throw error;
-      return data || [];
+      
+      // Transform the status to the correct type
+      return (data || []).map(table => ({
+        ...table,
+        status: table.status as 'available' | 'occupied' | 'reserved'
+      }));
     }
   });
 
-  const handleTableClick = (table: any) => {
+  const handleTableClick = (table: Table) => {
     setSelectedTable(table);
     setIsMenuOpen(true);
   };
