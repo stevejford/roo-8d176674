@@ -6,11 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 
-interface POSMenuBrowserProps {
-  onSelect: (product: any, quantity: number) => void;
-}
-
-export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
+export const POSMenuBrowser = ({ onOrderComplete }: { onOrderComplete?: () => void }) => {
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
 
@@ -53,21 +49,23 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
     });
   };
 
-  const handleAddToOrder = (product: any) => {
-    const quantity = quantities[product.id] || 1;
-    onSelect(product, quantity);
-    setQuantities(prev => ({ ...prev, [product.id]: 0 }));
+  const handleAddToOrder = (product: any, quantity: number) => {
+    // Add the item to the current active order
+    // This will be implemented in the next iteration
+    if (onOrderComplete) {
+      onOrderComplete();
+    }
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header with category filters */}
+    <div className="h-full flex flex-col bg-gray-50">
+      {/* Category filters */}
       <div className="p-4 bg-white border-b">
         <div className="flex gap-2 overflow-x-auto pb-2">
           <Button 
             variant={selectedCategory === null ? "default" : "outline"}
             onClick={() => setSelectedCategory(null)}
-            className="shrink-0 h-8 px-3 text-sm"
+            className="shrink-0"
           >
             All Items
           </Button>
@@ -76,7 +74,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
               key={category.id}
               variant={selectedCategory === category.id ? "default" : "outline"}
               onClick={() => setSelectedCategory(category.id)}
-              className="shrink-0 h-8 px-3 text-sm"
+              className="shrink-0"
             >
               {category.title}
             </Button>
@@ -85,8 +83,8 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
       </div>
 
       {/* Products Grid */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+      <div className="flex-1 overflow-auto p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
@@ -101,7 +99,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-1.5">
+                <div className="p-2">
                   <h3 className="font-medium text-xs truncate">{product.title}</h3>
                   <p className="text-xs text-gray-500">
                     ${product.price?.toFixed(2)}
@@ -112,10 +110,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                         size="icon"
                         variant="outline"
                         className="h-5 w-5"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleQuantityChange(product.id, -1);
-                        }}
+                        onClick={() => handleQuantityChange(product.id, -1)}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
@@ -124,10 +119,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                         size="icon"
                         variant="outline"
                         className="h-5 w-5"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleQuantityChange(product.id, 1);
-                        }}
+                        onClick={() => handleQuantityChange(product.id, 1)}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
@@ -135,7 +127,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
                     <Button
                       size="sm"
                       className="h-5 text-xs px-2"
-                      onClick={() => handleAddToOrder(product)}
+                      onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
                       Add
@@ -146,7 +138,7 @@ export const POSMenuBrowser = ({ onSelect }: POSMenuBrowserProps) => {
             );
           })}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
