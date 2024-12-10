@@ -17,6 +17,7 @@ export const OrderItems = () => {
     const result = await validateVoucher(voucherCode);
     if (result) {
       setShowVoucherInput(false);
+      setVoucherCode('');
       toast({
         title: "Voucher Applied Successfully!",
         description: `${result.code} - ${result.discount_type === 'percentage' 
@@ -77,7 +78,6 @@ export const OrderItems = () => {
                     onClick={() => {
                       setShowVoucherInput(false);
                       setVoucherCode('');
-                      clearVoucher();
                     }}
                     className="text-gray-400 hover:text-gray-500"
                   >
@@ -107,7 +107,6 @@ export const OrderItems = () => {
           <button
             onClick={() => {
               clearVoucher();
-              setVoucherCode('');
               toast({
                 title: "Voucher Removed",
                 description: "The voucher has been removed from your order.",

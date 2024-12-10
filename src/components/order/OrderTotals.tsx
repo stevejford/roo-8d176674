@@ -10,6 +10,8 @@ interface OrderTotalsProps {
 export const OrderTotals = ({ validVoucher, calculateTotal }: OrderTotalsProps) => {
   const { items } = useCartStore();
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = calculateTotal();
+  const discount = subtotal - total;
 
   if (!validVoucher) return null;
 
@@ -25,11 +27,11 @@ export const OrderTotals = ({ validVoucher, calculateTotal }: OrderTotalsProps) 
             ? `${validVoucher.discount_value}%` 
             : `$${validVoucher.discount_value}`}):
         </span>
-        <span>-${(subtotal - calculateTotal()).toFixed(2)}</span>
+        <span>-${discount.toFixed(2)}</span>
       </div>
       <div className="flex justify-between font-semibold mt-1 text-base border-t pt-1">
         <span>Total:</span>
-        <span>${calculateTotal().toFixed(2)}</span>
+        <span>${total.toFixed(2)}</span>
       </div>
     </div>
   );
