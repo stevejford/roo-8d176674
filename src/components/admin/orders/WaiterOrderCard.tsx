@@ -86,20 +86,16 @@ export const WaiterOrderCard = ({
 
   const handleDeleteOrder = async () => {
     try {
-      console.log('Starting soft deletion for order:', order.id);
-      
-      const { error: updateError } = await supabase
+      const { error } = await supabase
         .from('orders')
         .update({ 
           deleted_at: new Date().toISOString(),
           status: 'cancelled' as OrderStatus
         })
-        .eq('id', order.id);
+        .eq('id', order.id)
+        .select();
 
-      if (updateError) {
-        console.error('Error soft deleting order:', updateError);
-        throw updateError;
-      }
+      if (error) throw error;
 
       toast({
         title: "Order Deleted",
@@ -108,7 +104,7 @@ export const WaiterOrderCard = ({
 
       setShowDeleteDialog(false);
       onUpdateStatus(order.id, 'cancelled');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Deletion process failed:', error);
       toast({
         title: "Error",
