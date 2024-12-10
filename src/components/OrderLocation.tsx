@@ -27,7 +27,9 @@ const OrderLocationContent = ({ mode }: { mode: 'pickup' | 'delivery' }) => {
     setShowSuccessDialog,
     successOrderDetails,
     handleCheckout,
-    calculateTotal
+    calculateTotal,
+    isProcessing,
+    validVoucher
   } = useOrderState();
 
   useEffect(() => {
@@ -81,8 +83,11 @@ const OrderLocationContent = ({ mode }: { mode: 'pickup' | 'delivery' }) => {
         selectedTime={selectedTime}
         isStoreCurrentlyOpen={isStoreCurrentlyOpen}
         isCheckingStoreHours={isCheckingStoreHours}
+        isProcessing={isProcessing}
         itemCount={0}
         total={calculateTotal()}
+        validVoucher={validVoucher}
+        calculateTotal={calculateTotal}
         onTimeChange={() => setShowTimeModal(true)}
         onCheckout={handleCheckout}
         showTimeModal={showTimeModal}
