@@ -7,10 +7,10 @@ import { PickupTimeModal } from "./PickupTimeModal";
 import { OrderHeader } from "./order/OrderHeader";
 import { LocationInfo } from "./order/LocationInfo";
 import { OrderItems } from "./order/OrderItems";
+import { CheckoutButton } from "./order/CheckoutButton";
 import { useCartStore } from "@/stores/useCartStore";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Clock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -79,15 +79,6 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   };
 
   const handleCheckout = async () => {
-    if (!isStoreCurrentlyOpen) {
-      toast({
-        title: "Store Closed",
-        description: "Sorry, we are currently closed. Please try again during business hours.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       setIsProcessing(true);
 
@@ -145,40 +136,14 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
       </div>
 
       <div className="mt-auto p-6">
-        {isCheckingStoreHours ? (
-          <button
-            className="w-full bg-gray-400 text-white py-4 rounded-lg font-medium flex items-center justify-center"
-            disabled
-          >
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Checking store hours...
-          </button>
-        ) : (
-          <button
-            className={`w-full ${
-              isStoreCurrentlyOpen ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-500'
-            } text-white py-4 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors`}
-            disabled={!isStoreCurrentlyOpen || items.length === 0 || isProcessing}
-            onClick={handleCheckout}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing...
-              </>
-            ) : !isStoreCurrentlyOpen ? (
-              <>
-                <Clock className="w-4 h-4 mr-2" />
-                Store Closed
-              </>
-            ) : (
-              <>
-                <span>Pay ${calculateTotal().toFixed(2)}</span>
-                <span className="ml-1">→</span>
-              </>
-            )}
-          </button>
-        )}
+        <CheckoutButton
+          isStoreCurrentlyOpen={isStoreCurrentlyOpen}
+          isCheckingStoreHours={isCheckingStoreHours}
+          isProcessing={isProcessing}
+          itemCount={items.length}
+          total={calculateTotal()}
+          onCheckout={handleCheckout}
+        />
       </div>
 
       <PickupTimeModal
