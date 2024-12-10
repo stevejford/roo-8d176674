@@ -56,10 +56,11 @@ export const OrderActions = ({
 
       <Button 
         variant="outline" 
-        className="w-full"
+        size="sm"
+        className="flex items-center gap-2"
         onClick={() => navigate('/admin/waiter/menu')}
       >
-        <Plus className="w-4 h-4 mr-2" />
+        <Plus className="w-4 h-4" />
         Add Items
       </Button>
     </div>
