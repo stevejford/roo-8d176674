@@ -6,7 +6,7 @@ export const TrustInfo = () => {
   return (
     <div className="flex items-center justify-center mt-3 space-x-2 text-gray-500 text-xs">
       <span>Secure payment powered by</span>
-      <FontAwesomeIcon icon={faStripe} className="h-4" />
+      <FontAwesomeIcon icon={faStripe} className="h-6" />
       <span>with SSL encryption</span>
     </div>
   );
