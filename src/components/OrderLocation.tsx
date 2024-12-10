@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useCartStore } from "@/stores/useCartStore";
-import { supabase } from "@/integrations/supabase/client";
+import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "react-router-dom";
-import { useVoucherValidation } from "@/hooks/useVoucherValidation";
 import { OrderContent } from "./order/OrderContent";
 import { OrderSuccessDialog } from "./order/OrderSuccessDialog";
-import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
+import { OrderStateProvider, useOrderState } from "./order/OrderStateProvider";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -16,104 +13,22 @@ interface OrderLocationProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocationProps) => {
-  const isMobile = useIsMobile();
-  const [selectedTime, setSelectedTime] = useState("Wednesday - Reopen");
+const OrderLocationContent = ({ mode }: { mode: 'pickup' | 'delivery' }) => {
   const [storeAddress, setStoreAddress] = useState("");
   const [storeName, setStoreName] = useState("");
   const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
-  const [showTimeModal, setShowTimeModal] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [successOrderDetails, setSuccessOrderDetails] = useState(null);
-  const { items, clearCart } = useCartStore();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
-  const { validVoucher } = useVoucherValidation();
-
-  const calculateTotal = () => {
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    if (validVoucher) {
-      if (validVoucher.discount_type === 'percentage') {
-        const discountAmount = (subtotal * validVoucher.discount_value) / 100;
-        return Math.max(0, subtotal - discountAmount);
-      } else if (validVoucher.discount_type === 'fixed') {
-        return Math.max(0, subtotal - validVoucher.discount_value);
-      }
-    }
-    
-    return subtotal;
-  };
-
-  const handleCheckout = async () => {
-    try {
-      setIsProcessing(true);
-
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
-        body: {
-          items: items.map(item => ({
-            title: item.title,
-            description: `${item.size ? `Size: ${item.size}` : ''} Quantity: ${item.quantity}`,
-            image_url: item.image_url,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-          voucher: validVoucher
-        }
-      });
-
-      if (checkoutError) throw checkoutError;
-
-      if (checkoutData?.url) {
-        // Open Stripe checkout in a new tab
-        window.open(checkoutData.url, '_blank');
-        clearCart();
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process payment. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  useEffect(() => {
-    // Check for payment status in URL
-    const paymentStatus = searchParams.get('payment_status');
-    if (paymentStatus === 'success') {
-      setSuccessOrderDetails({
-        items: items,
-        total: calculateTotal(),
-        pickupTime: selectedTime
-      });
-      setShowSuccessDialog(true);
-      toast({
-        title: "Payment Successful",
-        description: "Thank you for your order!",
-        variant: "default"
-      });
-      // Remove the payment_status from URL without refreshing the page
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    } else if (paymentStatus === 'cancelled') {
-      toast({
-        title: "Payment Cancelled",
-        description: "Your payment was cancelled.",
-        variant: "destructive"
-      });
-      // Remove the payment_status from URL without refreshing the page
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [searchParams, toast, items, selectedTime]);
+  const {
+    selectedTime,
+    showTimeModal,
+    setShowTimeModal,
+    showSuccessDialog,
+    setShowSuccessDialog,
+    successOrderDetails,
+    handleCheckout,
+    calculateTotal
+  } = useOrderState();
 
   useEffect(() => {
     const loadStoreData = async () => {
@@ -141,7 +56,6 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
 
     loadStoreData();
     
-    // Check store status every minute
     const interval = setInterval(async () => {
       try {
         const storeOpen = await isStoreOpen();
@@ -155,11 +69,10 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   }, [toast]);
 
   const handleScheduleTime = (date: string, time: string) => {
-    setSelectedTime(`${date} at ${time}`);
     setShowTimeModal(false);
   };
 
-  const content = (
+  return (
     <>
       <OrderContent
         mode={mode}
@@ -168,11 +81,8 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
         selectedTime={selectedTime}
         isStoreCurrentlyOpen={isStoreCurrentlyOpen}
         isCheckingStoreHours={isCheckingStoreHours}
-        isProcessing={isProcessing}
-        itemCount={items.length}
+        itemCount={0}
         total={calculateTotal()}
-        validVoucher={validVoucher}
-        calculateTotal={calculateTotal}
         onTimeChange={() => setShowTimeModal(true)}
         onCheckout={handleCheckout}
         showTimeModal={showTimeModal}
@@ -185,6 +95,16 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
         orderDetails={successOrderDetails}
       />
     </>
+  );
+};
+
+export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocationProps) => {
+  const isMobile = useIsMobile();
+
+  const content = (
+    <OrderStateProvider>
+      <OrderLocationContent mode={mode} />
+    </OrderStateProvider>
   );
 
   if (isMobile) {
