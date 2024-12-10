@@ -12,6 +12,7 @@ import { useCartStore } from "@/stores/useCartStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
+import { useVoucherValidation } from "@/hooks/useVoucherValidation";
 
 interface OrderLocationProps {
   mode: 'pickup' | 'delivery';
@@ -31,6 +32,59 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   const { items, clearCart } = useCartStore();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const { validVoucher } = useVoucherValidation();
+
+  const calculateTotal = () => {
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    if (validVoucher) {
+      if (validVoucher.discount_type === 'percentage') {
+        const discountAmount = (subtotal * validVoucher.discount_value) / 100;
+        return Math.max(0, subtotal - discountAmount);
+      } else if (validVoucher.discount_type === 'fixed') {
+        return Math.max(0, subtotal - validVoucher.discount_value);
+      }
+    }
+    
+    return subtotal;
+  };
+
+  const handleCheckout = async () => {
+    try {
+      setIsProcessing(true);
+
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          items: items.map(item => ({
+            title: item.title,
+            description: `${item.size ? `Size: ${item.size}` : ''} Quantity: ${item.quantity}`,
+            image_url: item.image_url,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+          voucher: validVoucher // Pass voucher information to the checkout function
+        }
+      });
+
+      if (checkoutError) throw checkoutError;
+
+      if (checkoutData?.url) {
+        window.location.href = checkoutData.url;
+        clearCart();
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process payment. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   useEffect(() => {
     // Check for payment status in URL
@@ -100,47 +154,6 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
     setShowTimeModal(false);
   };
 
-  const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  };
-
-  const handleCheckout = async () => {
-    try {
-      setIsProcessing(true);
-
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
-        body: {
-          items: items.map(item => ({
-            title: item.title,
-            description: `${item.size ? `Size: ${item.size}` : ''} Quantity: ${item.quantity}`,
-            image_url: item.image_url,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-        }
-      });
-
-      if (checkoutError) throw checkoutError;
-
-      if (checkoutData?.url) {
-        // Redirect to Stripe Checkout in the same window
-        window.location.href = checkoutData.url;
-        clearCart();
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process payment. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const content = (
     <div className="h-full flex flex-col bg-white">
       <div className="flex-1 overflow-auto">
@@ -163,6 +176,22 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
       </div>
 
       <div className="mt-auto p-6">
+        {validVoucher && (
+          <div className="mb-2 text-sm">
+            <div className="flex justify-between text-gray-600">
+              <span>Subtotal:</span>
+              <span>${items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-green-600 font-medium">
+              <span>Discount ({validVoucher.discount_type === 'percentage' ? `${validVoucher.discount_value}%` : `$${validVoucher.discount_value}`}):</span>
+              <span>-${(items.reduce((sum, item) => sum + (item.price * item.quantity), 0) - calculateTotal()).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-semibold mt-1 text-base border-t pt-1">
+              <span>Total:</span>
+              <span>${calculateTotal().toFixed(2)}</span>
+            </div>
+          </div>
+        )}
         <CheckoutButton
           isStoreCurrentlyOpen={isStoreCurrentlyOpen}
           isCheckingStoreHours={isCheckingStoreHours}
