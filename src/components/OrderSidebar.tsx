@@ -53,9 +53,9 @@ export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSi
             pricing_strategies (*)
           `)
           .eq('category_id', selectedProduct.category_id)
-          .single();
+          .maybeSingle();
         
-        if (error && error.code !== 'PGRST116') throw error;
+        if (error) throw error;
         return data as CategoryPricing | null;
       } catch (error) {
         console.error('Error fetching category pricing:', error);
@@ -76,9 +76,9 @@ export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSi
           .from('products')
           .select('id')
           .eq('title', selectedProduct.title)
-          .single();
+          .maybeSingle();
 
-        if (productError && productError.code !== 'PGRST116') throw productError;
+        if (productError) throw productError;
         if (!products) return null;
 
         const { data: pricing, error: pricingError } = await supabase
@@ -88,7 +88,7 @@ export const OrderSidebar = ({ selectedProduct, onClose, onAfterClose }: OrderSi
             pricing_strategies (*)
           `)
           .eq('product_id', products.id)
-          .single();
+          .maybeSingle();
 
         if (pricingError && pricingError.code !== 'PGRST116') throw pricingError;
         return pricing as ProductPricing | null;
