@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
 import { useVoucherValidation } from "@/hooks/useVoucherValidation";
 import { OrderContent } from "./order/OrderContent";
+import { OrderSuccessDialog } from "./order/OrderSuccessDialog";
 import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
 
 interface OrderLocationProps {
@@ -24,6 +25,8 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successOrderDetails, setSuccessOrderDetails] = useState(null);
   const { items, clearCart } = useCartStore();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -86,6 +89,12 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
     // Check for payment status in URL
     const paymentStatus = searchParams.get('payment_status');
     if (paymentStatus === 'success') {
+      setSuccessOrderDetails({
+        items: items,
+        total: calculateTotal(),
+        pickupTime: selectedTime
+      });
+      setShowSuccessDialog(true);
       toast({
         title: "Payment Successful",
         description: "Thank you for your order!",
@@ -104,7 +113,7 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
-  }, [searchParams, toast]);
+  }, [searchParams, toast, items, selectedTime]);
 
   useEffect(() => {
     const loadStoreData = async () => {
@@ -151,24 +160,31 @@ export const OrderLocation = ({ mode, isOpen = true, onOpenChange }: OrderLocati
   };
 
   const content = (
-    <OrderContent
-      mode={mode}
-      storeName={storeName}
-      storeAddress={storeAddress}
-      selectedTime={selectedTime}
-      isStoreCurrentlyOpen={isStoreCurrentlyOpen}
-      isCheckingStoreHours={isCheckingStoreHours}
-      isProcessing={isProcessing}
-      itemCount={items.length}
-      total={calculateTotal()}
-      validVoucher={validVoucher}
-      calculateTotal={calculateTotal}
-      onTimeChange={() => setShowTimeModal(true)}
-      onCheckout={handleCheckout}
-      showTimeModal={showTimeModal}
-      onCloseTimeModal={() => setShowTimeModal(false)}
-      onScheduleTime={handleScheduleTime}
-    />
+    <>
+      <OrderContent
+        mode={mode}
+        storeName={storeName}
+        storeAddress={storeAddress}
+        selectedTime={selectedTime}
+        isStoreCurrentlyOpen={isStoreCurrentlyOpen}
+        isCheckingStoreHours={isCheckingStoreHours}
+        isProcessing={isProcessing}
+        itemCount={items.length}
+        total={calculateTotal()}
+        validVoucher={validVoucher}
+        calculateTotal={calculateTotal}
+        onTimeChange={() => setShowTimeModal(true)}
+        onCheckout={handleCheckout}
+        showTimeModal={showTimeModal}
+        onCloseTimeModal={() => setShowTimeModal(false)}
+        onScheduleTime={handleScheduleTime}
+      />
+      <OrderSuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        orderDetails={successOrderDetails}
+      />
+    </>
   );
 
   if (isMobile) {
