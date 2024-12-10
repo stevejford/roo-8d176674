@@ -17,10 +17,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { Database } from '@/integrations/supabase/types';
+
+type OrderStatus = Database['public']['Enums']['order_status'];
 
 interface WaiterOrderCardProps {
   order: any;
-  onUpdateStatus: (orderId: string, status: string) => void;
+  onUpdateStatus: (orderId: string, status: OrderStatus) => void;
   statusColors: Record<string, string>;
   isNew?: boolean;
 }
@@ -37,13 +40,10 @@ export const WaiterOrderCard = ({
   const navigate = useNavigate();
 
   const calculateTotal = () => {
-    console.log('Calculating total for order items:', order.order_items);
     return order.order_items?.reduce((acc: number, item: any) => {
       const itemPrice = Number(item.price) || 0;
       const quantity = Number(item.quantity) || 0;
-      const itemTotal = itemPrice * quantity;
-      console.log(`Item: ${item.product?.title}, Price: ${itemPrice}, Quantity: ${quantity}, Total: ${itemTotal}`);
-      return acc + itemTotal;
+      return acc + (itemPrice * quantity);
     }, 0) || 0;
   };
 
@@ -57,7 +57,7 @@ export const WaiterOrderCard = ({
           payment_status: 'completed',
           payment_method: method,
           paid_amount: total,
-          status: 'completed'
+          status: 'completed' as OrderStatus
         })
         .eq('id', order.id);
 
@@ -84,7 +84,7 @@ export const WaiterOrderCard = ({
       const { error } = await supabase
         .from('orders')
         .update({ 
-          status: 'preparing',
+          status: 'preparing' as OrderStatus,
           order_taken_at: new Date().toISOString()
         })
         .eq('id', order.id);
