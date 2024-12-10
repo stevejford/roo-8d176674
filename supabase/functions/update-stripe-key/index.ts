@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -38,6 +39,10 @@ serve(async (req) => {
     }
 
     const { stripeKey } = await req.json();
+
+    if (!stripeKey) {
+      throw new Error('Stripe key is required');
+    }
 
     // Store the Stripe key in Edge Function secrets
     const response = await fetch(

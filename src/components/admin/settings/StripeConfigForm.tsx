@@ -8,10 +8,12 @@ import { SettingsSectionHeader } from './SettingsSectionHeader';
 
 export const StripeConfigForm = () => {
   const [stripeKey, setStripeKey] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   const handleSave = async () => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.functions.invoke('update-stripe-key', {
         body: { stripeKey }
       });
@@ -28,9 +30,11 @@ export const StripeConfigForm = () => {
       console.error('Error saving Stripe key:', error);
       toast({
         title: "Error",
-        description: "Failed to update Stripe configuration",
+        description: error.message || "Failed to update Stripe configuration",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,8 +68,11 @@ export const StripeConfigForm = () => {
           </p>
         </div>
 
-        <Button onClick={handleSave} disabled={!stripeKey}>
-          Save Stripe Configuration
+        <Button 
+          onClick={handleSave} 
+          disabled={!stripeKey || isLoading}
+        >
+          {isLoading ? "Saving..." : "Save Stripe Configuration"}
         </Button>
       </div>
     </div>
