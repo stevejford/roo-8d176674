@@ -100,6 +100,11 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
     ? products?.filter(p => p.category_id === selectedCategory)
     : products;
 
+  const handleProductSelect = (product: Product) => {
+    onSelect(product);
+    onClose(); // Close the dialog after selection
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-full w-full h-screen max-h-screen p-0 m-0 rounded-none">
@@ -139,7 +144,7 @@ export const MenuBrowser = ({ isOpen, onClose, onSelect }: MenuBrowserProps) => 
                   categoryPricing={categoryPricing?.find(
                     cp => cp.category_id === product.category_id
                   )}
-                  onSelect={onSelect}
+                  onSelect={handleProductSelect}
                 />
               ))}
             </div>
