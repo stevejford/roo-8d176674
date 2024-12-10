@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { BusinessInfoForm } from "./BusinessInfoForm";
+import { ServiceTimingForm } from "./ServiceTimingForm";
+import { SettingsSectionHeader } from "./SettingsSectionHeader";
+import { Separator } from "@/components/ui/separator";
 
 interface StoreSettingsFormData {
   store_name: string;
@@ -42,7 +45,6 @@ export const StoreSettingsForm = () => {
       toast({
         title: "Settings updated",
         description: "Business information has been successfully updated.",
-        duration: 3000,
       });
     },
     onError: (error) => {
@@ -50,7 +52,6 @@ export const StoreSettingsForm = () => {
         title: "Error",
         description: "Failed to update business information.",
         variant: "destructive",
-        duration: 3000,
       });
       console.error('Error updating store settings:', error);
     },
@@ -61,8 +62,12 @@ export const StoreSettingsForm = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="bg-white p-6 rounded-lg shadow-sm">
+        <SettingsSectionHeader
+          title="Business Information"
+          description="Update your business details and contact information."
+        />
         <BusinessInfoForm
           defaultValues={{
             store_name: settings?.store_name || '',
@@ -70,6 +75,16 @@ export const StoreSettingsForm = () => {
           }}
           onSubmit={mutation.mutate}
         />
+      </div>
+
+      <Separator />
+
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <SettingsSectionHeader
+          title="Service Timing Settings"
+          description="Configure timing thresholds for various service alerts and notifications."
+        />
+        <ServiceTimingForm />
       </div>
     </div>
   );
