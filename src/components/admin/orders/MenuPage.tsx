@@ -77,16 +77,20 @@ export const MenuPage = () => {
     : products;
 
   const handleProductSelect = (product: Product) => {
-    // Handle product selection
     navigate(-1); // Go back to the previous page
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen w-screen bg-white">
       <div className="sticky top-0 z-10 bg-white border-b">
         <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-semibold">Add Items</h1>
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate(-1)}
+            className="hover:bg-gray-100"
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -112,7 +116,7 @@ export const MenuPage = () => {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="h-[calc(100vh-132px)] overflow-y-auto p-4">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
           {filteredProducts?.map((product) => (
             <MenuProductCard
