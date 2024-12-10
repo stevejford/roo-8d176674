@@ -7,7 +7,6 @@ import { ProductList } from '@/components/admin/products/ProductList';
 import { OrderList } from '@/components/admin/orders/OrderList';
 import { UserManagement } from '@/components/admin/users/UserManagement';
 import { KitchenDashboard } from '@/components/admin/orders/KitchenDashboard';
-import { WaiterDashboard } from '@/components/admin/orders/WaiterDashboard';
 import { POSDashboard } from '@/components/admin/pos/POSDashboard';
 import { PricingModelList } from '@/components/admin/pricing/PricingModelList';
 import { StoreSettingsForm } from '@/components/admin/settings/StoreSettingsForm';
@@ -129,7 +128,6 @@ const Admin = () => {
     { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Kitchen', href: '/admin/kitchen', icon: Utensils },
-    { name: 'Waiter', href: '/admin/waiter', icon: ClipboardList },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart },
     { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
@@ -178,9 +176,6 @@ const Admin = () => {
             <Route path="pricing/*" element={<PricingModelList />} />
             <Route path="orders/*" element={<Orders />} />
             <Route path="kitchen/*" element={<KitchenDashboard />} />
-            <Route path="waiter/*" element={<WaiterDashboard />} />
-            <Route path="waiter/menu" element={<MenuPage />} />
-            <Route path="waiter/order/:orderId" element={<WaiterDashboard />} />
             <Route path="users/*" element={<UsersManagement />} />
             <Route path="analytics/*" element={<Analytics />} />
             <Route path="settings/*" element={<SettingsPanel />} />
