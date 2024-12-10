@@ -23,17 +23,33 @@ export const WaiterDashboard = () => {
   const { data: tables, refetch } = useQuery({
     queryKey: ['tables'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get all tables
+      const { data: tablesData, error: tablesError } = await supabase
         .from('tables')
         .select('*');
       
-      if (error) throw error;
+      if (tablesError) throw tablesError;
       
-      // Transform the status to the correct type
-      return (data || []).map(table => ({
-        ...table,
-        status: table.status as 'available' | 'occupied' | 'reserved'
-      }));
+      // Then, get active orders to determine table status and customer info
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('*')
+        .not('table_number', 'is', null)
+        .in('status', ['pending', 'confirmed', 'preparing', 'ready', 'delivered'])
+        .order('created_at', { ascending: false });
+
+      // Transform the data to include customer information
+      return tablesData.map((table): Table => {
+        const activeOrder = orders?.find(o => o.table_number === table.table_number);
+        return {
+          id: table.id,
+          table_number: table.table_number,
+          status: activeOrder ? 'occupied' : 'available',
+          customer_name: activeOrder?.customer_name,
+          order_id: activeOrder?.id,
+          order_status: activeOrder?.status,
+        };
+      });
     }
   });
 
