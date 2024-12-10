@@ -85,31 +85,28 @@ export const WaiterOrderCard = ({
   };
 
   const handleDeleteOrder = async () => {
-    console.log('Starting deletion process for order:', order.id);
     try {
       // First delete all order items
-      const { error: itemsError, data: deletedItems } = await supabase
+      const { error: itemsError } = await supabase
         .from('order_items')
         .delete()
-        .eq('order_id', order.id);
+        .match({ order_id: order.id });
 
       if (itemsError) {
         console.error('Error deleting order items:', itemsError);
         throw itemsError;
       }
-      console.log('Successfully deleted order items:', deletedItems);
 
       // Then delete the order itself
-      const { error: orderError, data: deletedOrder } = await supabase
+      const { error: orderError } = await supabase
         .from('orders')
         .delete()
-        .eq('id', order.id);
+        .match({ id: order.id });
 
       if (orderError) {
         console.error('Error deleting order:', orderError);
         throw orderError;
       }
-      console.log('Successfully deleted order:', deletedOrder);
 
       toast({
         title: "Order Deleted",
@@ -117,6 +114,7 @@ export const WaiterOrderCard = ({
       });
 
       setShowDeleteDialog(false);
+      onUpdateStatus(order.id, 'cancelled');
     } catch (error) {
       console.error('Deletion process failed:', error);
       toast({
