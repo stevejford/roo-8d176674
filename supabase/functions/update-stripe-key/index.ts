@@ -15,7 +15,7 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
     // Get the authenticated user
@@ -46,24 +46,19 @@ serve(async (req) => {
       throw new Error('Stripe key is required');
     }
 
-    // Store the Stripe key in Edge Function secrets
-    const response = await fetch(
-      `${Deno.env.get('SUPABASE_URL')}/functions/v1/secrets`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: 'STRIPE_SECRET_KEY',
-          value: stripeKey,
-        }),
-      }
+    // Test if the key starts with 'sk_'
+    if (!stripeKey.startsWith('sk_')) {
+      throw new Error('Invalid Stripe secret key format');
+    }
+
+    // Store the key in Supabase secrets
+    const { error: secretError } = await supabaseClient.functions.setSecret(
+      'STRIPE_SECRET_KEY',
+      stripeKey
     );
 
-    if (!response.ok) {
-      console.error('Failed to update secret:', await response.text());
+    if (secretError) {
+      console.error('Failed to update secret:', secretError);
       throw new Error('Failed to update Stripe key');
     }
 
