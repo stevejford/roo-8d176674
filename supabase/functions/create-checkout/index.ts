@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { items, customer_email } = await req.json()
+    const { items, voucher, customer_email } = await req.json()
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -38,9 +38,28 @@ serve(async (req) => {
     })
 
     console.log('Creating line items...');
+    // Calculate total before discount
+    const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+    
+    // Calculate discount if voucher exists
+    let discountAmount = 0;
+    if (voucher) {
+      if (voucher.discount_type === 'percentage') {
+        discountAmount = (subtotal * voucher.discount_value) / 100;
+      } else if (voucher.discount_type === 'fixed') {
+        discountAmount = voucher.discount_value;
+      }
+    }
+
     // Create line items for the checkout session
     const lineItems = await Promise.all(items.map(async (item: any) => {
       console.log('Processing item:', item.title);
+      
+      // Calculate item unit price after discount (proportionally distributed)
+      const itemSubtotal = item.price * item.quantity;
+      const itemDiscountAmount = (itemSubtotal / subtotal) * discountAmount;
+      const discountedUnitPrice = Math.max(0, ((itemSubtotal - itemDiscountAmount) / item.quantity));
+      
       // Create a product for each item
       const product = await stripe.products.create({
         name: item.title,
@@ -48,10 +67,10 @@ serve(async (req) => {
         images: item.image_url ? [item.image_url] : undefined,
       })
 
-      // Create a price for the product
+      // Create a price for the product with the discounted amount
       const price = await stripe.prices.create({
         product: product.id,
-        unit_amount: Math.round(item.price * 100), // Convert to cents
+        unit_amount: Math.round(discountedUnitPrice * 100), // Convert to cents
         currency: 'usd',
       })
 
