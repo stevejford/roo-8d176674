@@ -138,13 +138,13 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2">
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
           {products?.map((product) => {
             const quantity = quantities[product.id] || 0;
             return (
               <Card 
                 key={product.id}
-                className="overflow-hidden hover:bg-gray-50 transition-colors w-full"
+                className="overflow-hidden hover:bg-gray-50 transition-colors"
               >
                 <div className="aspect-square w-full">
                   <img
