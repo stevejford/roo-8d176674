@@ -33,7 +33,7 @@ export const useOrderState = () => {
 };
 
 export const OrderStateProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedTime, setSelectedTime] = useState("Wednesday - Reopen");
+  const [selectedTime, setSelectedTime] = useState("Select pickup time");
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successOrderDetails, setSuccessOrderDetails] = useState(null);
@@ -59,7 +59,7 @@ export const OrderStateProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   const handleCheckout = async () => {
-    if (selectedTime === "Wednesday - Reopen") {
+    if (selectedTime === "Select pickup time") {
       toast({
         title: "Pickup Time Required",
         description: "Please select a pickup time before proceeding to checkout.",
