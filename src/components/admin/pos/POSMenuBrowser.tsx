@@ -106,8 +106,9 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
             variant="ghost" 
             size="sm"
             onClick={onOrderComplete}
+            className="gap-2"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Orders
           </Button>
         </div>
@@ -117,7 +118,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
               size="sm"
-              className="shrink-0 text-xs sm:text-sm whitespace-nowrap"
+              className="shrink-0 text-xs sm:text-sm whitespace-nowrap h-10 px-4"
             >
               All Items
             </Button>
@@ -127,7 +128,7 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category.id)}
                 size="sm"
-                className="shrink-0 text-xs sm:text-sm whitespace-nowrap"
+                className="shrink-0 text-xs sm:text-sm whitespace-nowrap h-10 px-4"
               >
                 {category.title}
               </Button>
@@ -152,34 +153,34 @@ export const POSMenuBrowser = ({ orderId, onOrderComplete }: POSMenuBrowserProps
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-2">
+                <div className="p-3">
                   <h3 className="font-medium text-[10px] sm:text-xs truncate">{product.title}</h3>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mb-1">
+                  <p className="text-[10px] sm:text-xs text-gray-500 mb-2">
                     ${product.price?.toFixed(2)}
                   </p>
-                  <div className="flex items-center justify-between gap-0.5 sm:gap-1">
-                    <div className="flex items-center gap-0.5 sm:gap-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
                       <Button
-                        size="icon"
+                        size="sm"
                         variant="outline"
-                        className="h-4 w-4 sm:h-5 sm:w-5"
+                        className="h-10 w-10"
                         onClick={() => handleQuantityChange(product.id, -1)}
                       >
-                        <Minus className="h-2 w-2 sm:h-3 sm:w-3" />
+                        <Minus className="h-5 w-5" />
                       </Button>
-                      <span className="text-[10px] sm:text-xs w-3 sm:w-4 text-center">{quantity}</span>
+                      <span className="text-sm w-6 text-center font-medium">{quantity}</span>
                       <Button
-                        size="icon"
+                        size="sm"
                         variant="outline"
-                        className="h-4 w-4 sm:h-5 sm:w-5"
+                        className="h-10 w-10"
                         onClick={() => handleQuantityChange(product.id, 1)}
                       >
-                        <Plus className="h-2 w-2 sm:h-3 sm:w-3" />
+                        <Plus className="h-5 w-5" />
                       </Button>
                     </div>
                     <Button
                       size="sm"
-                      className="h-4 sm:h-5 text-[10px] sm:text-xs px-1 sm:px-1.5"
+                      className="h-10 px-6"
                       onClick={() => handleAddToOrder(product, quantity)}
                       disabled={quantity === 0}
                     >
