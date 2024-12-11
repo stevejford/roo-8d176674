@@ -22,12 +22,10 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
     const isPopularCategory = category.toLowerCase() === "popular";
     const isMobile = useIsMobile();
 
-    // Fetch category pricing only if not in Popular category
     const { data: categoryPricing } = useCategoryPricing(
       !isPopularCategory ? products[0]?.category_id : null
     );
 
-    // Fetch product pricing overrides
     const { data: productPricingMap } = useProductPricing(products);
 
     const calculatePrice = (product: Product) => {
@@ -85,19 +83,16 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
         }
       }
 
-      // Fallback to product's default price
       console.log('Using product default price:', product.price);
       const finalPrice = product.price || 0;
       console.log('Final calculated price:', finalPrice);
       return finalPrice;
     };
 
-    // Filter products for Popular category
     const displayProducts = isPopularCategory 
       ? products.filter(product => product.is_popular)
       : products;
 
-    // Don't render the section if it's the Popular category and there are no popular products
     if (isPopularCategory && displayProducts.length === 0) {
       return null;
     }
@@ -107,10 +102,10 @@ export const CategorySection = React.forwardRef<HTMLDivElement, CategorySectionP
         <h3 className="text-2xl font-bold text-primary-title mb-6">
           {category}
         </h3>
-        <div className={`grid gap-4 sm:gap-6 ${
+        <div className={`grid gap-3 sm:gap-4 md:gap-5 ${
           isSpecialsCategory 
             ? 'grid-cols-1 sm:grid-cols-2'
-            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
+            : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
         }`}>
           {displayProducts.map((item) => {
             const price = calculatePrice(item);
