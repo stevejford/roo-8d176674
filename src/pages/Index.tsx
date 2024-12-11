@@ -10,6 +10,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { Product } from '@/components/admin/products/types';
 import { OrderLocation } from '@/components/OrderLocation';
+import { useCartStore } from '@/stores/useCartStore';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const categoryRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const { items } = useCartStore();
 
   const [selectedProduct, setSelectedProduct] = useState<{
     title: string;
@@ -31,7 +33,6 @@ const Index = () => {
   const isDesktopWidth = windowWidth >= 1280;
   const [showLocationSheet, setShowLocationSheet] = useState(isDesktopWidth);
   const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
-  const [cartCount, setCartCount] = useState(2);
 
   useEffect(() => {
     const handleResize = () => {
@@ -136,9 +137,9 @@ const Index = () => {
             className="fixed bottom-0 left-0 right-0 bg-[#D84A4A] text-white py-4 flex items-center justify-center space-x-3 z-50 shadow-lg"
           >
             <span className="text-lg font-medium">View Order</span>
-            {cartCount > 0 && (
+            {items.length > 0 && (
               <div className="flex items-center justify-center bg-white text-[#D84A4A] rounded-full h-6 w-6 font-bold text-sm">
-                {cartCount}
+                {items.length}
               </div>
             )}
           </button>
