@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/components/AuthProvider";
 import {
   Table,
   TableBody,
@@ -25,6 +26,7 @@ interface StoreHours {
 export const StoreHoursForm = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isAdmin } = useAuth();
 
   const { data: hours, isLoading } = useQuery({
     queryKey: ['store-hours'],
@@ -45,6 +47,10 @@ export const StoreHoursForm = () => {
 
   const mutation = useMutation({
     mutationFn: async (hours: StoreHours) => {
+      if (!user || !isAdmin) {
+        throw new Error('Unauthorized: Only admin users can modify store hours');
+      }
+
       // If the day is closed, set times to null
       const updatedHours = hours.is_closed ? {
         ...hours,
@@ -71,12 +77,12 @@ export const StoreHoursForm = () => {
       });
     },
     onError: (error) => {
+      console.error('Error updating store hours:', error);
       toast({
         title: "Error",
-        description: "Failed to update store hours.",
+        description: error instanceof Error ? error.message : "Failed to update store hours.",
         variant: "destructive",
       });
-      console.error('Error updating store hours:', error);
     },
   });
 
@@ -104,6 +110,14 @@ export const StoreHoursForm = () => {
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="text-red-600">
+        Only administrators can modify store hours.
+      </div>
+    );
   }
 
   return (
