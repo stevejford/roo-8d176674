@@ -26,7 +26,7 @@ interface StoreHours {
 export const StoreHoursForm = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { session, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const { data: hours, isLoading } = useQuery({
     queryKey: ['store-hours'],
@@ -47,7 +47,7 @@ export const StoreHoursForm = () => {
 
   const mutation = useMutation({
     mutationFn: async (hours: StoreHours) => {
-      if (!session || !isAdmin) {
+      if (!user || !isAdmin) {
         throw new Error('Unauthorized: Only admin users can modify store hours');
       }
 
