@@ -17,11 +17,6 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
 
   useEffect(() => {
     const loadGoogleMapsScript = async () => {
-      // Remove any existing Google Maps script
-      if (scriptRef.current) {
-        document.head.removeChild(scriptRef.current);
-      }
-
       try {
         console.log('Fetching Google Maps API key...');
         const { data, error } = await supabase.functions.invoke('get-maps-key', {
@@ -40,6 +35,11 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
 
         console.log('API key fetched successfully');
         
+        // Remove existing script if it exists
+        if (scriptRef.current && document.head.contains(scriptRef.current)) {
+          document.head.removeChild(scriptRef.current);
+        }
+
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=places&callback=initGoogleMaps`;
         script.async = true;
@@ -75,7 +75,8 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
     loadGoogleMapsScript();
 
     return () => {
-      if (scriptRef.current) {
+      // Only remove the script if it exists and is actually in the document
+      if (scriptRef.current && document.head.contains(scriptRef.current)) {
         document.head.removeChild(scriptRef.current);
       }
       // Clean up the global callback
