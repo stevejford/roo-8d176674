@@ -7,6 +7,7 @@ import { ServiceTimingForm } from './ServiceTimingForm';
 import { StoreHoursForm } from './StoreHoursForm';
 import { BillSplittingForm } from './BillSplittingForm';
 import { StripeConfigForm } from './StripeConfigForm';
+import { DeliveryZonesForm } from './DeliveryZonesForm';
 import { SettingsSectionHeader } from './SettingsSectionHeader';
 import { StoreSettingsResponse } from './types';
 
@@ -99,6 +100,7 @@ export const StoreSettingsForm = () => {
 
       <ServiceTimingForm />
       <StoreHoursForm />
+      <DeliveryZonesForm />
 
       <div>
         <SettingsSectionHeader
