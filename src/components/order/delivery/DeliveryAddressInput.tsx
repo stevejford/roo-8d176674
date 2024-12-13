@@ -21,11 +21,15 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
         document.head.removeChild(scriptRef.current);
       }
 
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      console.log('API Key available:', !!apiKey); // Debug log
+      // Log the environment variable to debug
+      console.log('Environment variables:', {
+        VITE_GOOGLE_MAPS_API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+      });
 
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      
       if (!apiKey) {
-        console.error('Google Maps API key is not defined');
+        console.error('Google Maps API key is missing in environment variables');
         toast({
           title: "Configuration Error",
           description: "Google Maps API key is missing. Address autocomplete will not work.",
@@ -35,13 +39,16 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`;
       script.async = true;
       script.defer = true;
-      script.onload = () => {
-        console.log('Google Maps script loaded successfully');
+
+      // Define the callback function
+      window.initGoogleMaps = () => {
+        console.log('Google Maps script loaded, initializing autocomplete');
         initAutocomplete();
       };
+
       script.onerror = (error) => {
         console.error('Error loading Google Maps script:', error);
         toast({
@@ -50,6 +57,7 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
           variant: "destructive"
         });
       };
+
       document.head.appendChild(script);
       scriptRef.current = script;
     };
@@ -60,6 +68,8 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
       if (scriptRef.current) {
         document.head.removeChild(scriptRef.current);
       }
+      // Clean up the global callback
+      delete window.initGoogleMaps;
     };
   }, [toast]);
 
@@ -108,3 +118,11 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
     </div>
   );
 };
+
+// Add the global type declaration
+declare global {
+  interface Window {
+    initGoogleMaps: () => void;
+    google: any;
+  }
+}
