@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type AuthContextType = {
   session: Session | null;
@@ -38,25 +39,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Error checking admin status:', error);
+        toast.error("Error checking admin status");
         setIsAdmin(false);
         return;
       }
 
+      console.log("Profile data:", profile);
       if (profile) {
-        console.log("Found existing profile:", profile);
-        setIsAdmin(profile.role === 'admin');
+        const isUserAdmin = profile.role === 'admin';
+        console.log("Is user admin?", isUserAdmin);
+        setIsAdmin(isUserAdmin);
+      } else {
+        console.log("No profile found");
+        setIsAdmin(false);
       }
-
-      // Profile will be created by the database trigger, no need to create it here
-      console.log("Profile status:", profile ? "exists" : "will be created by trigger");
-      setIsAdmin(profile?.role === 'admin');
 
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
+      toast.error("Error checking admin status");
       setIsAdmin(false);
     } finally {
       setIsLoading(false);
