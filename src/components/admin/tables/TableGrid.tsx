@@ -76,6 +76,7 @@ export const TableGrid = () => {
       <TableManagementDialogs
         showAddDialog={showAddDialog}
         onCloseAddDialog={() => setShowAddDialog(false)}
+        onTableAdded={refetch}
       />
     </div>
   );

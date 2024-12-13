@@ -12,6 +12,7 @@ interface TableManagementDialogsProps {
   setIsDeleteDialogOpen?: (open: boolean) => void;
   selectedTable?: any;
   setSelectedTable?: (table: any) => void;
+  onTableAdded?: () => void;
 }
 
 export const TableManagementDialogs: React.FC<TableManagementDialogsProps> = ({
@@ -21,6 +22,7 @@ export const TableManagementDialogs: React.FC<TableManagementDialogsProps> = ({
   setIsDeleteDialogOpen,
   selectedTable,
   setSelectedTable,
+  onTableAdded,
 }) => {
   const [newTableNumber, setNewTableNumber] = useState('');
   const { toast } = useToast();
@@ -49,6 +51,9 @@ export const TableManagementDialogs: React.FC<TableManagementDialogsProps> = ({
       
       setNewTableNumber('');
       onCloseAddDialog();
+      if (onTableAdded) {
+        onTableAdded();
+      }
     } catch (error) {
       console.error('Error adding table:', error);
       toast({
