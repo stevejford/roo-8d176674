@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -7,13 +7,15 @@ import { supabase } from "@/integrations/supabase/client";
 interface DeliveryAddressInputProps {
   value: string;
   onChange: (value: string) => void;
+  onPostcodeChange?: (postcode: string | null) => void;
 }
 
-export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputProps) => {
+export const DeliveryAddressInput = ({ value, onChange, onPostcodeChange }: DeliveryAddressInputProps) => {
   const addressInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
   const { toast } = useToast();
+  const [isValidPostcode, setIsValidPostcode] = useState<boolean | null>(null);
 
   useEffect(() => {
     const loadGoogleMapsScript = async () => {
@@ -35,7 +37,6 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
 
         console.log('API key fetched successfully');
         
-        // Remove existing script if it exists
         if (scriptRef.current && document.head.contains(scriptRef.current)) {
           document.head.removeChild(scriptRef.current);
         }
@@ -45,7 +46,6 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
         script.async = true;
         script.defer = true;
 
-        // Define the callback function
         window.initGoogleMaps = () => {
           console.log('Google Maps script loaded, initializing autocomplete');
           initAutocomplete();
@@ -75,14 +75,41 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
     loadGoogleMapsScript();
 
     return () => {
-      // Only remove the script if it exists and is actually in the document
       if (scriptRef.current && document.head.contains(scriptRef.current)) {
         document.head.removeChild(scriptRef.current);
       }
-      // Clean up the global callback
       delete window.initGoogleMaps;
     };
   }, [toast]);
+
+  const checkDeliveryZone = async (postcode: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('delivery_zones')
+        .select('*')
+        .eq('postcode', postcode)
+        .eq('active', true)
+        .single();
+
+      if (error) throw error;
+
+      const isValid = !!data;
+      setIsValidPostcode(isValid);
+      onPostcodeChange?.(isValid ? postcode : null);
+
+      if (!isValid) {
+        toast({
+          title: "Delivery Unavailable",
+          description: "Sorry, we don't deliver to this area yet.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error checking delivery zone:', error);
+      setIsValidPostcode(false);
+      onPostcodeChange?.(null);
+    }
+  };
 
   const initAutocomplete = () => {
     if (!addressInputRef.current || !window.google) {
@@ -93,14 +120,23 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
     try {
       autocompleteRef.current = new google.maps.places.Autocomplete(addressInputRef.current, {
         types: ['address'],
-        componentRestrictions: { country: 'AU' }, // Restrict to Australia
-        fields: ['formatted_address']
+        componentRestrictions: { country: 'AU' },
+        fields: ['formatted_address', 'address_components']
       });
 
       autocompleteRef.current.addListener('place_changed', () => {
         const place = autocompleteRef.current?.getPlace();
         if (place?.formatted_address) {
           onChange(place.formatted_address);
+          
+          // Extract postcode from address components
+          const postcodeComponent = place.address_components?.find(
+            component => component.types.includes('postal_code')
+          );
+          
+          if (postcodeComponent?.long_name) {
+            checkDeliveryZone(postcodeComponent.long_name);
+          }
         }
       });
       
@@ -123,14 +159,17 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
         placeholder="Enter delivery address"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="pl-10 py-6"
+        className={cn(
+          "pl-10 py-6",
+          isValidPostcode === false && "border-red-500",
+          isValidPostcode === true && "border-green-500"
+        )}
       />
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
     </div>
   );
 };
 
-// Add the global type declaration
 declare global {
   interface Window {
     initGoogleMaps: () => void;

@@ -78,6 +78,36 @@ export type Database = {
           },
         ]
       }
+      delivery_zones: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          estimated_minutes: number
+          id: string
+          postcode: string
+          suburb: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          estimated_minutes: number
+          id?: string
+          postcode: string
+          suburb: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          estimated_minutes?: number
+          id?: string
+          postcode?: string
+          suburb?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string | null
