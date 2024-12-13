@@ -89,12 +89,11 @@ export const DeliveryAddressInput = ({ value, onChange, onPostcodeChange }: Deli
         .from('delivery_zones')
         .select('*')
         .eq('postcode', postcode)
-        .eq('active', true)
-        .single();
+        .eq('active', true);
 
       if (error) throw error;
 
-      const isValid = !!data;
+      const isValid = data && data.length > 0;
       setIsValidPostcode(isValid);
       onPostcodeChange?.(isValid ? postcode : null);
 
@@ -109,6 +108,11 @@ export const DeliveryAddressInput = ({ value, onChange, onPostcodeChange }: Deli
       console.error('Error checking delivery zone:', error);
       setIsValidPostcode(false);
       onPostcodeChange?.(null);
+      toast({
+        title: "Error",
+        description: "Failed to check delivery availability.",
+        variant: "destructive"
+      });
     }
   };
 
