@@ -9,13 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,26 +16,12 @@ import { Button } from "@/components/ui/button";
 import { UserActions } from './UserActions';
 import { EditUserDialog } from './EditUserDialog';
 import { DeleteUserDialog } from './DeleteUserDialog';
+import { InviteStaffDialog } from './InviteStaffDialog';
+import { UserRoleSelect } from './UserRoleSelect';
+import { UserStatusSelect } from './UserStatusSelect';
 import type { Database } from '@/integrations/supabase/types';
 
-type UserRole = Database['public']['Enums']['user_role'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
-
-const roleColors = {
-  admin: "bg-red-100 text-red-800",
-  manager: "bg-purple-100 text-purple-800",
-  kitchen: "bg-yellow-100 text-yellow-800",
-  staff: "bg-blue-100 text-blue-800",
-  delivery: "bg-green-100 text-green-800",
-  owner: "bg-indigo-100 text-indigo-800",
-  user: "bg-gray-100 text-gray-800"
-} as const;
-
-const statusColors = {
-  active: "bg-green-100 text-green-800",
-  inactive: "bg-red-100 text-red-800",
-  pending: "bg-yellow-100 text-yellow-800"
-} as const;
 
 export const UserManagement = () => {
   const { toast } = useToast();
@@ -91,14 +70,6 @@ export const UserManagement = () => {
     },
   });
 
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    updateUserMutation.mutate({ id: userId, updates: { role: newRole } });
-  };
-
-  const handleStatusChange = (userId: string, newStatus: string) => {
-    updateUserMutation.mutate({ id: userId, updates: { status: newStatus } });
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -107,6 +78,7 @@ export const UserManagement = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">User Management</h2>
+        <InviteStaffDialog />
       </div>
 
       <Table>
@@ -142,46 +114,22 @@ export const UserManagement = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Select
-                    value={user.role || 'user'}
-                    onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue>
-                        <Badge className={roleColors[user.role as keyof typeof roleColors] || roleColors.user}>
-                          {user.role || 'user'}
-                        </Badge>
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="owner">Owner</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="kitchen">Kitchen</SelectItem>
-                      <SelectItem value="staff">Staff</SelectItem>
-                      <SelectItem value="delivery">Delivery</SelectItem>
-                      <SelectItem value="user">User</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <UserRoleSelect
+                    userId={user.id}
+                    currentRole={user.role}
+                    onRoleChange={(role) => 
+                      updateUserMutation.mutate({ id: user.id, updates: { role } })
+                    }
+                  />
                 </TableCell>
                 <TableCell>
-                  <Select
-                    value={user.status || 'active'}
-                    onValueChange={(value) => handleStatusChange(user.id, value)}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue>
-                        <Badge className={statusColors[user.status as keyof typeof statusColors] || statusColors.active}>
-                          {user.status || 'active'}
-                        </Badge>
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <UserStatusSelect
+                    userId={user.id}
+                    currentStatus={user.status}
+                    onStatusChange={(status) =>
+                      updateUserMutation.mutate({ id: user.id, updates: { status } })
+                    }
+                  />
                 </TableCell>
                 <TableCell>
                   {user.last_sign_in_at ? (
