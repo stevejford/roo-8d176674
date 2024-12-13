@@ -50,7 +50,8 @@ export const getAvailableDays = async (startDate: Date = new Date()): Promise<Da
   let currentDate = startOfDay(startDate);
   for (let i = 0; i < 7; i++) {
     const dayName = format(currentDate, 'EEEE');
-    if (hours[dayName]) {
+    // Check if the day is not marked as closed in store hours
+    if (hours[dayName] && !hours[dayName]?.is_closed) {
       days.push(currentDate);
     }
     currentDate = addDays(currentDate, 1);
@@ -66,7 +67,7 @@ export const getAvailableTimeSlots = async (date: Date): Promise<string[]> => {
   if (!hours || !hours[dayName]) return [];
 
   const schedule = hours[dayName];
-  if (!schedule) return [];
+  if (!schedule || !schedule.open || !schedule.close) return [];
 
   const timeSlots: string[] = [];
   const [openHour, openMinute] = schedule.open.split(':').map(Number);
@@ -79,11 +80,13 @@ export const getAvailableTimeSlots = async (date: Date): Promise<string[]> => {
   closeTime.setHours(closeHour, closeMinute, 0);
   
   const now = new Date();
+  const isToday = startOfDay(date).getTime() === startOfDay(now).getTime();
   
   // Generate 15-minute intervals
   while (isBefore(currentTime, closeTime)) {
-    // If it's today, only show future times
-    if (isBefore(startOfDay(date), startOfDay(now)) || isAfter(currentTime, now)) {
+    // For today, only show future times if store is open
+    // For future dates, show all times within business hours
+    if (!isToday || isAfter(currentTime, now)) {
       timeSlots.push(format(currentTime, 'HH:mm'));
     }
     currentTime = setMinutes(currentTime, currentTime.getMinutes() + 15);
@@ -97,49 +100,36 @@ export const isStoreOpen = async () => {
   if (!hours) return false;
 
   const now = new Date();
-  const currentHour = now.getHours();
   const currentDay = format(now, 'EEEE');
   const currentTime = format(now, 'HH:mm');
   
   console.log('Current time check:', {
     now,
-    currentHour,
     currentDay,
     currentTime
   });
 
   // Get today's schedule
   const todaySchedule = hours[currentDay];
-  if (!todaySchedule) {
+  if (!todaySchedule || !todaySchedule.open || !todaySchedule.close) {
     console.log('Store is closed today');
     return false;
   }
 
   console.log('Today\'s schedule:', todaySchedule);
 
-  // If it's before noon, show "Closed - Preorder available after 12pm"
-  if (currentHour < 12) {
-    console.log('Store is closed - before noon');
-    return false;
-  }
-
-  // If it's after midnight but before opening time, allow pre-orders
-  const [openHour, openMinute] = todaySchedule.open.split(':').map(Number);
-  const [closeHour, closeMinute] = todaySchedule.close.split(':').map(Number);
-  
-  const openingTime = new Date(now);
-  openingTime.setHours(openHour, openMinute, 0);
-  
-  const closingTime = new Date(now);
-  closingTime.setHours(closeHour, closeMinute, 0);
+  // Parse store hours
+  const openTime = parse(todaySchedule.open, 'HH:mm', new Date());
+  const closeTime = parse(todaySchedule.close, 'HH:mm', new Date());
+  const currentTimeDate = parse(currentTime, 'HH:mm', new Date());
 
   // Check if current time is within business hours
-  const isWithinHours = isAfter(now, openingTime) && isBefore(now, closingTime);
+  const isWithinHours = isAfter(currentTimeDate, openTime) && isBefore(currentTimeDate, closeTime);
   
   console.log('Hours check:', {
     currentTime,
-    openingTime: format(openingTime, 'HH:mm'),
-    closingTime: format(closingTime, 'HH:mm'),
+    openTime: format(openTime, 'HH:mm'),
+    closeTime: format(closeTime, 'HH:mm'),
     isWithinHours
   });
 
