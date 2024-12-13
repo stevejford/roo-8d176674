@@ -11,14 +11,14 @@ export const DeliveryModeSelector = ({ mode, setMode }: DeliveryModeSelectorProp
     <div className="relative inline-flex p-1 bg-gray-100 rounded-full">
       <div
         className={cn(
-          "absolute inset-y-1 transition-transform duration-200 ease-in-out bg-white rounded-full shadow-sm w-[96px]",
-          mode === 'delivery' ? 'translate-x-[96px]' : 'translate-x-0'
+          "absolute inset-y-1 transition-transform duration-200 ease-in-out bg-white rounded-full shadow-sm w-24",
+          mode === 'delivery' ? 'translate-x-24' : 'translate-x-0'
         )}
       />
       <button 
         onClick={() => setMode('pickup')}
         className={cn(
-          "relative px-6 py-2 rounded-full text-sm transition-colors z-10",
+          "relative px-6 py-2 rounded-full text-sm transition-colors z-10 w-24",
           mode === 'pickup' ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'
         )}
       >
@@ -27,7 +27,7 @@ export const DeliveryModeSelector = ({ mode, setMode }: DeliveryModeSelectorProp
       <button 
         onClick={() => setMode('delivery')}
         className={cn(
-          "relative px-6 py-2 rounded-full text-sm transition-colors z-10",
+          "relative px-6 py-2 rounded-full text-sm transition-colors z-10 w-24",
           mode === 'delivery' ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'
         )}
       >
