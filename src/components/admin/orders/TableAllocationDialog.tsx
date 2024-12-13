@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TableOrderActions } from './table/TableOrderActions';
-import { Phone, User, Mail, Store, TakeoutDining } from 'lucide-react';
+import { Phone, User, Mail, Store, UtensilsCrossed } from 'lucide-react';
 
 interface Table {
   table_number: string;
@@ -104,11 +104,8 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
           <TableOrderActions 
             orderId={table.order_id} 
             onAddItem={async () => {
-              // This is now a Promise<void> as required by the type
-              return new Promise<void>((resolve) => {
-                // Implementation for adding item would go here
-                resolve();
-              });
+              // Implementation for adding item would go here
+              return Promise.resolve();
             }}
           />
         )}
@@ -144,7 +141,7 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
               </SelectItem>
               <SelectItem value="takeout">
                 <div className="flex items-center gap-2">
-                  <TakeoutDining className="h-4 w-4" />
+                  <UtensilsCrossed className="h-4 w-4" />
                   <span>Takeout</span>
                 </div>
               </SelectItem>
