@@ -34,6 +34,17 @@ export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
     }
   };
 
+  const getStatusBadgeStyle = () => {
+    switch (table.status) {
+      case 'available':
+        return 'bg-gray-100 text-gray-900 border-gray-200';
+      case 'reserved':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default:
+        return 'bg-white/20 text-white';
+    }
+  };
+
   const getServiceAlerts = () => {
     if (table.status !== 'occupied' || !table.seated_at) return [];
     
@@ -101,12 +112,8 @@ export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
                 Table {table.table_number}
               </h3>
               <Badge 
-                variant={table.status === 'available' ? 'outline' : 'secondary'}
-                className={`${
-                  table.status === 'available' 
-                    ? 'bg-gray-100 text-gray-900 border-gray-200' 
-                    : 'bg-white/20 text-white'
-                }`}
+                variant={table.status === 'available' || table.status === 'reserved' ? 'outline' : 'secondary'}
+                className={getStatusBadgeStyle()}
               >
                 {table.status === 'occupied' && table.order_status ? table.order_status : table.status}
               </Badge>
