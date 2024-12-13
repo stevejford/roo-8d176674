@@ -93,7 +93,7 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
     try {
       autocompleteRef.current = new google.maps.places.Autocomplete(addressInputRef.current, {
         types: ['address'],
-        componentRestrictions: { country: 'US' },
+        componentRestrictions: { country: 'AU' }, // Restrict to Australia
         fields: ['formatted_address']
       });
 
