@@ -24,6 +24,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { AnalyticsDashboard } from '@/components/admin/analytics/AnalyticsDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BusinessInfoForm } from '@/components/admin/settings/BusinessInfoForm';
 
 const Dashboard = () => (
   <div className="p-8">
@@ -96,29 +97,36 @@ const SettingsPanel = () => (
         <TabsTrigger value="payment">Payment</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="business" className="space-y-8">
+      <TabsContent value="business">
         <div>
           <SettingsSectionHeader
             title="Business Information"
             description="Manage your restaurant's basic information and contact details"
           />
-          <StoreSettingsForm />
+          <BusinessInfoForm
+            defaultValues={{
+              store_name: '',
+              address: '',
+              accept_preorders: true,
+            }}
+            onSubmit={() => {}}
+          />
         </div>
       </TabsContent>
 
-      <TabsContent value="hours" className="space-y-8">
+      <TabsContent value="hours">
         <StoreHoursForm />
       </TabsContent>
 
-      <TabsContent value="service" className="space-y-8">
+      <TabsContent value="service">
         <ServiceTimingForm />
       </TabsContent>
 
-      <TabsContent value="delivery" className="space-y-8">
+      <TabsContent value="delivery">
         <DeliveryZonesForm />
       </TabsContent>
 
-      <TabsContent value="billing" className="space-y-8">
+      <TabsContent value="billing">
         <div>
           <SettingsSectionHeader
             title="Bill Splitting"
@@ -136,7 +144,7 @@ const SettingsPanel = () => (
         </div>
       </TabsContent>
 
-      <TabsContent value="payment" className="space-y-8">
+      <TabsContent value="payment">
         <StripeConfigForm />
       </TabsContent>
     </Tabs>
