@@ -29,7 +29,7 @@ export function AdminSidebar() {
   
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Quick Add Order', href: '/admin/pos', icon: Plus },
+    { name: 'POS Dashboard', href: '/admin/pos', icon: Plus },
     { name: 'Waiter View', href: '/admin/waiter', icon: Menu },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
