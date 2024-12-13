@@ -85,20 +85,14 @@ export const StoreSettingsForm = () => {
 
   return (
     <div className="space-y-12">
-      <div>
-        <SettingsSectionHeader
-          title="Business Information"
-          description="Manage your restaurant's basic information and contact details"
-        />
-        <BusinessInfoForm
-          defaultValues={{
-            store_name: settings?.store_name || '',
-            address: settings?.address || '',
-            accept_preorders: settings?.accept_preorders ?? true,
-          }}
-          onSubmit={handleBusinessInfoSubmit}
-        />
-      </div>
+      <BusinessInfoForm
+        defaultValues={{
+          store_name: settings?.store_name || '',
+          address: settings?.address || '',
+          accept_preorders: settings?.accept_preorders ?? true,
+        }}
+        onSubmit={handleBusinessInfoSubmit}
+      />
 
       <ServiceTimingForm />
       <StoreHoursForm />
