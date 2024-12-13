@@ -101,8 +101,12 @@ export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
                 Table {table.table_number}
               </h3>
               <Badge 
-                variant={table.status === 'available' ? 'secondary' : 'outline'}
-                className="bg-white/20"
+                variant={table.status === 'available' ? 'outline' : 'secondary'}
+                className={`${
+                  table.status === 'available' 
+                    ? 'bg-gray-100 text-gray-900 border-gray-200' 
+                    : 'bg-white/20 text-white'
+                }`}
               >
                 {table.status === 'occupied' && table.order_status ? table.order_status : table.status}
               </Badge>
