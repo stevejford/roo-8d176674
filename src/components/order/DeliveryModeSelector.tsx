@@ -1,5 +1,4 @@
 import React from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface DeliveryModeSelectorProps {
   mode: 'pickup' | 'delivery';
@@ -8,34 +7,27 @@ interface DeliveryModeSelectorProps {
 
 export const DeliveryModeSelector = ({ mode, setMode }: DeliveryModeSelectorProps) => {
   return (
-    <div className="relative inline-flex">
-      {/* Sliding background */}
-      <div
-        className={`absolute inset-y-1 w-[120px] bg-white rounded-full transition-transform duration-200 ease-in-out ${
-          mode === 'delivery' ? 'translate-x-[120px]' : 'translate-x-1'
+    <div className="inline-flex p-1 bg-gray-100 rounded-full">
+      <button 
+        onClick={() => setMode('pickup')}
+        className={`px-6 py-2 rounded-full text-sm transition-colors ${
+          mode === 'pickup' 
+            ? 'bg-white text-gray-900 shadow-sm' 
+            : 'text-gray-600 hover:text-gray-900'
         }`}
-      />
-      
-      {/* ToggleGroup buttons */}
-      <ToggleGroup 
-        type="single" 
-        value={mode}
-        onValueChange={(value) => value && setMode(value as 'pickup' | 'delivery')}
-        className="bg-muted p-1 rounded-full relative z-10"
       >
-        <ToggleGroupItem 
-          value="pickup" 
-          className="rounded-full px-6 py-1.5 text-sm font-medium transition-colors data-[state=on]:bg-transparent data-[state=on]:text-foreground data-[state=off]:text-muted-foreground"
-        >
-          Pickup
-        </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="delivery" 
-          className="rounded-full px-6 py-1.5 text-sm font-medium transition-colors data-[state=on]:bg-transparent data-[state=on]:text-foreground data-[state=off]:text-muted-foreground"
-        >
-          Delivery
-        </ToggleGroupItem>
-      </ToggleGroup>
+        Pickup
+      </button>
+      <button 
+        onClick={() => setMode('delivery')}
+        className={`px-6 py-2 rounded-full text-sm transition-colors ${
+          mode === 'delivery' 
+            ? 'bg-white text-gray-900 shadow-sm' 
+            : 'text-gray-600 hover:text-gray-900'
+        }`}
+      >
+        Delivery
+      </button>
     </div>
   );
 };

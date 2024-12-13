@@ -13,8 +13,7 @@ interface OrderLocationContentProps {
   mode: 'pickup' | 'delivery';
 }
 
-export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContentProps) => {
-  const [mode, setMode] = useState(initialMode);
+export const OrderLocationContent = ({ mode }: OrderLocationContentProps) => {
   const [storeAddress, setStoreAddress] = useState("");
   const [storeName, setStoreName] = useState("");
   const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
@@ -120,7 +119,6 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
         <h3 className="text-lg font-semibold text-[#2D3648] mb-4">Items</h3>
         <OrderContent
           mode={mode}
-          setMode={setMode}
           storeName={storeName}
           storeAddress={storeAddress}
           selectedTime={selectedTime}
@@ -144,7 +142,6 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
   const renderPickupContent = () => (
     <OrderContent
       mode={mode}
-      setMode={setMode}
       storeName={storeName}
       storeAddress={storeAddress}
       selectedTime={selectedTime}

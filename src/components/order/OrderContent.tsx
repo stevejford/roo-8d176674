@@ -11,7 +11,6 @@ import type { Voucher } from "@/hooks/useVoucherValidation";
 
 interface OrderContentProps {
   mode: 'pickup' | 'delivery';
-  setMode: (mode: 'pickup' | 'delivery') => void;
   storeName: string;
   storeAddress: string;
   selectedTime: string;
@@ -31,7 +30,6 @@ interface OrderContentProps {
 
 export const OrderContent = ({
   mode,
-  setMode,
   storeName,
   storeAddress,
   selectedTime,
@@ -52,7 +50,7 @@ export const OrderContent = ({
     <div className="h-full flex flex-col bg-white">
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6">
-          <OrderHeader mode={mode} setMode={setMode} />
+          <OrderHeader mode={mode} setMode={() => {}} />
           
           <LocationInfo 
             storeName={storeName}
