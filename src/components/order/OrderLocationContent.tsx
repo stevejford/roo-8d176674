@@ -3,8 +3,11 @@ import { useToast } from "@/hooks/use-toast";
 import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
 import { OrderContent } from "./OrderContent";
 import { OrderSuccessDialog } from "./OrderSuccessDialog";
-import { useOrderState } from "./OrderStateProvider";
+import { OrderStateProvider } from "./OrderStateProvider";
 import { useCartStore } from "@/stores/useCartStore";
+import { Search, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface OrderLocationContentProps {
   mode: 'pickup' | 'delivery';
@@ -15,6 +18,7 @@ export const OrderLocationContent = ({ mode }: OrderLocationContentProps) => {
   const [storeName, setStoreName] = useState("");
   const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
   const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const { toast } = useToast();
   const { items } = useCartStore();
   const {
@@ -75,26 +79,90 @@ export const OrderLocationContent = ({ mode }: OrderLocationContentProps) => {
     setShowTimeModal(false);
   };
 
+  const renderDeliveryContent = () => (
+    <div className="p-6 space-y-6">
+      <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
+      
+      <div className="space-y-4">
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder="Enter delivery address"
+            value={deliveryAddress}
+            onChange={(e) => setDeliveryAddress(e.target.value)}
+            className="pl-10 py-6"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-gray-500" />
+              <div>
+                <h3 className="font-medium text-[#2D3648]">Delivery Time</h3>
+                <p className="text-sm text-gray-600">{selectedTime}</p>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowTimeModal(true)}
+              className="text-emerald-600 font-medium hover:text-emerald-700"
+            >
+              CHANGE
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4">
+        <h3 className="text-lg font-semibold text-[#2D3648] mb-4">Items</h3>
+        <OrderContent
+          mode={mode}
+          storeName={storeName}
+          storeAddress={storeAddress}
+          selectedTime={selectedTime}
+          isStoreCurrentlyOpen={isStoreCurrentlyOpen}
+          isCheckingStoreHours={isCheckingStoreHours}
+          isProcessing={isProcessing}
+          itemCount={items.length}
+          total={calculateTotal()}
+          validVoucher={validVoucher}
+          calculateTotal={calculateTotal}
+          onTimeChange={() => setShowTimeModal(true)}
+          onCheckout={handleCheckout}
+          showTimeModal={showTimeModal}
+          onCloseTimeModal={() => setShowTimeModal(false)}
+          onScheduleTime={handleScheduleTime}
+        />
+      </div>
+    </div>
+  );
+
+  const renderPickupContent = () => (
+    <OrderContent
+      mode={mode}
+      storeName={storeName}
+      storeAddress={storeAddress}
+      selectedTime={selectedTime}
+      isStoreCurrentlyOpen={isStoreCurrentlyOpen}
+      isCheckingStoreHours={isCheckingStoreHours}
+      isProcessing={isProcessing}
+      itemCount={items.length}
+      total={calculateTotal()}
+      validVoucher={validVoucher}
+      calculateTotal={calculateTotal}
+      onTimeChange={() => setShowTimeModal(true)}
+      onCheckout={handleCheckout}
+      showTimeModal={showTimeModal}
+      onCloseTimeModal={() => setShowTimeModal(false)}
+      onScheduleTime={handleScheduleTime}
+    />
+  );
+
   return (
     <>
-      <OrderContent
-        mode={mode}
-        storeName={storeName}
-        storeAddress={storeAddress}
-        selectedTime={selectedTime}
-        isStoreCurrentlyOpen={isStoreCurrentlyOpen}
-        isCheckingStoreHours={isCheckingStoreHours}
-        isProcessing={isProcessing}
-        itemCount={items.length}
-        total={calculateTotal()}
-        validVoucher={validVoucher}
-        calculateTotal={calculateTotal}
-        onTimeChange={() => setShowTimeModal(true)}
-        onCheckout={handleCheckout}
-        showTimeModal={showTimeModal}
-        onCloseTimeModal={() => setShowTimeModal(false)}
-        onScheduleTime={handleScheduleTime}
-      />
+      {mode === 'delivery' ? renderDeliveryContent() : renderPickupContent()}
       <OrderSuccessDialog
         open={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
