@@ -28,11 +28,11 @@ export const POSDashboard = () => {
           
           <TabsContent value="orders" className="m-0">
             <div className="flex gap-2">
-              <Button onClick={() => setTakeoutDialog(true)}>
+              <Button onClick={() => setShowTakeoutDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Takeout Order
               </Button>
-              <Button onClick={() => setPhoneDialog(true)}>
+              <Button onClick={() => setShowPhoneDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Phone Order
               </Button>
