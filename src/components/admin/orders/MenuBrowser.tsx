@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MenuCard } from '@/components/MenuCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -7,11 +8,13 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface MenuBrowserProps {
   onOrderComplete?: () => void;
-  selectedTable?: any;
 }
 
-export const MenuBrowser = ({ onOrderComplete, selectedTable }: MenuBrowserProps) => {
+export const MenuBrowser = ({ onOrderComplete }: MenuBrowserProps) => {
   const { toast } = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const selectedTable = location.state?.selectedTable;
   
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -37,23 +40,38 @@ export const MenuBrowser = ({ onOrderComplete, selectedTable }: MenuBrowserProps
     }
 
     try {
-      // Create a new order for the table
-      const { data: order, error: orderError } = await supabase
+      // Check if there's an existing pending order for the table
+      const { data: existingOrders, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          table_number: selectedTable.table_number,
-          status: 'pending',
-        })
-        .select()
+        .select('*')
+        .eq('table_number', selectedTable.table_number)
+        .eq('status', 'pending')
         .single();
 
-      if (orderError) throw orderError;
+      let orderId;
+
+      if (existingOrders) {
+        orderId = existingOrders.id;
+      } else {
+        // Create a new order for the table
+        const { data: order, error: newOrderError } = await supabase
+          .from('orders')
+          .insert({
+            table_number: selectedTable.table_number,
+            status: 'pending',
+          })
+          .select()
+          .single();
+
+        if (newOrderError) throw newOrderError;
+        orderId = order.id;
+      }
 
       // Add the product to the order
       const { error: itemError } = await supabase
         .from('order_items')
         .insert({
-          order_id: order.id,
+          order_id: orderId,
           product_id: product.id,
           price: product.price,
           quantity: 1
@@ -70,18 +88,17 @@ export const MenuBrowser = ({ onOrderComplete, selectedTable }: MenuBrowserProps
       if (tableError) throw tableError;
 
       toast({
-        title: "Order created",
-        description: `Order created for table ${selectedTable.table_number}`,
+        title: "Item added",
+        description: `${product.title} has been added to the order`,
       });
 
-      if (onOrderComplete) {
-        onOrderComplete();
-      }
+      // Navigate back to the tables view
+      navigate('/admin/waiter');
     } catch (error) {
       console.error('Error creating order:', error);
       toast({
         title: "Error",
-        description: "Failed to create order",
+        description: "Failed to add item to order",
         variant: "destructive"
       });
     }

@@ -1,8 +1,10 @@
-import { Users, Edit, Trash, Clock, AlertCircle } from "lucide-react";
+import { Users, Edit, Trash, Clock, AlertCircle, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { differenceInMinutes } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface TableCardProps {
   table: {
@@ -23,6 +25,8 @@ interface TableCardProps {
 }
 
 export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
+  const navigate = useNavigate();
+
   const getStatusColor = () => {
     switch (table.status) {
       case 'occupied':
@@ -92,6 +96,18 @@ export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
 
   const alerts = getServiceAlerts();
 
+  const handleAddItems = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate('/admin/waiter/menu', { state: { selectedTable: table } });
+  };
+
+  const handleViewOrder = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (table.order_id) {
+      navigate(`/admin/waiter/order/${table.order_id}`);
+    }
+  };
+
   return (
     <div className="relative p-2">
       <div
@@ -112,7 +128,7 @@ export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
                 Table {table.table_number}
               </h3>
               <Badge 
-                variant={table.status === 'available' || table.status === 'reserved' ? 'outline' : 'secondary'}
+                variant={table.status === 'available' ? 'secondary' : 'outline'}
                 className={getStatusBadgeStyle()}
               >
                 {table.status === 'occupied' && table.order_status ? table.order_status : table.status}
@@ -142,6 +158,26 @@ export const TableCard = ({ table, onClick, onDelete }: TableCardProps) => {
               <span className={`text-base ${table.status === 'available' ? 'text-gray-600' : 'text-white/90'}`}>
                 {table.status === 'available' ? 'Tap to add order' : 'No customer name'}
               </span>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-4 flex gap-2">
+            <Button
+              className="flex-1 bg-white/10 hover:bg-white/20 text-white"
+              onClick={handleAddItems}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Items
+            </Button>
+            
+            {table.order_id && (
+              <Button
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white"
+                onClick={handleViewOrder}
+              >
+                View Order
+              </Button>
             )}
           </div>
         </div>
