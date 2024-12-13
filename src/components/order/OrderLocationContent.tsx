@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
 import { OrderContent } from "./OrderContent";
 import { OrderSuccessDialog } from "./OrderSuccessDialog";
 import { useOrderState } from "./OrderStateProvider";
 import { useCartStore } from "@/stores/useCartStore";
-import { Search, Clock } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeliveryModeSelector } from "./DeliveryModeSelector";
+import { DeliveryAddressInput } from "./delivery/DeliveryAddressInput";
 
 interface OrderLocationContentProps {
   mode: 'pickup' | 'delivery';
@@ -21,8 +21,6 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
   const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
   const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const addressInputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const { toast } = useToast();
   const { items } = useCartStore();
   const {
@@ -38,37 +36,6 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
     validVoucher,
     setSelectedTime
   } = useOrderState();
-
-  useEffect(() => {
-    // Load Google Maps JavaScript API
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = initAutocomplete;
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
-  const initAutocomplete = () => {
-    if (addressInputRef.current) {
-      autocompleteRef.current = new google.maps.places.Autocomplete(addressInputRef.current, {
-        types: ['address'],
-        componentRestrictions: { country: 'US' },
-        fields: ['formatted_address']
-      });
-
-      autocompleteRef.current.addListener('place_changed', () => {
-        const place = autocompleteRef.current?.getPlace();
-        if (place?.formatted_address) {
-          setDeliveryAddress(place.formatted_address);
-        }
-      });
-    }
-  };
 
   useEffect(() => {
     const loadStoreData = async () => {
@@ -122,17 +89,10 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
       </div>
       
       <div className="space-y-4">
-        <div className="relative">
-          <Input
-            ref={addressInputRef}
-            type="text"
-            placeholder="Enter delivery address"
-            value={deliveryAddress}
-            onChange={(e) => setDeliveryAddress(e.target.value)}
-            className="pl-10 py-6"
-          />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-        </div>
+        <DeliveryAddressInput 
+          value={deliveryAddress}
+          onChange={setDeliveryAddress}
+        />
 
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex items-center justify-between">
@@ -155,7 +115,6 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
       </div>
 
       <div className="pt-4">
-        <h3 className="text-lg font-semibold text-[#2D3648] mb-4">Items</h3>
         <OrderContent
           mode={mode}
           setMode={setMode}
