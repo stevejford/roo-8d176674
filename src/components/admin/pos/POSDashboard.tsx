@@ -1,175 +1,67 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { OrderCard } from './components/OrderCard';
-import { POSMenuBrowser } from './POSMenuBrowser';
-import { TableGrid } from '@/components/admin/orders/TableGrid';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { TableGrid } from '../orders/TableGrid';
+import { TakeoutOrderDialog } from '../orders/takeout/TakeoutOrderDialog';
+import { PhoneOrderDialog } from '../orders/phone/PhoneOrderDialog';
+import { Plus } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 export const POSDashboard = () => {
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [showTakeoutDialog, setShowTakeoutDialog] = useState(false);
+  const [showPhoneDialog, setShowPhoneDialog] = useState(false);
+  const navigate = useNavigate();
 
-  const { data: orders, refetch } = useQuery({
-    queryKey: ['pos-orders'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *,
-            product:products (*)
-          )
-        `)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const handleDeleteOrder = async (orderId: string) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .delete()
-        .eq('id', orderId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Order deleted successfully",
-      });
-      setOrderToDelete(null);
-      refetch();
-    } catch (error: any) {
-      console.error('Error deleting order:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete order",
-        variant: "destructive"
-      });
-    }
+  const handleOrderSuccess = () => {
+    navigate('/admin/waiter/menu');
   };
-
-  const handleStartNewOrder = async () => {
-    const { data, error } = await supabase
-      .from('orders')
-      .insert({ status: 'pending' })
-      .select()
-      .single();
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create new order",
-        variant: "destructive"
-      });
-    } else {
-      setSelectedOrderId(data.id);
-      setIsMenuOpen(true);
-    }
-  };
-
-  if (isMenuOpen) {
-    return (
-      <div className="h-full w-full">
-        <POSMenuBrowser 
-          orderId={selectedOrderId}
-          onOrderComplete={() => {
-            setIsMenuOpen(false);
-            setSelectedOrderId(null);
-            refetch();
-          }}
-        />
-      </div>
-    );
-  }
 
   return (
-    <div className="h-full">
-      <div className="flex justify-between items-center mb-6 px-6 pt-6">
-        <h2 className="text-2xl font-bold">Quick Add Order</h2>
-        <Button 
-          onClick={handleStartNewOrder} 
-          size="lg"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          New Order
-        </Button>
-      </div>
-
-      <div className="px-6">
-        <Tabs defaultValue="orders" className="space-y-6">
+    <div className="container mx-auto p-6">
+      <Tabs defaultValue="tables">
+        <div className="flex justify-between items-center mb-6">
           <TabsList>
-            <TabsTrigger value="orders">Active Orders</TabsTrigger>
             <TabsTrigger value="tables">Tables</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="orders" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-              {orders?.map((order) => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  onAddItems={() => {
-                    setSelectedOrderId(order.id);
-                    setIsMenuOpen(true);
-                  }}
-                  onDelete={(orderId) => setOrderToDelete(orderId)}
-                />
-              ))}
+          
+          <TabsContent value="orders" className="m-0">
+            <div className="flex gap-2">
+              <Button onClick={() => setTakeoutDialog(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Takeout Order
+              </Button>
+              <Button onClick={() => setPhoneDialog(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Phone Order
+              </Button>
             </div>
           </TabsContent>
+        </div>
 
-          <TabsContent value="tables">
-            <TableGrid />
-          </TabsContent>
-        </Tabs>
-      </div>
+        <TabsContent value="tables" className="mt-0">
+          <TableGrid />
+        </TabsContent>
 
-      <AlertDialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action will permanently delete the order and its items. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (orderToDelete) {
-                  handleDeleteOrder(orderToDelete);
-                }
-              }}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <TabsContent value="orders">
+          {/* Order list component will go here */}
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={showTakeoutDialog} onOpenChange={setShowTakeoutDialog}>
+        <TakeoutOrderDialog
+          onClose={() => setShowTakeoutDialog(false)}
+          onSuccess={handleOrderSuccess}
+        />
+      </Dialog>
+
+      <Dialog open={showPhoneDialog} onOpenChange={setShowPhoneDialog}>
+        <PhoneOrderDialog
+          onClose={() => setShowPhoneDialog(false)}
+          onSuccess={handleOrderSuccess}
+        />
+      </Dialog>
     </div>
   );
 };
