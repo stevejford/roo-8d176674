@@ -122,10 +122,13 @@ export const InviteStaffDialog = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="staff">Staff</SelectItem>
-                      <SelectItem value="kitchen">Kitchen</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="owner">Owner</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="kitchen">Kitchen</SelectItem>
+                      <SelectItem value="staff">Staff</SelectItem>
                       <SelectItem value="delivery">Delivery</SelectItem>
+                      <SelectItem value="user">User</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
