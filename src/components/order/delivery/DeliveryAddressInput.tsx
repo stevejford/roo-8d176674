@@ -10,39 +10,61 @@ interface DeliveryAddressInputProps {
 export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputProps) => {
   const addressInputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   useEffect(() => {
     const loadGoogleMapsScript = () => {
+      // Remove any existing Google Maps script
+      if (scriptRef.current) {
+        document.head.removeChild(scriptRef.current);
+      }
+
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        console.error('Google Maps API key is not defined');
+        return;
+      }
+
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
       script.async = true;
       script.defer = true;
       script.onload = initAutocomplete;
       document.head.appendChild(script);
-
-      return () => {
-        document.head.removeChild(script);
-      };
+      scriptRef.current = script;
     };
 
     loadGoogleMapsScript();
+
+    return () => {
+      if (scriptRef.current) {
+        document.head.removeChild(scriptRef.current);
+      }
+    };
   }, []);
 
   const initAutocomplete = () => {
-    if (!addressInputRef.current || !window.google) return;
+    if (!addressInputRef.current || !window.google) {
+      console.error('Google Maps or input reference not available');
+      return;
+    }
 
-    autocompleteRef.current = new google.maps.places.Autocomplete(addressInputRef.current, {
-      types: ['address'],
-      componentRestrictions: { country: 'US' },
-      fields: ['formatted_address']
-    });
+    try {
+      autocompleteRef.current = new google.maps.places.Autocomplete(addressInputRef.current, {
+        types: ['address'],
+        componentRestrictions: { country: 'US' },
+        fields: ['formatted_address']
+      });
 
-    autocompleteRef.current.addListener('place_changed', () => {
-      const place = autocompleteRef.current?.getPlace();
-      if (place?.formatted_address) {
-        onChange(place.formatted_address);
-      }
-    });
+      autocompleteRef.current.addListener('place_changed', () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (place?.formatted_address) {
+          onChange(place.formatted_address);
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing Google Maps Autocomplete:', error);
+    }
   };
 
   return (
