@@ -8,6 +8,7 @@ import { useCartStore } from "@/stores/useCartStore";
 import { Search, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { DeliveryModeSelector } from "./DeliveryModeSelector";
 
 interface OrderLocationContentProps {
   mode: 'pickup' | 'delivery';
@@ -82,7 +83,10 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
 
   const renderDeliveryContent = () => (
     <div className="p-6 space-y-6">
-      <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
+        <DeliveryModeSelector mode={mode} setMode={setMode} />
+      </div>
       
       <div className="space-y-4">
         <div className="relative">
