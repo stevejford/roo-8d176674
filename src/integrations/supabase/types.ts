@@ -585,24 +585,88 @@ export type Database = {
         }
         Relationships: []
       }
+      table_transfers: {
+        Row: {
+          from_table_number: string | null
+          id: string
+          notes: string | null
+          order_id: string | null
+          table_id: string
+          to_table_number: string | null
+          transferred_at: string | null
+          transferred_by: string | null
+        }
+        Insert: {
+          from_table_number?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          table_id: string
+          to_table_number?: string | null
+          transferred_at?: string | null
+          transferred_by?: string | null
+        }
+        Update: {
+          from_table_number?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          table_id?: string
+          to_table_number?: string | null
+          transferred_at?: string | null
+          transferred_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "table_transfers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "table_transfers_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "tables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "table_transfers_transferred_by_fkey"
+            columns: ["transferred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tables: {
         Row: {
+          capacity: number | null
           created_at: string | null
           id: string
+          last_transfer_at: string | null
+          section: string | null
           status: string | null
           table_number: string
           updated_at: string | null
         }
         Insert: {
+          capacity?: number | null
           created_at?: string | null
           id?: string
+          last_transfer_at?: string | null
+          section?: string | null
           status?: string | null
           table_number: string
           updated_at?: string | null
         }
         Update: {
+          capacity?: number | null
           created_at?: string | null
           id?: string
+          last_transfer_at?: string | null
+          section?: string | null
           status?: string | null
           table_number?: string
           updated_at?: string | null
