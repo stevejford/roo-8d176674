@@ -23,8 +23,10 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
       }
 
       try {
-        // Fetch the API key from Supabase Edge Function
-        const { data, error } = await supabase.functions.invoke('get-maps-key');
+        // Fetch the API key from Supabase Edge Function using GET
+        const { data, error } = await supabase.functions.invoke('get-maps-key', {
+          method: 'GET'
+        });
         
         if (error || !data?.apiKey) {
           console.error('Failed to fetch Google Maps API key:', error);
