@@ -1,4 +1,5 @@
 import React from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface DeliveryModeSelectorProps {
   mode: 'pickup' | 'delivery';
@@ -7,35 +8,26 @@ interface DeliveryModeSelectorProps {
 
 export const DeliveryModeSelector = ({ mode, setMode }: DeliveryModeSelectorProps) => {
   return (
-    <div className="inline-flex p-1 bg-gray-100 rounded-full relative">
-      {/* Sliding background */}
-      <div
-        className={`absolute h-[calc(100%-8px)] w-[calc(50%-4px)] bg-white rounded-full shadow-sm transition-transform duration-200 ease-in-out ${
-          mode === 'delivery' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-[2px]'
-        }`}
-      />
-      
-      {/* Buttons */}
-      <button 
-        onClick={() => setMode('pickup')}
-        className={`relative z-10 px-6 py-2 rounded-full text-sm transition-colors ${
-          mode === 'pickup' 
-            ? 'text-gray-900' 
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
+    <ToggleGroup
+      type="single"
+      value={mode}
+      onValueChange={(value) => {
+        if (value) setMode(value as 'pickup' | 'delivery');
+      }}
+      className="inline-flex h-10 items-center justify-center rounded-full bg-muted p-1"
+    >
+      <ToggleGroupItem
+        value="pickup"
+        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-white data-[state=on]:text-gray-900 data-[state=off]:text-gray-600 hover:text-gray-900"
       >
         Pickup
-      </button>
-      <button 
-        onClick={() => setMode('delivery')}
-        className={`relative z-10 px-6 py-2 rounded-full text-sm transition-colors ${
-          mode === 'delivery' 
-            ? 'text-gray-900' 
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
+      </ToggleGroupItem>
+      <ToggleGroupItem
+        value="delivery"
+        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-white data-[state=on]:text-gray-900 data-[state=off]:text-gray-600 hover:text-gray-900"
       >
         Delivery
-      </button>
-    </div>
+      </ToggleGroupItem>
+    </ToggleGroup>
   );
 };
