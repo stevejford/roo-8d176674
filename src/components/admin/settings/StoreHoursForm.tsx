@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/AuthProvider";
 import { PreOrderSettings } from "./store-hours/PreOrderSettings";
 import { HoursTable } from "./store-hours/HoursTable";
+import { SettingsSectionHeader } from "./SettingsSectionHeader";
 
 interface StoreHours {
   id: string;
@@ -154,6 +155,10 @@ export const StoreHoursForm = () => {
 
   return (
     <div className="space-y-6">
+      <SettingsSectionHeader
+        title="Store Hours"
+        description="Set your restaurant's operating hours for each day of the week. Toggle days as closed when needed, and configure specific opening and closing times."
+      />
       <PreOrderSettings
         acceptPreorders={settings?.accept_preorders ?? true}
         onPreorderToggle={(checked) => settingsMutation.mutate(checked)}
