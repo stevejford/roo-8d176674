@@ -15,6 +15,7 @@ import { OrderTotals } from "./OrderTotals";
 import { TrustInfo } from "./TrustInfo";
 import { ComplementaryItems } from "../ComplementaryItems";
 import { CheckoutButton } from "./CheckoutButton";
+import { PickupTimeModal } from "../PickupTimeModal";
 
 interface OrderLocationContentProps {
   mode: 'pickup' | 'delivery';
@@ -110,7 +111,13 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
                       <Clock className="h-5 w-5 text-gray-500" />
                       <div>
                         <h3 className="font-medium text-[#2D3648]">Delivery Time</h3>
-                        <p className="text-sm text-gray-600">{selectedTime}</p>
+                        <p className="text-sm text-gray-600">
+                          {!isStoreCurrentlyOpen 
+                            ? "Tomorrow - Reopen" 
+                            : selectedTime === "Select pickup time" 
+                              ? "Select delivery time" 
+                              : selectedTime}
+                        </p>
                       </div>
                     </div>
                     <Button 
@@ -177,6 +184,11 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
   return (
     <>
       {renderContent()}
+      <PickupTimeModal
+        isOpen={showTimeModal}
+        onClose={() => setShowTimeModal(false)}
+        onSchedule={handleScheduleTime}
+      />
       <OrderSuccessDialog
         open={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
