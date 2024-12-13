@@ -13,6 +13,8 @@ import { DeliveryAddressInput } from "./delivery/DeliveryAddressInput";
 import { OrderItems } from "./OrderItems";
 import { OrderTotals } from "./OrderTotals";
 import { TrustInfo } from "./TrustInfo";
+import { ComplementaryItems } from "../ComplementaryItems";
+import { CheckoutButton } from "./CheckoutButton";
 
 interface OrderLocationContentProps {
   mode: 'pickup' | 'delivery';
@@ -123,6 +125,10 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
               </div>
 
               <OrderItems />
+
+              <div className="pt-4">
+                <ComplementaryItems />
+              </div>
             </div>
           </div>
 
@@ -131,17 +137,14 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
               validVoucher={validVoucher}
               calculateTotal={calculateTotal}
             />
-            <Button
-              className="w-full bg-[#F97316] hover:bg-[#F97316]/90 text-white py-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleCheckout}
-              disabled={items.length === 0 || isProcessing}
-            >
-              {isProcessing ? (
-                <>Processing...</>
-              ) : (
-                <>Pre-order ${calculateTotal().toFixed(2)}</>
-              )}
-            </Button>
+            <CheckoutButton
+              isStoreCurrentlyOpen={isStoreCurrentlyOpen}
+              isCheckingStoreHours={isCheckingStoreHours}
+              isProcessing={isProcessing}
+              itemCount={items.length}
+              total={calculateTotal()}
+              onCheckout={handleCheckout}
+            />
             <TrustInfo />
           </div>
         </div>
