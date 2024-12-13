@@ -27,9 +27,10 @@ const Login = () => {
     const errorDescription = hashParams.get('error_description');
 
     console.log('Auth flow check - Type:', type, 'Error:', error);
+    console.log('Session state:', { session, isAdmin, isLoading });
 
     if (error) {
-      console.log('Auth error:', error, errorDescription);
+      console.error('Auth error:', error, errorDescription);
       if (error === 'access_denied' && errorDescription?.includes('expired')) {
         toast.error("Password reset link has expired. Please request a new one.");
         navigate('/reset-password');
