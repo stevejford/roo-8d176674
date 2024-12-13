@@ -1,9 +1,17 @@
 import { format, addDays, isAfter, isBefore, parse, setMinutes, startOfDay, endOfDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
+type StoreHours = {
+  day_of_week: string;
+  open_time: string | null;
+  close_time: string | null;
+  is_closed: boolean;
+}
+
 type DaySchedule = {
-  open: string;
-  close: string;
+  open: string | null;
+  close: string | null;
+  is_closed: boolean;
 } | null;
 
 const dayOrder = {
@@ -31,10 +39,11 @@ export const getStoreHours = async () => {
     dayOrder[b.day_of_week as keyof typeof dayOrder]
   );
 
-  return hours.reduce((acc: { [key: string]: DaySchedule }, hour) => {
+  return hours.reduce((acc: { [key: string]: DaySchedule }, hour: StoreHours) => {
     acc[hour.day_of_week] = hour.is_closed ? null : {
       open: hour.open_time,
-      close: hour.close_time
+      close: hour.close_time,
+      is_closed: hour.is_closed
     };
     return acc;
   }, {});
