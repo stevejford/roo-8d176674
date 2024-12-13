@@ -180,7 +180,7 @@ const Admin = () => {
               <Route path="orders/*" element={<Orders />} />
               <Route path="kitchen/*" element={<KitchenDashboard />} />
               <Route path="tables/*" element={<TableGrid />} />
-              <Route path="users/*" element={<UsersManagement />} />
+              <Route path="users/*" element={<UserManagement />} />
               <Route path="analytics/*" element={<Analytics />} />
               <Route path="settings/*" element={<SettingsPanel />} />
             </Routes>
