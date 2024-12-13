@@ -252,7 +252,9 @@ export type Database = {
           appetizer_served_at: string | null
           created_at: string | null
           created_by: string | null
+          customer_email: string | null
           customer_name: string | null
+          customer_phone: string | null
           deleted_at: string | null
           dessert_cleared_at: string | null
           dessert_ordered_at: string | null
@@ -268,6 +270,7 @@ export type Database = {
           main_served_at: string | null
           notes: string | null
           order_taken_at: string | null
+          order_type: string | null
           paid_amount: number | null
           payment_method: string | null
           payment_status: string | null
@@ -283,7 +286,9 @@ export type Database = {
           appetizer_served_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          customer_email?: string | null
           customer_name?: string | null
+          customer_phone?: string | null
           deleted_at?: string | null
           dessert_cleared_at?: string | null
           dessert_ordered_at?: string | null
@@ -299,6 +304,7 @@ export type Database = {
           main_served_at?: string | null
           notes?: string | null
           order_taken_at?: string | null
+          order_type?: string | null
           paid_amount?: number | null
           payment_method?: string | null
           payment_status?: string | null
@@ -314,7 +320,9 @@ export type Database = {
           appetizer_served_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          customer_email?: string | null
           customer_name?: string | null
+          customer_phone?: string | null
           deleted_at?: string | null
           dessert_cleared_at?: string | null
           dessert_ordered_at?: string | null
@@ -330,6 +338,7 @@ export type Database = {
           main_served_at?: string | null
           notes?: string | null
           order_taken_at?: string | null
+          order_type?: string | null
           paid_amount?: number | null
           payment_method?: string | null
           payment_status?: string | null

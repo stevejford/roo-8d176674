@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -7,8 +7,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { TableOrderActions } from './table/TableOrderActions';
-import { TableAllocationForm } from './table/TableAllocationForm';
 
 interface Table {
   table_number: string;
@@ -25,16 +34,32 @@ interface TableAllocationDialogProps {
 
 export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAllocationDialogProps) => {
   const { toast } = useToast();
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [orderType, setOrderType] = useState<'dine-in' | 'takeout' | 'phone'>('dine-in');
 
-  const handleAllocation = async (customerName: string) => {
+  const handleAllocation = async () => {
+    if (!customerName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter customer name",
+        variant: "destructive",
+      });
+      return;
+    }
+
     console.log('Creating new order for table:', table.table_number);
 
     const { data, error } = await supabase
       .from('orders')
       .insert([
         {
-          table_number: table.table_number,
+          table_number: orderType === 'dine-in' ? table.table_number : null,
           customer_name: customerName,
+          customer_phone: customerPhone,
+          customer_email: customerEmail,
+          order_type: orderType,
           status: 'pending',
           created_by: (await supabase.auth.getUser()).data.user?.id
         }
@@ -56,94 +81,11 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
 
     toast({
       title: "Success",
-      description: `Table ${table.table_number} allocated to ${customerName}`,
+      description: `Order created for ${customerName}`,
     });
     
     onClose();
     onSuccess();
-  };
-
-  const handleAddItem = async (product: any) => {
-    if (!table.order_id) {
-      toast({
-        title: "Error",
-        description: "No active order found for this table",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // First, check if the item already exists in the order
-      const { data: existingItems, error: queryError } = await supabase
-        .from('order_items')
-        .select('*')
-        .eq('order_id', table.order_id)
-        .eq('product_id', product.id);
-
-      if (queryError) throw queryError;
-
-      let updatedItem;
-      
-      if (existingItems && existingItems.length > 0) {
-        // Update quantity if item exists
-        const existingItem = existingItems[0];
-        const { data, error: updateError } = await supabase
-          .from('order_items')
-          .update({ 
-            quantity: existingItem.quantity + 1,
-            price: product.price
-          })
-          .eq('id', existingItem.id)
-          .select()
-          .single();
-
-        if (updateError) throw updateError;
-        updatedItem = data;
-      } else {
-        // Insert new item if it doesn't exist
-        const { data, error: insertError } = await supabase
-          .from('order_items')
-          .insert({
-            order_id: table.order_id,
-            product_id: product.id,
-            quantity: 1,
-            price: product.price,
-          })
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        updatedItem = data;
-      }
-
-      toast({
-        title: "Success",
-        description: `Added ${product.title} to the order`,
-      });
-
-      // Update the total amount in the orders table
-      const { data: orderItems } = await supabase
-        .from('order_items')
-        .select('price, quantity')
-        .eq('order_id', table.order_id);
-
-      if (orderItems) {
-        const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
-        await supabase
-          .from('orders')
-          .update({ total_amount: totalAmount })
-          .eq('id', table.order_id);
-      }
-    } catch (error) {
-      console.error('Error adding item:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add item to order",
-        variant: "destructive",
-      });
-    }
   };
 
   return (
@@ -151,23 +93,76 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
       <DialogHeader>
         <DialogTitle>
           {table.status === 'available' 
-            ? `Allocate Table ${table.table_number}`
+            ? `New Order - Table ${table.table_number}`
             : `Table ${table.table_number} - ${table.customer_name}`
           }
         </DialogTitle>
         <DialogDescription>
           {table.status === 'available' 
-            ? "Enter customer details to allocate this table"
-            : "View or manage the current table allocation"
+            ? "Enter customer details to create a new order"
+            : "View or manage the current order"
           }
         </DialogDescription>
       </DialogHeader>
+
       {table.status === 'available' ? (
-        <TableAllocationForm onAllocate={handleAllocation} />
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="orderType">Order Type</Label>
+            <Select
+              value={orderType}
+              onValueChange={(value: 'dine-in' | 'takeout' | 'phone') => setOrderType(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select order type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dine-in">Dine-in</SelectItem>
+                <SelectItem value="takeout">Takeout</SelectItem>
+                <SelectItem value="phone">Phone Order</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customerName">Customer Name *</Label>
+            <Input
+              id="customerName"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder="Enter customer name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customerPhone">Phone Number</Label>
+            <Input
+              id="customerPhone"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              placeholder="Enter phone number"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customerEmail">Email</Label>
+            <Input
+              id="customerEmail"
+              value={customerEmail}
+              onChange={(e) => setCustomerEmail(e.target.value)}
+              placeholder="Enter email address"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={handleAllocation}>Create Order</Button>
+          </div>
+        </div>
       ) : (
         <TableOrderActions 
           orderId={table.order_id!} 
-          onAddItem={handleAddItem}
+          onAddItem={() => {}}
         />
       )}
     </DialogContent>

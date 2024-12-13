@@ -23,6 +23,12 @@ const statusColors = {
   cancelled: 'bg-red-100 text-red-800',
 };
 
+const orderTypeColors = {
+  'dine-in': 'bg-blue-100 text-blue-800',
+  'takeout': 'bg-purple-100 text-purple-800',
+  'phone': 'bg-orange-100 text-orange-800',
+};
+
 export const OrderList = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -102,7 +108,9 @@ export const OrderList = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Order ID</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Customer</TableHead>
+              <TableHead>Contact</TableHead>
               <TableHead>Items</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
@@ -113,7 +121,23 @@ export const OrderList = () => {
             {orders?.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">{order.id.slice(0, 8)}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant="secondary"
+                    className={orderTypeColors[order.order_type as keyof typeof orderTypeColors]}
+                  >
+                    {order.order_type}
+                  </Badge>
+                </TableCell>
                 <TableCell>{order.customer_name || 'Anonymous'}</TableCell>
+                <TableCell>
+                  {order.customer_phone && (
+                    <div className="text-sm text-gray-600">{order.customer_phone}</div>
+                  )}
+                  {order.customer_email && (
+                    <div className="text-sm text-gray-600">{order.customer_email}</div>
+                  )}
+                </TableCell>
                 <TableCell>
                   {order.order_items?.map((item: any) => (
                     <div key={item.id} className="text-sm">
