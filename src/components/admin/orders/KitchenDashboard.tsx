@@ -6,6 +6,7 @@ import { UtensilsCrossed } from "lucide-react";
 import { Database } from '@/integrations/supabase/types';
 import { KitchenOrderCard } from './KitchenOrderCard';
 import { KitchenOrderSkeleton } from './KitchenOrderSkeleton';
+import { TableStatusOverview } from './TableStatusOverview';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 
@@ -103,6 +104,7 @@ export const KitchenDashboard = () => {
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Kitchen Orders</h2>
         </div>
+        <TableStatusOverview />
         <div className="border rounded-lg p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <KitchenOrderSkeleton />
@@ -120,6 +122,7 @@ export const KitchenDashboard = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Kitchen Orders</h2>
         </div>
+        <TableStatusOverview />
         <div className="border rounded-lg p-6">
           <div className="flex flex-col items-center justify-center h-64 space-y-4 text-gray-500">
             <UtensilsCrossed className="w-12 h-12" />
@@ -136,6 +139,8 @@ export const KitchenDashboard = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Kitchen Orders</h2>
       </div>
+
+      <TableStatusOverview />
 
       <div className="border rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
