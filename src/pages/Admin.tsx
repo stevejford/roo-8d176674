@@ -19,6 +19,7 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { AnalyticsDashboard } from '@/components/admin/analytics/AnalyticsDashboard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => (
   <div className="p-8">
@@ -81,23 +82,60 @@ const Analytics = () => (
 
 const SettingsPanel = () => (
   <div className="p-8">
-    <div className="space-y-8">
-      <div>
-        <SettingsSectionHeader
-          title="Business Information"
-          description="Manage your restaurant's basic information and contact details"
-        />
-        <StoreSettingsForm />
-      </div>
-      
-      <div>
-        <SettingsSectionHeader
-          title="Operating Hours"
-          description="Set your restaurant's opening and closing hours for each day of the week"
-        />
+    <Tabs defaultValue="business" className="space-y-8">
+      <TabsList className="bg-muted/50">
+        <TabsTrigger value="business">Business Info</TabsTrigger>
+        <TabsTrigger value="hours">Operating Hours</TabsTrigger>
+        <TabsTrigger value="service">Service Timings</TabsTrigger>
+        <TabsTrigger value="delivery">Delivery Zones</TabsTrigger>
+        <TabsTrigger value="billing">Bill Splitting</TabsTrigger>
+        <TabsTrigger value="payment">Payment</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="business" className="space-y-8">
+        <div>
+          <SettingsSectionHeader
+            title="Business Information"
+            description="Manage your restaurant's basic information and contact details"
+          />
+          <StoreSettingsForm />
+        </div>
+      </TabsContent>
+
+      <TabsContent value="hours" className="space-y-8">
         <StoreHoursForm />
-      </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="service" className="space-y-8">
+        <ServiceTimingForm />
+      </TabsContent>
+
+      <TabsContent value="delivery" className="space-y-8">
+        <DeliveryZonesForm />
+      </TabsContent>
+
+      <TabsContent value="billing" className="space-y-8">
+        <div>
+          <SettingsSectionHeader
+            title="Bill Splitting"
+            description="Configure how customers can split their bills"
+          />
+          <BillSplittingForm
+            defaultValues={{
+              enabled: true,
+              max_splits: 4,
+              min_amount_per_split: 5,
+              allow_uneven_splits: true,
+            }}
+            onSubmit={() => {}}
+          />
+        </div>
+      </TabsContent>
+
+      <TabsContent value="payment" className="space-y-8">
+        <StripeConfigForm />
+      </TabsContent>
+    </Tabs>
   </div>
 );
 
