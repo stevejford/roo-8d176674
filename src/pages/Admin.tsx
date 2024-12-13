@@ -89,6 +89,11 @@ const SettingsPanel = () => (
     <Tabs defaultValue="business" className="space-y-8">
       <TabsList className="bg-muted/50">
         <TabsTrigger value="business">Business Info</TabsTrigger>
+        <TabsTrigger value="hours">Operating Hours</TabsTrigger>
+        <TabsTrigger value="service">Service Timings</TabsTrigger>
+        <TabsTrigger value="delivery">Delivery Zones</TabsTrigger>
+        <TabsTrigger value="billing">Bill Splitting</TabsTrigger>
+        <TabsTrigger value="payment">Payment</TabsTrigger>
       </TabsList>
 
       <TabsContent value="business" className="space-y-8">
@@ -99,6 +104,40 @@ const SettingsPanel = () => (
           />
           <StoreSettingsForm />
         </div>
+      </TabsContent>
+
+      <TabsContent value="hours" className="space-y-8">
+        <StoreHoursForm />
+      </TabsContent>
+
+      <TabsContent value="service" className="space-y-8">
+        <ServiceTimingForm />
+      </TabsContent>
+
+      <TabsContent value="delivery" className="space-y-8">
+        <DeliveryZonesForm />
+      </TabsContent>
+
+      <TabsContent value="billing" className="space-y-8">
+        <div>
+          <SettingsSectionHeader
+            title="Bill Splitting"
+            description="Configure how customers can split their bills"
+          />
+          <BillSplittingForm
+            defaultValues={{
+              enabled: true,
+              max_splits: 4,
+              min_amount_per_split: 5,
+              allow_uneven_splits: true,
+            }}
+            onSubmit={() => {}}
+          />
+        </div>
+      </TabsContent>
+
+      <TabsContent value="payment" className="space-y-8">
+        <StripeConfigForm />
       </TabsContent>
     </Tabs>
   </div>
