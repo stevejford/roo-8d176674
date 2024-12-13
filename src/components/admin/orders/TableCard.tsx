@@ -13,10 +13,9 @@ interface TableCardProps {
     order_status?: string;
     seated_at?: string;
   };
-  onClick: () => void;
 }
 
-export const TableCard = ({ table, onClick }: TableCardProps) => {
+export const TableCard = ({ table }: TableCardProps) => {
   const getStatusColor = () => {
     switch (table.status) {
       case 'occupied':
@@ -31,15 +30,7 @@ export const TableCard = ({ table, onClick }: TableCardProps) => {
   return (
     <div className="relative p-2">
       <div
-        role="button"
-        tabIndex={0}
         className={`relative h-[12rem] w-full rounded-md transition-all duration-300 hover:shadow-lg ${getStatusColor()}`}
-        onClick={onClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            onClick();
-          }
-        }}
       >
         <div className="flex flex-col h-full p-4">
           <TableCardHeader 

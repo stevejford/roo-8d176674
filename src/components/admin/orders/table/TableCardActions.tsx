@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface TableCardActionsProps {
@@ -40,6 +40,7 @@ export const TableCardActions = ({ table }: TableCardActionsProps) => {
           className="w-full bg-white/10 hover:bg-white/20 text-white"
           onClick={handleViewOrder}
         >
+          <FileText className="w-4 h-4 mr-2" />
           View Order Details
         </Button>
       )}
