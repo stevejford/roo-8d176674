@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
 import { OrderContent } from "./OrderContent";
@@ -21,6 +21,8 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
   const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = useState(false);
   const [isCheckingStoreHours, setIsCheckingStoreHours] = useState(true);
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const addressInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const { toast } = useToast();
   const { items } = useCartStore();
   const {
@@ -36,6 +38,37 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
     validVoucher,
     setSelectedTime
   } = useOrderState();
+
+  useEffect(() => {
+    // Load Google Maps JavaScript API
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = initAutocomplete;
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  const initAutocomplete = () => {
+    if (addressInputRef.current) {
+      autocompleteRef.current = new google.maps.places.Autocomplete(addressInputRef.current, {
+        types: ['address'],
+        componentRestrictions: { country: 'US' },
+        fields: ['formatted_address']
+      });
+
+      autocompleteRef.current.addListener('place_changed', () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (place?.formatted_address) {
+          setDeliveryAddress(place.formatted_address);
+        }
+      });
+    }
+  };
 
   useEffect(() => {
     const loadStoreData = async () => {
@@ -91,6 +124,7 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
       <div className="space-y-4">
         <div className="relative">
           <Input
+            ref={addressInputRef}
             type="text"
             placeholder="Enter delivery address"
             value={deliveryAddress}
