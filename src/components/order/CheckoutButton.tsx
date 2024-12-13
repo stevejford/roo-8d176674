@@ -26,7 +26,7 @@ export const CheckoutButton = ({
     if (!isStoreCurrentlyOpen) {
       toast({
         title: "Store Closed",
-        description: "Pre-orders will be accepted after 12am. Please try again then.",
+        description: "Pre-orders will be accepted for next-day delivery. Please select a time slot.",
         variant: "default"
       });
       return;
@@ -66,7 +66,7 @@ export const CheckoutButton = ({
       ) : isPreOrder ? (
         <>
           <Clock className="w-4 h-4" />
-          <span>Pre-order ${displayTotal}</span>
+          <span>Pre-order for tomorrow ${displayTotal}</span>
         </>
       ) : (
         <>

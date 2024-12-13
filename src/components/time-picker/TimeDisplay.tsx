@@ -19,9 +19,9 @@ export const TimeDisplay = ({
   const getTimeDisplay = () => {
     if (!isStoreCurrentlyOpen) {
       if (currentHour < 12) {
-        return "Closed - Preorder available after 12pm";
+        return "Closed - Pre-order available after 12pm";
       }
-      return "Preorder available";
+      return "Pre-order for next-day delivery";
     }
     
     if (!selectedTime) {

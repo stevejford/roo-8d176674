@@ -6,13 +6,15 @@ interface LocationInfoProps {
   storeAddress: string;
   selectedTime: string;
   onTimeChange: () => void;
+  isStoreCurrentlyOpen?: boolean;
 }
 
 export const LocationInfo = ({ 
   storeName, 
   storeAddress, 
   selectedTime, 
-  onTimeChange 
+  onTimeChange,
+  isStoreCurrentlyOpen = true
 }: LocationInfoProps) => {
   return (
     <div className="bg-gray-50 rounded-lg p-4 space-y-4">
@@ -29,7 +31,9 @@ export const LocationInfo = ({
           <Clock className="h-5 w-5 text-gray-500 mt-1 flex-shrink-0" />
           <div>
             <h3 className="font-medium text-[#2D3648]">Pickup Time</h3>
-            <p className="text-sm text-gray-600">{selectedTime}</p>
+            <p className="text-sm text-gray-600">
+              {!isStoreCurrentlyOpen ? 'Pre-order for next-day delivery' : selectedTime}
+            </p>
           </div>
         </div>
         <button 
