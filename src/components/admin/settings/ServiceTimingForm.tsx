@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceTimingFormData, StoreSettingsResponse } from "./types";
 import { ServiceTimingFormFields } from "./ServiceTimingFormFields";
+import { SettingsSectionHeader } from "./SettingsSectionHeader";
 
 const DEFAULT_TIMINGS: ServiceTimingFormData = {
   take_order_minutes: 5,
@@ -82,17 +83,23 @@ export const ServiceTimingForm = () => {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <ServiceTimingFormFields form={form} />
-        <Button 
-          type="submit" 
-          className="bg-emerald-600 hover:bg-emerald-700"
-          disabled={mutation.isPending}
-        >
-          {mutation.isPending ? "Saving..." : "Save Changes"}
-        </Button>
-      </form>
-    </Form>
+    <div className="space-y-6">
+      <SettingsSectionHeader
+        title="Service Timings"
+        description="Configure timing intervals for various service activities to ensure consistent and timely customer service"
+      />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <ServiceTimingFormFields form={form} />
+          <Button 
+            type="submit" 
+            className="bg-emerald-600 hover:bg-emerald-700"
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Saving..." : "Save Changes"}
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 };
