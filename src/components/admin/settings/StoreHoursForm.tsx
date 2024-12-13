@@ -28,7 +28,7 @@ export const StoreHoursForm = () => {
   const queryClient = useQueryClient();
   const { session, isAdmin } = useAuth();
 
-  const { data: hours, isLoading } = useQuery({
+  const { data: hours, isLoading: hoursLoading } = useQuery({
     queryKey: ['store-hours'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,20 +45,61 @@ export const StoreHoursForm = () => {
     },
   });
 
-  const mutation = useMutation({
+  const { data: settings, isLoading: settingsLoading } = useQuery({
+    queryKey: ['store-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const settingsMutation = useMutation({
+    mutationFn: async (accept_preorders: boolean) => {
+      if (!session || !isAdmin) {
+        throw new Error('Unauthorized: Only admin users can modify store settings');
+      }
+
+      const { error } = await supabase
+        .from('store_settings')
+        .update({ accept_preorders })
+        .eq('id', settings?.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['store-settings'] });
+      toast({
+        title: "Settings updated",
+        description: "Pre-order settings have been successfully updated.",
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating store settings:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update store settings.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const hoursMutation = useMutation({
     mutationFn: async (hours: StoreHours) => {
       if (!session || !isAdmin) {
         throw new Error('Unauthorized: Only admin users can modify store hours');
       }
 
-      // If the day is closed, set times to null
       const updatedHours = hours.is_closed ? {
         ...hours,
         open_time: null,
         close_time: null
       } : {
         ...hours,
-        // Only send time values if they're not empty strings
         open_time: hours.open_time || null,
         close_time: hours.close_time || null
       };
@@ -89,7 +130,7 @@ export const StoreHoursForm = () => {
   const handleTimeChange = (id: string, field: 'open_time' | 'close_time', value: string) => {
     const hour = hours?.find(h => h.id === id);
     if (hour) {
-      mutation.mutate({
+      hoursMutation.mutate({
         ...hour,
         [field]: value || null
       });
@@ -99,7 +140,7 @@ export const StoreHoursForm = () => {
   const handleClosedToggle = (id: string, value: boolean) => {
     const hour = hours?.find(h => h.id === id);
     if (hour) {
-      mutation.mutate({
+      hoursMutation.mutate({
         ...hour,
         is_closed: value,
         open_time: value ? null : hour.open_time,
@@ -108,7 +149,11 @@ export const StoreHoursForm = () => {
     }
   };
 
-  if (isLoading) {
+  const handlePreorderToggle = (checked: boolean) => {
+    settingsMutation.mutate(checked);
+  };
+
+  if (hoursLoading || settingsLoading) {
     return <div>Loading...</div>;
   }
 
@@ -122,6 +167,19 @@ export const StoreHoursForm = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-row items-center justify-between rounded-lg border p-4 mb-6">
+        <div className="space-y-0.5">
+          <h3 className="text-base font-medium">Accept Pre-orders</h3>
+          <p className="text-sm text-muted-foreground">
+            Allow customers to place orders for later delivery when the store is closed
+          </p>
+        </div>
+        <Switch
+          checked={settings?.accept_preorders ?? true}
+          onCheckedChange={handlePreorderToggle}
+        />
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
