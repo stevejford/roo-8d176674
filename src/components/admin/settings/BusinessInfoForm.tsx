@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Form,
   FormControl,
@@ -9,11 +10,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 
 interface BusinessInfoFormData {
   store_name: string;
   address: string;
+  accept_preorders: boolean;
 }
 
 interface BusinessInfoFormProps {
@@ -53,6 +56,27 @@ export const BusinessInfoForm = ({ defaultValues, onSubmit }: BusinessInfoFormPr
                 <Input {...field} placeholder="Enter your business address" />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="accept_preorders"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Accept Pre-orders</FormLabel>
+                <FormDescription>
+                  Allow customers to place orders for later delivery when the store is closed
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
             </FormItem>
           )}
         />

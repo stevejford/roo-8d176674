@@ -510,6 +510,7 @@ export type Database = {
       }
       store_settings: {
         Row: {
+          accept_preorders: boolean | null
           address: string
           bill_splitting_config: Json | null
           created_at: string | null
@@ -520,6 +521,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          accept_preorders?: boolean | null
           address: string
           bill_splitting_config?: Json | null
           created_at?: string | null
@@ -530,6 +532,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          accept_preorders?: boolean | null
           address?: string
           bill_splitting_config?: Json | null
           created_at?: string | null

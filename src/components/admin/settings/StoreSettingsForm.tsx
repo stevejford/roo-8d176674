@@ -15,6 +15,7 @@ interface StoreSettings {
   id: string;
   store_name: string;
   address: string;
+  accept_preorders: boolean;
   bill_splitting_config: {
     enabled: boolean;
     max_splits: number;
@@ -70,7 +71,7 @@ export const StoreSettingsForm = () => {
     },
   });
 
-  const handleBusinessInfoSubmit = (data: { store_name: string; address: string }) => {
+  const handleBusinessInfoSubmit = (data: { store_name: string; address: string; accept_preorders: boolean }) => {
     mutation.mutate(data);
   };
 
@@ -93,6 +94,7 @@ export const StoreSettingsForm = () => {
           defaultValues={{
             store_name: settings?.store_name || '',
             address: settings?.address || '',
+            accept_preorders: settings?.accept_preorders ?? true,
           }}
           onSubmit={handleBusinessInfoSubmit}
         />
