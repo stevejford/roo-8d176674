@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TableOrderActions } from './table/TableOrderActions';
+import { Phone, User, Mail, Store, TakeoutDining } from 'lucide-react';
 
 interface Table {
   table_number: string;
@@ -88,83 +89,123 @@ export const TableAllocationDialog = ({ table, onClose, onSuccess }: TableAlloca
     onSuccess();
   };
 
+  if (table.status !== 'available') {
+    return (
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Table {table.table_number} - {table.customer_name}
+          </DialogTitle>
+          <DialogDescription>
+            View or manage the current order
+          </DialogDescription>
+        </DialogHeader>
+        {table.order_id && (
+          <TableOrderActions 
+            orderId={table.order_id} 
+            onAddItem={async () => {
+              // This is now a Promise<void> as required by the type
+              return new Promise<void>((resolve) => {
+                // Implementation for adding item would go here
+                resolve();
+              });
+            }}
+          />
+        )}
+      </DialogContent>
+    );
+  }
+
   return (
-    <DialogContent>
+    <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>
-          {table.status === 'available' 
-            ? `New Order - Table ${table.table_number}`
-            : `Table ${table.table_number} - ${table.customer_name}`
-          }
-        </DialogTitle>
+        <DialogTitle>New Order - Table {table.table_number}</DialogTitle>
         <DialogDescription>
-          {table.status === 'available' 
-            ? "Enter customer details to create a new order"
-            : "View or manage the current order"
-          }
+          Enter customer details to create a new order
         </DialogDescription>
       </DialogHeader>
 
-      {table.status === 'available' ? (
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="orderType">Order Type</Label>
-            <Select
-              value={orderType}
-              onValueChange={(value: 'dine-in' | 'takeout' | 'phone') => setOrderType(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select order type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dine-in">Dine-in</SelectItem>
-                <SelectItem value="takeout">Takeout</SelectItem>
-                <SelectItem value="phone">Phone Order</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <div className="space-y-4 py-4">
+        <div className="space-y-2">
+          <Label htmlFor="orderType">Order Type</Label>
+          <Select
+            value={orderType}
+            onValueChange={(value: 'dine-in' | 'takeout' | 'phone') => setOrderType(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select order type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dine-in">
+                <div className="flex items-center gap-2">
+                  <Store className="h-4 w-4" />
+                  <span>Dine-in</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="takeout">
+                <div className="flex items-center gap-2">
+                  <TakeoutDining className="h-4 w-4" />
+                  <span>Takeout</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="phone">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span>Phone Order</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="customerName">Customer Name *</Label>
+        <div className="space-y-2">
+          <Label htmlFor="customerName">Customer Name *</Label>
+          <div className="relative">
             <Input
               id="customerName"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Enter customer name"
+              className="pl-10"
             />
+            <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="customerPhone">Phone Number</Label>
+        <div className="space-y-2">
+          <Label htmlFor="customerPhone">Phone Number</Label>
+          <div className="relative">
             <Input
               id="customerPhone"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
               placeholder="Enter phone number"
+              className="pl-10"
             />
+            <Phone className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="customerEmail">Email</Label>
+        <div className="space-y-2">
+          <Label htmlFor="customerEmail">Email</Label>
+          <div className="relative">
             <Input
               id="customerEmail"
               value={customerEmail}
               onChange={(e) => setCustomerEmail(e.target.value)}
               placeholder="Enter email address"
+              className="pl-10"
+              type="email"
             />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleAllocation}>Create Order</Button>
+            <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
         </div>
-      ) : (
-        <TableOrderActions 
-          orderId={table.order_id!} 
-          onAddItem={() => {}}
-        />
-      )}
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleAllocation}>Create Order</Button>
+        </div>
+      </div>
     </DialogContent>
   );
 };
