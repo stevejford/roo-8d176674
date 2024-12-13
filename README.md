@@ -4,6 +4,13 @@
 
 **URL**: https://lovable.dev/projects/915bbaf8-2dc2-4eb0-ba7d-f73e96c36a17
 
+## Important Guidelines
+
+**CRITICAL: DO NOT MODIFY WITHOUT PERMISSION:**
+- Any system settings or configuration
+- The UI/layout of POSDashboard.tsx - this component's design must remain unchanged
+- Only approved changes through explicit permission should be implemented
+
 ## Implementation Phases
 
 ### Phase 1: Core Order Management
