@@ -64,17 +64,21 @@ const Login = () => {
   }, [navigate]);
 
   useEffect(() => {
-    console.log("Login page - Session check:", !!session, "IsAdmin:", isAdmin, "IsLoading:", isLoading);
-    
-    if (session && !isLoading) {
-      console.log("Login redirect check - IsAdmin:", isAdmin);
-      if (isAdmin) {
-        console.log("Redirecting admin to admin dashboard");
-        navigate("/admin", { replace: true });
-        return;
-      }
-      console.log("Redirecting user to main page");
-      navigate("/", { replace: true });
+    if (!isLoading && session) {
+      console.log("Login redirect check - Session:", !!session, "IsAdmin:", isAdmin, "IsLoading:", isLoading);
+      
+      // Small delay to ensure admin status is properly set
+      const redirectTimer = setTimeout(() => {
+        if (isAdmin) {
+          console.log("Redirecting admin to admin dashboard");
+          navigate("/admin", { replace: true });
+        } else {
+          console.log("Redirecting user to main page");
+          navigate("/", { replace: true });
+        }
+      }, 500);
+
+      return () => clearTimeout(redirectTimer);
     }
   }, [session, isAdmin, isLoading, navigate]);
 
