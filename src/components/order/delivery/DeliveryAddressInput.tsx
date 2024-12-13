@@ -23,21 +23,23 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
       }
 
       try {
-        // Fetch the API key from Supabase Edge Function using GET
+        console.log('Fetching Google Maps API key...');
         const { data, error } = await supabase.functions.invoke('get-maps-key', {
           method: 'GET'
         });
         
-        if (error || !data?.apiKey) {
-          console.error('Failed to fetch Google Maps API key:', error);
-          toast({
-            title: "Configuration Error",
-            description: "Failed to load Google Maps configuration. Address autocomplete will not work.",
-            variant: "destructive"
-          });
-          return;
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw error;
+        }
+        
+        if (!data?.apiKey) {
+          console.error('No API key in response:', data);
+          throw new Error('Failed to fetch Google Maps API key');
         }
 
+        console.log('API key fetched successfully');
+        
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=places&callback=initGoogleMaps`;
         script.async = true;

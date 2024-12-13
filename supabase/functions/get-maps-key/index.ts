@@ -40,7 +40,13 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ apiKey }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store, no-cache, must-revalidate'
+        } 
+      }
     );
   } catch (error) {
     console.error('Error in get-maps-key function:', error);
