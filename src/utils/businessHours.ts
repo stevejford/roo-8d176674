@@ -111,36 +111,35 @@ export const isStoreOpen = async () => {
   // Get today's schedule
   const todaySchedule = hours[currentDay];
   if (!todaySchedule) {
-    console.log('No schedule found for today');
+    console.log('Store is closed today');
     return false;
   }
 
   console.log('Today\'s schedule:', todaySchedule);
 
-  // If it's after midnight and before store opening time, allow pre-orders
-  if (currentHour >= 0) {
-    const [openHour, openMinute] = todaySchedule.open.split(':').map(Number);
-    const openingTime = new Date(now);
-    openingTime.setHours(openHour, openMinute, 0);
-    
-    console.log('Pre-order time check:', {
-      currentHour,
-      openingTime,
-      isBeforeOpening: isBefore(now, openingTime)
-    });
-    
-    if (isBefore(now, openingTime)) {
-      console.log('Pre-orders allowed: It\'s after midnight and before opening time');
-      return true;
-    }
+  // If it's before noon, show "Closed - Preorder available after 12pm"
+  if (currentHour < 12) {
+    console.log('Store is closed - before noon');
+    return false;
   }
 
-  // During regular hours, check if we're within opening hours
-  const isWithinHours = currentTime >= todaySchedule.open && currentTime <= todaySchedule.close;
-  console.log('Regular hours check:', {
+  // If it's after midnight but before opening time, allow pre-orders
+  const [openHour, openMinute] = todaySchedule.open.split(':').map(Number);
+  const [closeHour, closeMinute] = todaySchedule.close.split(':').map(Number);
+  
+  const openingTime = new Date(now);
+  openingTime.setHours(openHour, openMinute, 0);
+  
+  const closingTime = new Date(now);
+  closingTime.setHours(closeHour, closeMinute, 0);
+
+  // Check if current time is within business hours
+  const isWithinHours = isAfter(now, openingTime) && isBefore(now, closingTime);
+  
+  console.log('Hours check:', {
     currentTime,
-    openTime: todaySchedule.open,
-    closeTime: todaySchedule.close,
+    openingTime: format(openingTime, 'HH:mm'),
+    closingTime: format(closingTime, 'HH:mm'),
     isWithinHours
   });
 
