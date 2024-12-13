@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getStoreSettings, isStoreOpen } from "@/utils/businessHours";
 import { OrderContent } from "./OrderContent";
 import { OrderSuccessDialog } from "./OrderSuccessDialog";
-import { OrderStateProvider } from "./OrderStateProvider";
+import { useOrderState } from "./OrderStateProvider";
 import { useCartStore } from "@/stores/useCartStore";
 import { Search, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
