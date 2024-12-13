@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DeliveryAddressInputProps {
   value: string;
@@ -15,51 +16,56 @@ export const DeliveryAddressInput = ({ value, onChange }: DeliveryAddressInputPr
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadGoogleMapsScript = () => {
+    const loadGoogleMapsScript = async () => {
       // Remove any existing Google Maps script
       if (scriptRef.current) {
         document.head.removeChild(scriptRef.current);
       }
 
-      // Log the environment variable to debug
-      console.log('Environment variables:', {
-        VITE_GOOGLE_MAPS_API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-      });
+      try {
+        // Fetch the API key from Supabase Edge Function
+        const { data, error } = await supabase.functions.invoke('get-maps-key');
+        
+        if (error || !data?.apiKey) {
+          console.error('Failed to fetch Google Maps API key:', error);
+          toast({
+            title: "Configuration Error",
+            description: "Failed to load Google Maps configuration. Address autocomplete will not work.",
+            variant: "destructive"
+          });
+          return;
+        }
 
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      
-      if (!apiKey) {
-        console.error('Google Maps API key is missing in environment variables');
-        toast({
-          title: "Configuration Error",
-          description: "Google Maps API key is missing. Address autocomplete will not work.",
-          variant: "destructive"
-        });
-        return;
-      }
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=places&callback=initGoogleMaps`;
+        script.async = true;
+        script.defer = true;
 
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`;
-      script.async = true;
-      script.defer = true;
+        // Define the callback function
+        window.initGoogleMaps = () => {
+          console.log('Google Maps script loaded, initializing autocomplete');
+          initAutocomplete();
+        };
 
-      // Define the callback function
-      window.initGoogleMaps = () => {
-        console.log('Google Maps script loaded, initializing autocomplete');
-        initAutocomplete();
-      };
+        script.onerror = (error) => {
+          console.error('Error loading Google Maps script:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load Google Maps. Address autocomplete will not work.",
+            variant: "destructive"
+          });
+        };
 
-      script.onerror = (error) => {
-        console.error('Error loading Google Maps script:', error);
+        document.head.appendChild(script);
+        scriptRef.current = script;
+      } catch (error) {
+        console.error('Error setting up Google Maps:', error);
         toast({
           title: "Error",
-          description: "Failed to load Google Maps. Address autocomplete will not work.",
+          description: "Failed to initialize Google Maps. Address autocomplete will not work.",
           variant: "destructive"
         });
-      };
-
-      document.head.appendChild(script);
-      scriptRef.current = script;
+      }
     };
 
     loadGoogleMapsScript();
