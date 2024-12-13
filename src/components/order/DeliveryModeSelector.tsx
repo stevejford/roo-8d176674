@@ -11,8 +11,8 @@ export const DeliveryModeSelector = ({ mode, setMode }: DeliveryModeSelectorProp
     <div className="relative inline-flex">
       {/* Sliding background */}
       <div
-        className={`absolute top-1 h-8 w-[120px] bg-white rounded-full transition-transform duration-200 ease-in-out ${
-          mode === 'delivery' ? 'translate-x-[124px]' : 'translate-x-1'
+        className={`absolute inset-y-1 w-[120px] bg-white rounded-full transition-transform duration-200 ease-in-out ${
+          mode === 'delivery' ? 'translate-x-[120px]' : 'translate-x-1'
         }`}
       />
       
