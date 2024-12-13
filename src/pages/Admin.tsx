@@ -151,6 +151,15 @@ const SettingsPanel = () => (
   </div>
 );
 
+const Tables = () => (
+  <div className="p-8">
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-3xl font-bold tracking-tight">Table Management</h2>
+    </div>
+    <TableGrid />
+  </div>
+);
+
 const Admin = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
@@ -179,7 +188,7 @@ const Admin = () => {
               <Route path="pricing/*" element={<PricingModelList />} />
               <Route path="orders/*" element={<Orders />} />
               <Route path="kitchen/*" element={<KitchenDashboard />} />
-              <Route path="tables/*" element={<TableGrid />} />
+              <Route path="tables/*" element={<Tables />} />
               <Route path="users/*" element={<UsersManagement />} />
               <Route path="analytics/*" element={<Analytics />} />
               <Route path="settings/*" element={<SettingsPanel />} />
