@@ -23,6 +23,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
 
+  const updateLastSignIn = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_sign_in_at: new Date().toISOString() })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Error updating last sign in:', error);
+      }
+    } catch (error) {
+      console.error('Error in updateLastSignIn:', error);
+    }
+  };
+
   const checkAdminStatus = async (session: Session | null) => {
     if (!session || isCheckingAdmin) {
       console.log("No session or already checking admin status");
@@ -73,6 +88,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("Initial session check:", session?.user.id);
       setSession(session);
+      if (session) {
+        updateLastSignIn(session.user.id);
+      }
       checkAdminStatus(session);
     });
 
@@ -80,6 +98,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth state changed:", session?.user.id);
       setSession(session);
+      if (session) {
+        updateLastSignIn(session.user.id);
+      }
       checkAdminStatus(session);
     });
 
