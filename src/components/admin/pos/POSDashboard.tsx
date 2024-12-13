@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { OrderCard } from './components/OrderCard';
 import { POSMenuBrowser } from './POSMenuBrowser';
+import { TableGrid } from '@/components/admin/orders/TableGrid';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const POSDashboard = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -105,7 +107,7 @@ export const POSDashboard = () => {
   return (
     <div className="h-full">
       <div className="flex justify-between items-center mb-6 px-6 pt-6">
-        <h2 className="text-2xl font-bold">Active Orders</h2>
+        <h2 className="text-2xl font-bold">Quick Add Order</h2>
         <Button 
           onClick={handleStartNewOrder} 
           size="lg"
@@ -116,20 +118,33 @@ export const POSDashboard = () => {
         </Button>
       </div>
 
-      <div className="px-6 pb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-          {orders?.map((order) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onAddItems={() => {
-                setSelectedOrderId(order.id);
-                setIsMenuOpen(true);
-              }}
-              onDelete={(orderId) => setOrderToDelete(orderId)}
-            />
-          ))}
-        </div>
+      <div className="px-6">
+        <Tabs defaultValue="orders" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="orders">Active Orders</TabsTrigger>
+            <TabsTrigger value="tables">Tables</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="orders" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {orders?.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onAddItems={() => {
+                    setSelectedOrderId(order.id);
+                    setIsMenuOpen(true);
+                  }}
+                  onDelete={(orderId) => setOrderToDelete(orderId)}
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tables">
+            <TableGrid />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <AlertDialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>
