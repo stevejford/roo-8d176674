@@ -1,19 +1,10 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/components/AuthProvider";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PreOrderSettings } from "./store-hours/PreOrderSettings";
+import { HoursTable } from "./store-hours/HoursTable";
 
 interface StoreHours {
   id: string;
@@ -149,10 +140,6 @@ export const StoreHoursForm = () => {
     }
   };
 
-  const handlePreorderToggle = (checked: boolean) => {
-    settingsMutation.mutate(checked);
-  };
-
   if (hoursLoading || settingsLoading) {
     return <div>Loading...</div>;
   }
@@ -167,58 +154,15 @@ export const StoreHoursForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-row items-center justify-between rounded-lg border p-4 mb-6">
-        <div className="space-y-0.5">
-          <h3 className="text-base font-medium">Accept Pre-orders</h3>
-          <p className="text-sm text-muted-foreground">
-            Allow customers to place orders for later delivery when the store is closed
-          </p>
-        </div>
-        <Switch
-          checked={settings?.accept_preorders ?? true}
-          onCheckedChange={handlePreorderToggle}
-        />
-      </div>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Day</TableHead>
-            <TableHead>Open Time</TableHead>
-            <TableHead>Close Time</TableHead>
-            <TableHead>Closed</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {hours?.map((hour) => (
-            <TableRow key={hour.id}>
-              <TableCell>{hour.day_of_week}</TableCell>
-              <TableCell>
-                <Input
-                  type="time"
-                  value={hour.open_time || ''}
-                  onChange={(e) => handleTimeChange(hour.id, 'open_time', e.target.value)}
-                  disabled={hour.is_closed}
-                />
-              </TableCell>
-              <TableCell>
-                <Input
-                  type="time"
-                  value={hour.close_time || ''}
-                  onChange={(e) => handleTimeChange(hour.id, 'close_time', e.target.value)}
-                  disabled={hour.is_closed}
-                />
-              </TableCell>
-              <TableCell>
-                <Switch
-                  checked={hour.is_closed}
-                  onCheckedChange={(checked) => handleClosedToggle(hour.id, checked)}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <PreOrderSettings
+        acceptPreorders={settings?.accept_preorders ?? true}
+        onPreorderToggle={(checked) => settingsMutation.mutate(checked)}
+      />
+      <HoursTable
+        hours={hours || []}
+        onTimeChange={handleTimeChange}
+        onClosedToggle={handleClosedToggle}
+      />
     </div>
   );
 };
