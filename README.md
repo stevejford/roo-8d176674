@@ -22,6 +22,8 @@
 - [ ] Table assignment integration
 - [ ] Basic payment processing
 - [ ] Receipt printing setup
+- [ ] Order type designation (Dine-in/Takeout/Phone)
+- [ ] Basic customer information capture
 
 ### Phase 2: Enhanced Table Management
 **Status**: Planned
@@ -35,6 +37,7 @@
   - Regular check-in reminders (10 min)
 - [ ] Table transfer functionality
 - [ ] Table capacity management
+- [ ] Basic reservation handling
 
 ### Phase 3: Course Management & Kitchen Integration
 **Status**: Planned
@@ -52,6 +55,8 @@
 - [ ] Course timing coordination
 - [ ] Special instructions handling
 - [ ] Dietary restrictions flagging
+- [ ] Pickup time notifications
+- [ ] Order ready alerts
 
 ### Phase 4: Service Coordination
 **Status**: Planned
@@ -61,6 +66,11 @@
 - [ ] Course timing preferences
 - [ ] Table service coordination
 - [ ] Order modification tracking
+- [ ] Phone order management workflow:
+  - Customer contact recording
+  - Scheduled pickup times
+  - Payment status tracking
+  - Staff callback reminders
 
 ### Phase 5: Performance & Analytics
 **Status**: Planned
@@ -74,11 +84,24 @@
   - Server performance stats
 - [ ] Peak period analysis
 - [ ] Resource utilization tracking
+- [ ] Phone order analytics
+- [ ] Reservation patterns
 
 ### Phase 6: Advanced Features
 **Status**: Planned
+- [ ] Comprehensive Reservation System:
+  - Phone bookings management
+  - Online reservations
+  - Deposit handling
+  - Special requests tracking
+  - Automated confirmations (SMS/Email)
+  - Reminder system
+- [ ] Advanced Phone Order Features:
+  - Caller ID integration
+  - Regular customer recognition
+  - Order history access
+  - Preferred payment methods
 - [ ] Split billing capabilities
-- [ ] Reservation management
 - [ ] Pre-order handling
 - [ ] Delivery integration
 - [ ] Customer profile management
@@ -94,6 +117,8 @@
 - `/admin/kitchen` - Kitchen Display System
 - `/admin/tables` - Table Management
 - `/admin/analytics` - Performance Metrics
+- `/admin/reservations` - Reservation Management
+- `/admin/phone-orders` - Phone Order Management
 
 ### Key Components
 - POSDashboard.tsx - Quick order management
@@ -101,6 +126,8 @@
 - KitchenDashboard.tsx - Kitchen order views
 - OrderManagement.tsx - Comprehensive order handling
 - ServiceAlerts.tsx - Timing and service notifications
+- ReservationManager.tsx - Booking management
+- PhoneOrderHandler.tsx - Phone order processing
 
 ### Database Tables
 - orders
@@ -109,6 +136,9 @@
 - categories
 - products
 - order_status_history
+- reservations
+- customer_profiles
+- phone_orders
 
 ## How to edit this code?
 
