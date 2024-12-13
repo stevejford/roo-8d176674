@@ -10,6 +10,8 @@ import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeliveryModeSelector } from "./DeliveryModeSelector";
 import { DeliveryAddressInput } from "./delivery/DeliveryAddressInput";
+import { OrderItems } from "./OrderItems";
+import { OrderTotals } from "./OrderTotals";
 
 interface OrderLocationContentProps {
   mode: 'pickup' | 'delivery';
@@ -85,36 +87,58 @@ export const OrderLocationContent = ({ mode: initialMode }: OrderLocationContent
   const renderContent = () => {
     if (mode === 'delivery') {
       return (
-        <div className="p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
-            <DeliveryModeSelector mode={mode} setMode={setMode} />
-          </div>
-          
-          <div className="space-y-4">
-            <DeliveryAddressInput 
-              value={deliveryAddress}
-              onChange={setDeliveryAddress}
-            />
+        <div className="flex flex-col h-full">
+          <div className="p-6 space-y-6 flex-1 overflow-auto">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-[#2D3648]">Order</h2>
+              <DeliveryModeSelector mode={mode} setMode={setMode} />
+            </div>
+            
+            <div className="space-y-4">
+              <DeliveryAddressInput 
+                value={deliveryAddress}
+                onChange={setDeliveryAddress}
+              />
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-gray-500" />
-                  <div>
-                    <h3 className="font-medium text-[#2D3648]">Delivery Time</h3>
-                    <p className="text-sm text-gray-600">{selectedTime}</p>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-gray-500" />
+                    <div>
+                      <h3 className="font-medium text-[#2D3648]">Delivery Time</h3>
+                      <p className="text-sm text-gray-600">{selectedTime}</p>
+                    </div>
                   </div>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setShowTimeModal(true)}
+                    className="text-emerald-600 font-medium hover:text-emerald-700"
+                  >
+                    CHANGE
+                  </Button>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setShowTimeModal(true)}
-                  className="text-emerald-600 font-medium hover:text-emerald-700"
-                >
-                  CHANGE
-                </Button>
               </div>
             </div>
+
+            <OrderItems />
+          </div>
+
+          <div className="p-6 mt-auto border-t">
+            <OrderTotals 
+              validVoucher={validVoucher}
+              calculateTotal={calculateTotal}
+            />
+            <Button
+              className="w-full bg-[#F97316] hover:bg-[#F97316]/90 text-white py-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              onClick={handleCheckout}
+              disabled={items.length === 0 || isProcessing}
+            >
+              {isProcessing ? (
+                <>Processing...</>
+              ) : (
+                <>Pre-order ${calculateTotal().toFixed(2)}</>
+              )}
+            </Button>
           </div>
         </div>
       );
