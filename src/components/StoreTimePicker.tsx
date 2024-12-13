@@ -1,13 +1,15 @@
+"use client";
+
 import * as React from "react";
 import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { getAvailableDays, getAvailableTimeSlots, isStoreOpen } from "@/utils/businessHours";
+import { getAvailableDays, getAvailableTimeSlots } from "@/utils/businessHours";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { DeliveryTimeSlots } from "./time-picker/DeliveryTimeSlots";
-import { PickupTimeSelector } from "./time-picker/PickupTimeSelector";
 
 interface StoreTimePickerProps {
   date?: Date;
@@ -24,21 +26,12 @@ export function StoreTimePicker({ date, onSelect, mode = 'pickup', postcode }: S
   const [isLoading, setIsLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState("time");
   const [estimatedDeliveryTime, setEstimatedDeliveryTime] = React.useState<number | null>(null);
-  const [isStoreCurrentlyOpen, setIsStoreCurrentlyOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkStoreStatus = async () => {
-      const storeOpen = await isStoreOpen();
-      setIsStoreCurrentlyOpen(storeOpen);
-    };
-
-    checkStoreStatus();
-  }, []);
 
   React.useEffect(() => {
     const loadAvailableDays = async () => {
       try {
         if (mode === 'delivery') {
+          // For delivery, we only need today
           setAvailableDays([new Date()]);
         } else {
           const days = await getAvailableDays();
@@ -58,11 +51,7 @@ export function StoreTimePicker({ date, onSelect, mode = 'pickup', postcode }: S
     const loadAvailableTimes = async () => {
       if (mode === 'delivery' && postcode) {
         try {
-          if (!isStoreCurrentlyOpen) {
-            setAvailableTimes([]);
-            return;
-          }
-
+          // Fetch delivery time estimate for the postcode
           const { data: zoneData, error } = await supabase
             .from('delivery_zones')
             .select('estimated_minutes')
@@ -75,21 +64,18 @@ export function StoreTimePicker({ date, onSelect, mode = 'pickup', postcode }: S
           if (zoneData) {
             setEstimatedDeliveryTime(zoneData.estimated_minutes);
             
-            // Get available times based on store hours
-            const times = await getAvailableTimeSlots(new Date());
-            
-            // Filter times to ensure they're after current time + delivery estimate
+            // Generate time slots starting from current time + estimated delivery time
             const now = new Date();
-            const minDeliveryTime = new Date(now.getTime() + (zoneData.estimated_minutes * 60000));
+            const startTime = new Date(now.getTime() + (zoneData.estimated_minutes * 60000));
+            const times: string[] = [];
             
-            const filteredTimes = times.filter(time => {
-              const [hours, minutes] = time.split(':').map(Number);
-              const timeDate = new Date();
-              timeDate.setHours(hours, minutes, 0, 0);
-              return timeDate > minDeliveryTime;
-            });
+            // Generate time slots for the next 3 hours
+            for (let i = 0; i < 12; i++) {
+              const slotTime = new Date(startTime.getTime() + (i * 15 * 60000));
+              times.push(format(slotTime, 'HH:mm'));
+            }
             
-            setAvailableTimes(filteredTimes);
+            setAvailableTimes(times);
           }
         } catch (error) {
           console.error('Error loading delivery times:', error);
@@ -109,7 +95,7 @@ export function StoreTimePicker({ date, onSelect, mode = 'pickup', postcode }: S
     if (mode === 'delivery' || selectedDate) {
       loadAvailableTimes();
     }
-  }, [selectedDate, mode, postcode, isStoreCurrentlyOpen]);
+  }, [selectedDate, mode, postcode]);
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
@@ -173,23 +159,50 @@ export function StoreTimePicker({ date, onSelect, mode = 'pickup', postcode }: S
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-white">
         {mode === 'pickup' ? (
-          <PickupTimeSelector
-            selectedDate={selectedDate}
-            availableDays={availableDays}
-            availableTimes={availableTimes}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onDateSelect={handleDateSelect}
-            onTimeSelect={handleTimeSelect}
-            isDateUnavailable={isDateUnavailable}
-          />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="date">Date</TabsTrigger>
+              <TabsTrigger value="time" disabled={!selectedDate}>Time</TabsTrigger>
+            </TabsList>
+            <TabsContent value="date" className="p-0">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                disabled={isDateUnavailable}
+                initialFocus
+              />
+            </TabsContent>
+            <TabsContent value="time" className="p-4">
+              <div className="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
+                {availableTimes.map((time) => (
+                  <Button
+                    key={time}
+                    variant={selectedDate && format(selectedDate, 'HH:mm') === time ? "default" : "outline"}
+                    onClick={() => handleTimeSelect(time)}
+                    className="w-full"
+                  >
+                    {format(new Date(`2000-01-01T${time}`), 'h:mm aa')}
+                  </Button>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         ) : (
-          <DeliveryTimeSlots
-            availableTimes={availableTimes}
-            selectedDate={selectedDate}
-            estimatedDeliveryTime={estimatedDeliveryTime}
-            onTimeSelect={handleTimeSelect}
-          />
+          <div className="p-4">
+            <div className="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
+              {availableTimes.map((time) => (
+                <Button
+                  key={time}
+                  variant={selectedDate && format(selectedDate, 'HH:mm') === time ? "default" : "outline"}
+                  onClick={() => handleTimeSelect(time)}
+                  className="w-full"
+                >
+                  {format(new Date(`2000-01-01T${time}`), 'h:mm aa')}
+                </Button>
+              ))}
+            </div>
+          </div>
         )}
       </PopoverContent>
     </Popover>
