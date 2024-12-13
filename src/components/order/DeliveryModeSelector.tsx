@@ -8,24 +8,34 @@ interface DeliveryModeSelectorProps {
 
 export const DeliveryModeSelector = ({ mode, setMode }: DeliveryModeSelectorProps) => {
   return (
-    <ToggleGroup 
-      type="single" 
-      value={mode}
-      onValueChange={(value) => value && setMode(value as 'pickup' | 'delivery')}
-      className="bg-muted p-1 rounded-full"
-    >
-      <ToggleGroupItem 
-        value="pickup" 
-        className="data-[state=on]:bg-white data-[state=on]:text-foreground rounded-full px-6 py-1.5 text-sm font-medium transition-colors"
+    <div className="relative inline-flex">
+      {/* Sliding background */}
+      <div
+        className={`absolute top-1 h-8 w-[120px] bg-white rounded-full transition-transform duration-200 ease-in-out ${
+          mode === 'delivery' ? 'translate-x-[124px]' : 'translate-x-1'
+        }`}
+      />
+      
+      {/* ToggleGroup buttons */}
+      <ToggleGroup 
+        type="single" 
+        value={mode}
+        onValueChange={(value) => value && setMode(value as 'pickup' | 'delivery')}
+        className="bg-muted p-1 rounded-full relative z-10"
       >
-        Pickup
-      </ToggleGroupItem>
-      <ToggleGroupItem 
-        value="delivery" 
-        className="data-[state=on]:bg-white data-[state=on]:text-foreground rounded-full px-6 py-1.5 text-sm font-medium transition-colors"
-      >
-        Delivery
-      </ToggleGroupItem>
-    </ToggleGroup>
+        <ToggleGroupItem 
+          value="pickup" 
+          className="rounded-full px-6 py-1.5 text-sm font-medium transition-colors data-[state=on]:bg-transparent data-[state=on]:text-foreground data-[state=off]:text-muted-foreground"
+        >
+          Pickup
+        </ToggleGroupItem>
+        <ToggleGroupItem 
+          value="delivery" 
+          className="rounded-full px-6 py-1.5 text-sm font-medium transition-colors data-[state=on]:bg-transparent data-[state=on]:text-foreground data-[state=off]:text-muted-foreground"
+        >
+          Delivery
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
   );
 };
