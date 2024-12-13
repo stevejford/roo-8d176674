@@ -10,7 +10,6 @@ export const MenuBrowserDialog = ({ onSelectItem }: MenuBrowserDialogProps) => {
     <div className="fixed inset-0 bg-white">
       <MenuBrowser 
         onOrderComplete={() => onSelectItem}
-        selectedTable={null}
       />
     </div>
   );
